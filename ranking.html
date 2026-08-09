@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - O Bando</title>
+    <!-- CONEXÕES DO PWA (APLICATIVO) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding-top: 70px;
+        }
+
+        .navbar-bando {
+            background-color: #0d6efd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .podio-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+        }
+
+        .podio-posicao {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50px;
+            text-align: center;
+        }
+
+        .podio-info {
+            flex-grow: 1;
+        }
+
+        .podio-pontos {
+            text-align: right;
+        }
+
+        .destaque-1 {
+            border-left: 5px solid #FFD700;
+            background: #fffdf0;
+        }
+
+        .destaque-2 {
+            border-left: 5px solid #C0C0C0;
+            background: #f8f9fa;
+        }
+
+        .destaque-3 {
+            border-left: 5px solid #CD7F32;
+            background: #fffaf5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark navbar-bando fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-arrow-left me-2"></i> Voltar ao Mapa
+            </a>
+            <span class="navbar-text text-white fw-bold">
+                🏆 Ranking Oficial
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="text-center mb-4 mt-3">
+            <h2 class="fw-bold">Líderes da Caçada</h2>
+            <p class="text-muted">Quem encontrou mais adesivos?</p>
+
+            <div class="btn-group mt-2" role="group">
+                <a href="ranking.html" class="btn btn-primary active">Ranking de Caçadores</a>
+                <a href="ranking_adesivos.html" class="btn btn-outline-primary">Ranking de Adesivos</a>
+            </div>
+        </div>
+
+        <div id="listaRanking">
+            <div class="text-center text-muted mt-5">Carregando ranking...</div>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('bando_id')) {
+            window.location.href = 'login.html';
+        }
+
+        function carregarRanking() {
+            fetch('api/ranking.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const lista = document.getElementById('listaRanking');
+                        let html = '';
+
+                        data.dados.forEach((user, index) => {
+                            let classeCard = '';
+                            let medalha = `${index + 1}º`;
+
+                            if (index === 0) { classeCard = 'destaque-1'; medalha = '🥇'; }
+                            else if (index === 1) { classeCard = 'destaque-2'; medalha = '🥈'; }
+                            else if (index === 2) { classeCard = 'destaque-3'; medalha = '🥉'; }
+
+                            const isMe = user.id == localStorage.getItem('bando_id');
+                            const labelVoce = isMe ? ' <span class="badge bg-primary ms-1">Você</span>' : '';
+
+                            html += `
+                                <div class="podio-card ${classeCard} ${isMe ? 'border border-primary' : ''}">
+                                    <div class="podio-posicao">${medalha}</div>
+                                    <div class="podio-info">
+                                        <h5 class="mb-0 fw-bold">${user.apelido} ${labelVoce}</h5>
+                                        <small class="text-muted">Colou ${user.colados} | Achou ${user.achados}</small><br>
+                                        <span style="font-size: 1.2rem;" title="Conquistas">${user.badges}</span>
+                                    </div>
+                                    <div class="podio-pontos">
+                                        <h4 class="mb-0 fw-bold text-success">${user.xp_total}</h4>
+                                        <small class="text-muted">XP</small>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        lista.innerHTML = html;
+                    } else {
+                        alert("Erro ao carregar o ranking: " + data.erro);
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('listaRanking').innerHTML = '<div class="alert alert-danger">Erro de conexão.</div>';
+                });
+        }
+
+        carregarRanking();
+    </script>
+    <!-- REGISTRO DO SERVICE WORKER (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+
+</html>

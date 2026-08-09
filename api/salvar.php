@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
 
-$db_file = 'banco.sqlite';
-$upload_dir = '../uploads/';
+$db_file = 'banco.sqlite'; 
+$upload_dir = '../uploads/'; 
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
@@ -11,7 +11,7 @@ try {
     $nome_local = $_POST['nomeLocal'] ?? '';
     $lat = $_POST['lat'] ?? '';
     $lng = $_POST['lng'] ?? '';
-    $criador_id = $_POST['criador_id'] ?? ''; // <--- AGORA RECEBE O ID DINÂMICO
+    $criador_id = $_POST['criador_id'] ?? ''; 
     $foto = $_FILES['foto'] ?? null;
 
     if (empty($criador_id)) {
@@ -24,6 +24,32 @@ try {
 
     $codigo = '#' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
+    // --- NOVA LÓGICA DE RARIDADE POR DISTÂNCIA DE SÃO PAULO ---
+    $lat_sp = -23.5505;
+    $lon_sp = -46.6333;
+    
+    $lat_adesivo = (float) $lat;
+    $lon_adesivo = (float) $lng;
+
+    // Cálculo de Distância (Fórmula de Haversine) em Quilômetros
+    $raio_terra = 6371;
+    
+    $dLat = deg2rad($lat_adesivo - $lat_sp);
+    $dLon = deg2rad($lon_adesivo - $lon_sp);
+    
+    $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat_sp)) * cos(deg2rad($lat_adesivo)) * sin($dLon/2) * sin($dLon/2);
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    $distancia = $raio_terra * $c; 
+
+    // Define a raridade baseada nos Km de distância
+    if ($distancia <= 100) {
+        $raridade = 'Comum';
+    } elseif ($distancia <= 700) {
+        $raridade = 'Raro';
+    } else {
+        $raridade = 'Lendário';
+    }
+
     $extensao = pathinfo($foto['name'], PATHINFO_EXTENSION);
     $novo_nome = uniqid('adesivo_') . '.' . $extensao; 
     $caminho_destino = $upload_dir . $novo_nome;
@@ -32,8 +58,8 @@ try {
         
         $caminho_banco = 'uploads/' . $novo_nome;
 
-        $stmt = $pdo->prepare("INSERT INTO adesivos (codigo, criador_id, nome_local, lat, lng, foto_original) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$codigo, $criador_id, $nome_local, $lat, $lng, $caminho_banco]);
+        $stmt = $pdo->prepare("INSERT INTO adesivos (codigo, criador_id, nome_local, lat, lng, foto_original, raridade) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$codigo, $criador_id, $nome_local, $lat, $lng, $caminho_banco, $raridade]);
 
         echo json_encode(['sucesso' => true, 'mensagem' => 'Adesivo salvo com sucesso!']);
     } else {
