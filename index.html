@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mapa do Bando</title>
+    <title>Mapa Bandesivos</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -38,11 +38,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        .btn-flutuante:active {
-            transform: scale(0.9);
         }
 
         .modal-content {
@@ -61,21 +56,24 @@
             border-radius: 8px;
             object-fit: cover;
         }
+
+        .box-localizacao {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Mapa -->
     <div id="map"></div>
 
-    <!-- Botão Flutuante -->
-    <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"
-        aria-label="Adicionar Adesivo">
+    <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload">
         <i class="bi bi-camera-fill"></i>
     </button>
 
-    <!-- Modal do Formulário -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -85,6 +83,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="formAdesivo">
+
                         <div class="mb-3">
                             <label class="form-label">Tirar Foto do Adesivo</label>
                             <input class="form-control" type="file" accept="image/*" capture="environment"
@@ -92,13 +91,53 @@
                         </div>
 
                         <div id="preview-container">
-                            <img id="preview-foto" src="" alt="Preview do Adesivo">
+                            <img id="preview-foto" src="" alt="Preview">
                         </div>
 
                         <div class="mb-3 mt-3">
                             <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
                             <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
+
+                        <!-- CAMPO NOVO: Quem colou -->
+                        <div class="mb-3">
+                            <label class="form-label">Quem colou o adesivo?</label>
+                            <input type="text" class="form-control" id="quemColou" placeholder="Ex: Vitor, Yasmim..."
+                                required>
+                        </div>
+
+                        <div class="mb-3 mt-4 box-localizacao">
+                            <label class="form-label fw-bold">Onde o adesivo foi colado?</label>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="modoLocal" id="modoGps" value="gps"
+                                    checked>
+                                <label class="form-check-label" for="modoGps">Usar meu GPS agora</label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="modoLocal" id="modoMapa"
+                                    value="mapa">
+                                <label class="form-check-label" for="modoMapa">Usar local selecionado no mapa</label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoLocal" id="modoManual"
+                                    value="manual">
+                                <label class="form-check-label" for="modoManual">Procurar por endereço/cidade</label>
+                            </div>
+
+                            <div id="boxEndereco" class="mt-3" style="display: none;">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="inputEndereco"
+                                        placeholder="Ex: Torre Eiffel">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        id="btnBuscarEnd">Buscar</button>
+                                </div>
+                                <small id="statusBusca" class="form-text text-primary mt-1"></small>
+                            </div>
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -109,170 +148,177 @@
         </div>
     </div>
 
-    <!-- Scripts do Bootstrap e Leaflet -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // 1. Inicializa o Mapa
-        const map = L.map('map').setView([-23.5505, -46.6333], 12);
+        const map = L.map('map').setView([-23.5505, -46.6333], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            maxZoom: 19, attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Função para buscar os adesivos no banco e desenhar no mapa
-        function carregarAdesivos() {
-            fetch('api/listar.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        // Percorre cada adesivo retornado pelo banco
-                        data.dados.forEach(adesivo => {
-                            const marker = L.marker([adesivo.lat, adesivo.lng]).addTo(map);
-
-                            // Monta o visual do balãozinho (Popup) com a foto, o nome e o botão de excluir
-                            const popupContent = `
-                        <div style="text-align: center; font-family: sans-serif;">
-                            <strong>${adesivo.nome_local}</strong><br>
-                            
-                            <img src="${adesivo.foto_caminho}" alt="Adesivo em ${adesivo.nome_local}" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><br>
-                            
-                            <!-- Botão de excluir passando o ID do adesivo -->
-                            <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-danger btn-sm mt-2" style="width: 100%;">
-                                <i class="bi bi-trash"></i> Excluir
-                            </button>
-                        </div>
-                    `;
-
-                            // Atrela o balãozinho ao Pin
-                            marker.bindPopup(popupContent);
-                        });
-                    } else {
-                        console.error('Erro retornado pela API:', data.erro);
-                    }
-                })
-                .catch(error => console.error('Erro na comunicação com o servidor:', error));
-        }
-
-        // Chama a função assim que a página carregar
-        carregarAdesivos();
-
-        // 2. Preview da foto
-        const fotoInput = document.getElementById('fotoInput');
-        const previewContainer = document.getElementById('preview-container');
-        const previewFoto = document.getElementById('preview-foto');
-
-        fotoInput.addEventListener('change', function (event) {
+        document.getElementById('fotoInput').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    previewFoto.src = e.target.result;
-                    previewContainer.style.display = 'block';
+                reader.onload = e => {
+                    document.getElementById('preview-foto').src = e.target.result;
+                    document.getElementById('preview-container').style.display = 'block';
                 }
                 reader.readAsDataURL(file);
             }
         });
 
-        // 3. Captura GPS e Envia para o PHP
-        document.getElementById('btnSalvar').addEventListener('click', function () {
-            const nomeLocal = document.getElementById('nomeLocal').value;
-            const arquivoFoto = document.getElementById('fotoInput').files[0];
+        const modoGps = document.getElementById('modoGps');
+        const modoMapa = document.getElementById('modoMapa');
+        const modoManual = document.getElementById('modoManual');
+        const boxEndereco = document.getElementById('boxEndereco');
 
-            if (!nomeLocal || !arquivoFoto) {
-                alert("Por favor, tire a foto e preencha o nome do local.");
-                return;
-            }
+        modoGps.addEventListener('change', () => boxEndereco.style.display = 'none');
+        modoMapa.addEventListener('change', () => boxEndereco.style.display = 'none');
+        modoManual.addEventListener('change', () => boxEndereco.style.display = 'block');
 
-            if (!navigator.geolocation) {
-                alert('Geolocalização não suportada pelo seu navegador.');
-                return;
-            }
+        let latMapa = null;
+        let lngMapa = null;
+        let marcadorTemp = null;
 
-            const btn = this;
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Obtendo GPS e Salvando...';
-            btn.disabled = true;
+        map.on('click', function (e) {
+            latMapa = e.latlng.lat;
+            lngMapa = e.latlng.lng;
 
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
+            if (marcadorTemp) { map.removeLayer(marcadorTemp); }
 
-                    const formData = new FormData();
-                    formData.append('foto', arquivoFoto);
-                    formData.append('nomeLocal', nomeLocal);
-                    formData.append('lat', lat);
-                    formData.append('lng', lng);
-
-                    fetch('api/salvar.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.sucesso) {
-                                // Cria um Pin temporário na tela só para dar feedback visual imediato
-                                const marker = L.marker([lat, lng]).addTo(map);
-                                marker.bindPopup(`<b>${nomeLocal}</b><br>Salvo com sucesso!`).openPopup();
-                                map.setView([lat, lng], 16); // Dá um zoom no local
-
-                                // Reseta o modal
-                                document.getElementById('formAdesivo').reset();
-                                previewContainer.style.display = 'none';
-                                bootstrap.Modal.getInstance(document.getElementById('modalUpload')).hide();
-                            } else {
-                                alert('Erro: ' + data.erro);
-                            }
-                        })
-                        .catch(error => {
-                            alert('Erro na comunicação com o servidor.');
-                            console.error(error);
-                        })
-                        .finally(() => {
-                            btn.innerHTML = textoOriginal;
-                            btn.disabled = false;
-                        });
-                },
-                function (error) {
-                    alert('Erro ao obter localização. Verifique o GPS do seu celular.');
-                    btn.innerHTML = textoOriginal;
-                    btn.disabled = false;
-                },
-                { enableHighAccuracy: true }
-            );
+            marcadorTemp = L.marker([latMapa, lngMapa]).addTo(map);
+            marcadorTemp.bindPopup(`
+                <div style="text-align:center;">
+                    <strong>Colar adesivo aqui?</strong><br>
+                    <button class="btn btn-primary btn-sm mt-2" onclick="abrirModalPeloMapa()">Sim, adicionar</button>
+                </div>
+            `).openPopup();
         });
 
-        // Função disparada ao clicar no botão Excluir dentro do balãozinho
-        function deletarAdesivo(id) {
-            // Pede uma confirmação para evitar cliques acidentais
-            if (confirm("Tem certeza que deseja apagar este adesivo do mapa? A foto também será excluída.")) {
+        function abrirModalPeloMapa() {
+            document.getElementById('modoMapa').checked = true;
+            boxEndereco.style.display = 'none';
+            const modalElement = document.getElementById('modalUpload');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modalInstance.show();
+            if (marcadorTemp) marcadorTemp.closePopup();
+        }
 
-                // Envia o ID no formato JSON para o PHP
+        let latManual = null;
+        let lngManual = null;
+
+        document.getElementById('btnBuscarEnd').addEventListener('click', function () {
+            const endereco = document.getElementById('inputEndereco').value;
+            const status = document.getElementById('statusBusca');
+            if (!endereco) { status.innerText = "Digite um endereço primeiro."; return; }
+
+            status.innerText = "Buscando localização...";
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        latManual = data[0].lat; lngManual = data[0].lon;
+                        status.innerHTML = `✅ Encontrado: ${data[0].display_name}`;
+                        status.style.color = "green";
+                    } else {
+                        status.innerText = "❌ Local não encontrado.";
+                        latManual = null; lngManual = null;
+                    }
+                }).catch(err => { status.innerText = "Erro ao buscar endereço."; });
+        });
+
+        document.getElementById('btnSalvar').addEventListener('click', function () {
+            const nomeLocal = document.getElementById('nomeLocal').value;
+            const quemColou = document.getElementById('quemColou').value;
+            const arquivoFoto = document.getElementById('fotoInput').files[0];
+
+            if (!nomeLocal || !quemColou || !arquivoFoto) {
+                alert("Por favor, preencha todos os campos e tire a foto.");
+                return;
+            }
+
+            const modoSelecionado = document.querySelector('input[name="modoLocal"]:checked').value;
+            const btn = this;
+            const textoOriginal = btn.innerHTML;
+
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
+            btn.disabled = true;
+
+            if (modoSelecionado === 'manual') {
+                if (!latManual || !lngManual) { alert("Busque um endereço primeiro."); btn.innerHTML = textoOriginal; btn.disabled = false; return; }
+                enviarParaServidor(latManual, lngManual, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal);
+            } else if (modoSelecionado === 'mapa') {
+                if (!latMapa || !lngMapa) { alert("Selecione um lugar no mapa primeiro."); btn.innerHTML = textoOriginal; btn.disabled = false; return; }
+                enviarParaServidor(latMapa, lngMapa, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal);
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    position => { enviarParaServidor(position.coords.latitude, position.coords.longitude, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal); },
+                    error => { alert('Erro no GPS. Use a busca manual ou clique no mapa.'); btn.innerHTML = textoOriginal; btn.disabled = false; },
+                    { enableHighAccuracy: true }
+                );
+            }
+        });
+
+        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal) {
+            const formData = new FormData();
+            formData.append('foto', arquivoFoto);
+            formData.append('nomeLocal', nomeLocal);
+            formData.append('quemColou', quemColou);
+            formData.append('lat', lat);
+            formData.append('lng', lng);
+
+            fetch('api/salvar.php', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) location.reload();
+                    else alert('Erro: ' + data.erro);
+                })
+                .catch(error => alert('Erro na comunicação com o servidor.'))
+                .finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
+        }
+
+        function carregarAdesivos() {
+            fetch('api/listar.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        data.dados.forEach(adesivo => {
+                            const marker = L.marker([adesivo.lat, adesivo.lng]).addTo(map);
+                            const popupContent = `
+                                <div style="text-align: center; font-family: sans-serif;">
+                                    <strong>${adesivo.nome_local}</strong><br>
+                                    <small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br>
+                                    <img src="${adesivo.foto_caminho}" alt="Adesivo" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><br>
+                                    <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-danger btn-sm mt-2" style="width: 100%;">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </button>
+                                </div>
+                            `;
+                            marker.bindPopup(popupContent);
+                        });
+                    }
+                });
+        }
+
+        function deletarAdesivo(id) {
+            if (confirm("Tem certeza que deseja apagar este adesivo do mapa?")) {
                 fetch('api/excluir.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
                 })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.sucesso) {
-                            alert("Adesivo apagado com sucesso!");
-                            // Recarrega a página para atualizar o mapa sem o adesivo
-                            location.reload();
-                        } else {
-                            alert("Erro ao excluir: " + data.erro);
-                        }
-                    })
-                    .catch(error => {
-                        alert("Erro na comunicação com o servidor.");
-                        console.error(error);
+                        if (data.sucesso) location.reload();
+                        else alert("Erro ao excluir: " + data.erro);
                     });
             }
         }
+
+        carregarAdesivos();
     </script>
 </body>
 
