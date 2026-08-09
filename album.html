@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Álbum - O Bando</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding-top: 70px;
+        }
+
+        .navbar-bando {
+            background-color: #0d6efd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-figurinha {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .card-figurinha:hover {
+            transform: translateY(-5px);
+        }
+
+        .img-adesivo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .img-selfie {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid white;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge-codigo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navegação Superior -->
+    <nav class="navbar navbar-dark navbar-bando fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-arrow-left me-2"></i> Voltar ao Mapa
+            </a>
+            <span class="navbar-text text-white fw-bold">
+                📖 Álbum de <span id="nomeLogado"></span>
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="text-center mb-4 mt-3">
+            <h2 class="fw-bold">Sua Coleção</h2>
+            <p class="text-muted" id="contadorAdesivos">Carregando...</p>
+        </div>
+
+        <!-- Onde as figurinhas vão aparecer -->
+        <div class="row g-4" id="gridAlbum">
+            <!-- Inseridas pelo JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // --- SEGURANÇA E DADOS DO USUÁRIO ---
+        const meuId = localStorage.getItem('bando_id');
+        const meuApelido = localStorage.getItem('bando_apelido');
+
+        if (!meuId) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('nomeLogado').innerText = meuApelido;
+        }
+
+        // --- CARREGAR O ÁLBUM DA NOVA PASTA ---
+        function carregarAlbum() {
+            fetch(`album/meu_album.php?usuario_id=${meuId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const grid = document.getElementById('gridAlbum');
+                        const colecao = data.dados;
+
+                        document.getElementById('contadorAdesivos').innerText = `Você encontrou ${colecao.length} adesivo(s) até agora.`;
+
+                        if (colecao.length === 0) {
+                            grid.innerHTML = `<div class="col-12 text-center text-muted mt-5"><h4>Você ainda não encontrou nenhum adesivo.</h4><p>Abra o mapa e comece a caçada!</p></div>`;
+                            return;
+                        }
+
+                        let html = '';
+                        colecao.forEach(item => {
+                            // Converte a data para um formato mais bonito
+                            const dataObj = new Date(item.data_descoberta);
+                            const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+                            const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie">` : '';
+                            const comentarioHtml = item.comentario ? `<p class="card-text text-muted small mt-2"><i>"${item.comentario}"</i></p>` : '';
+
+                            html += `
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card card-figurinha">
+                                        <div class="position-relative">
+                                            <span class="badge bg-primary badge-codigo">${item.codigo}</span>
+                                            ${selfieHtml}
+                                            <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
+                                            <div class="mt-1">
+                                                <span class="badge bg-secondary">${item.raridade}</span>
+                                                <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> ${dataFormatada}</small>
+                                            </div>
+                                            ${comentarioHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        grid.innerHTML = html;
+                    } else {
+                        alert("Erro ao carregar o álbum: " + data.erro);
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('contadorAdesivos').innerText = "Erro ao conectar com o servidor.";
+                });
+        }
+
+        carregarAlbum();
+    </script>
+</body>
+
+</html>
