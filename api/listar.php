@@ -7,7 +7,6 @@ try {
     $pdo = new PDO("sqlite:" . $db_file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // O comando JOIN junta o Adesivo (a) com o Usuário (u)
     $sql = "SELECT 
                 a.id,
                 a.codigo,

@@ -68,8 +68,16 @@
 
 <body>
 
+    <!-- Badge de Usuário Logado -->
+    <div
+        style="position: fixed; top: 15px; right: 15px; z-index: 1000; background: white; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <small class="fw-bold">👤 <span id="nomeLogado"></span></small>
+        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold" style="padding: 0;">Sair</button>
+    </div>
+
     <div id="map"></div>
 
+    <!-- Botão de Registrar Novo Adesivo -->
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload">
         <i class="bi bi-plus-lg"></i>
     </button>
@@ -112,8 +120,6 @@
                             <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
                             <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
-
-                        <!-- O campo "Quem colou" foi removido daqui pois o PHP agora pega seu ID automático! -->
 
                         <div class="mb-3 mt-4 box-destaque">
                             <label class="form-label fw-bold">Onde o adesivo foi colado?</label>
@@ -177,6 +183,26 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // --- BLOQUEIO DE ACESSO ---
+        const meuId = localStorage.getItem('bando_id');
+        const meuApelido = localStorage.getItem('bando_apelido');
+
+        // Se não tiver ID salvo, chuta pro login!
+        if (!meuId) {
+            window.location.href = 'login.html';
+        } else {
+            // Se estiver logado, exibe o nome no topo
+            document.getElementById('nomeLogado').innerText = meuApelido;
+        }
+
+        // Função do botão Sair
+        function sairDoApp() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+
+        // --- INICIALIZAÇÃO DO MAPA ---
         const map = L.map('map').setView([-23.5505, -46.6333], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19, attribution: '© OpenStreetMap'
@@ -261,6 +287,7 @@
                 }).catch(err => { status.innerText = "Erro ao buscar endereço."; });
         });
 
+        // --- SALVAR ADESIVO ---
         document.getElementById('btnSalvar').addEventListener('click', function () {
             const nomeLocal = document.getElementById('nomeLocal').value;
 
@@ -298,6 +325,9 @@
             formData.append('lat', lat);
             formData.append('lng', lng);
 
+            // PEGA O ID DO USUÁRIO LOGADO E MANDA PRO PHP
+            formData.append('criador_id', localStorage.getItem('bando_id'));
+
             fetch('api/salvar.php', { method: 'POST', body: formData })
                 .then(response => response.json())
                 .then(data => {
@@ -308,6 +338,7 @@
                 .finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         }
 
+        // --- LISTAR ADESIVOS NO MAPA ---
         function carregarAdesivos() {
             fetch('api/listar.php')
                 .then(response => response.json())
@@ -357,6 +388,7 @@
             modal.show();
         }
 
+        // Chama a função para renderizar os adesivos
         carregarAdesivos();
     </script>
 </body>

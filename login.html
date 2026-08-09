@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - O Bando</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-login {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .brand-title {
+            font-weight: 800;
+            font-size: 2rem;
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card card-login bg-white">
+        <h1 class="brand-title">O Bando</h1>
+        <p class="text-center text-muted mb-4" id="textoModo">Faça login para ver o mapa</p>
+
+        <form id="formAuth">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Apelido</label>
+                <input type="text" class="form-control form-control-lg" id="inputApelido" placeholder="Como te chamam?"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Senha</label>
+                <input type="password" class="form-control form-control-lg" id="inputSenha" placeholder="••••••••"
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold" id="btnAcao">Entrar no Mapa</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="#" id="linkTrocarModo" class="text-decoration-none text-secondary">Ainda não tem conta?
+                <b>Registre-se aqui</b></a>
+        </div>
+
+        <div id="mensagemErro" class="alert alert-danger mt-3 d-none text-center"></div>
+    </div>
+
+    <script>
+        let modoLogin = true; // Define se a tela está em modo Entrar ou Registrar
+
+        const form = document.getElementById('formAuth');
+        const linkTrocarModo = document.getElementById('linkTrocarModo');
+        const btnAcao = document.getElementById('btnAcao');
+        const textoModo = document.getElementById('textoModo');
+        const msgErro = document.getElementById('mensagemErro');
+
+        // Alterna o visual da tela entre Login e Registro
+        linkTrocarModo.addEventListener('click', (e) => {
+            e.preventDefault();
+            modoLogin = !modoLogin;
+            msgErro.classList.add('d-none'); // Limpa os erros
+
+            if (modoLogin) {
+                textoModo.innerText = "Faça login para ver o mapa";
+                btnAcao.innerText = "Entrar no Mapa";
+                linkTrocarModo.innerHTML = "Ainda não tem conta? <b>Registre-se aqui</b>";
+            } else {
+                textoModo.innerText = "Crie sua conta no Bando";
+                btnAcao.innerText = "Criar Conta";
+                linkTrocarModo.innerHTML = "Já faz parte do Bando? <b>Faça login</b>";
+            }
+        });
+
+        // Envia os dados para a pasta auth/
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const apelido = document.getElementById('inputApelido').value;
+            const senha = document.getElementById('inputSenha').value;
+
+            // Aponta para a nova pasta auth
+            const endpoint = modoLogin ? 'auth/login.php' : 'auth/registrar.php';
+
+            btnAcao.disabled = true;
+            btnAcao.innerText = "Carregando...";
+            msgErro.classList.add('d-none');
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apelido, senha })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        // Salva a identidade da pessoa no navegador
+                        localStorage.setItem('bando_id', data.id);
+                        localStorage.setItem('bando_apelido', data.apelido);
+
+                        // Redireciona para o mapa
+                        window.location.href = 'index.html';
+                    } else {
+                        msgErro.innerText = data.erro;
+                        msgErro.classList.remove('d-none');
+                    }
+                })
+                .catch(err => {
+                    msgErro.innerText = "Erro ao conectar com o servidor.";
+                    msgErro.classList.remove('d-none');
+                })
+                .finally(() => {
+                    btnAcao.disabled = false;
+                    btnAcao.innerText = modoLogin ? "Entrar no Mapa" : "Criar Conta";
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$db_file = 'banco.sqlite';
+$db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
