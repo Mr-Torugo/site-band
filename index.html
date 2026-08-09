@@ -3,19 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <!-- Meta tag essencial para aplicativos móveis: impede que o usuário dê zoom acidental -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sticker Map</title>
+    <title>Mapa do Bando</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Ícones do Bootstrap (para o ícone da câmera) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
-        /* Reset básico e preparação para PWA */
         body,
         html {
             margin: 0;
@@ -24,14 +19,12 @@
             background-color: #f8f9fa;
         }
 
-        /* O mapa ocupará toda a tela e ficará no fundo */
         #map {
             height: 100vh;
             width: 100vw;
             z-index: 1;
         }
 
-        /* Botão flutuante (Floating Action Button) */
         .btn-flutuante {
             position: fixed;
             bottom: 30px;
@@ -42,7 +35,6 @@
             font-size: 24px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
             z-index: 1000;
-            /* Fica acima do mapa */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -53,12 +45,10 @@
             transform: scale(0.9);
         }
 
-        /* Bordas arredondadas no modal para um visual mais moderno */
         .modal-content {
             border-radius: 15px;
         }
 
-        /* Contêiner de visualização da foto tirada */
         #preview-container {
             display: none;
             margin-top: 15px;
@@ -76,61 +66,51 @@
 
 <body>
 
-    <!-- Contêiner do Mapa -->
+    <!-- Mapa -->
     <div id="map"></div>
 
-    <!-- Botão Flutuante que abre o formulário -->
+    <!-- Botão Flutuante -->
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"
         aria-label="Adicionar Adesivo">
         <i class="bi bi-camera-fill"></i>
     </button>
 
-    <!-- Modal do Formulário (Oculto por padrão) -->
-    <div class="modal fade" id="modalUpload" tabindex="-1" aria-labelledby="modalUploadLabel" aria-hidden="true">
+    <!-- Modal do Formulário -->
+    <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalUploadLabel">Registrar Novo Adesivo</h5>
+                    <h5 class="modal-title">Registrar Novo Adesivo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
                     <form id="formAdesivo">
-
-                        <!-- Input para câmera: capture="environment" abre a câmera traseira do celular -->
                         <div class="mb-3">
-                            <label for="fotoInput" class="form-label">Tirar Foto do Adesivo</label>
+                            <label class="form-label">Tirar Foto do Adesivo</label>
                             <input class="form-control" type="file" accept="image/*" capture="environment"
                                 id="fotoInput" required>
                         </div>
 
-                        <!-- Preview da Imagem após tirar a foto -->
                         <div id="preview-container">
                             <img id="preview-foto" src="" alt="Preview do Adesivo">
                         </div>
 
                         <div class="mb-3 mt-3">
-                            <label for="nomeLocal" class="form-label">Nome do Local</label>
-                            <input type="text" class="form-control" id="nomeLocal" placeholder="Ex: Poste da Rua X..."
-                                required>
+                            <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
+                            <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
-
-                        <!-- Campos ocultos que guardarão as coordenadas do GPS -->
-                        <input type="hidden" id="latInput">
-                        <input type="hidden" id="lngInput">
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <!-- O botão Salvar dispara a busca pelo GPS -->
-                    <button type="button" class="btn btn-primary" id="btnSalvar">Capturar GPS e Salvar</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvar">Salvar no Mapa</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Scripts do Bootstrap e Leaflet -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -141,7 +121,38 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 2. Lógica para mostrar o preview da foto
+        // Função para buscar os adesivos no banco e desenhar no mapa
+        function carregarAdesivos() {
+            fetch('api/listar.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        // Percorre cada adesivo retornado pelo banco
+                        data.dados.forEach(adesivo => {
+                            const marker = L.marker([adesivo.lat, adesivo.lng]).addTo(map);
+
+                            // Monta o visual do balãozinho (Popup) com a foto e o nome
+                            const popupContent = `
+                    
+                        ${adesivo.nome_local}
+                        
+                    
+                `;
+
+                            // Atrela o balãozinho ao Pin
+                            marker.bindPopup(popupContent);
+                        });
+                    } else {
+                        console.error('Erro retornado pela API:', data.erro);
+                    }
+                })
+                .catch(error => console.error('Erro na comunicação com o servidor:', error));
+        }
+
+        // Chama a função assim que a página carregar
+        carregarAdesivos();
+
+        // 2. Preview da foto
         const fotoInput = document.getElementById('fotoInput');
         const previewContainer = document.getElementById('preview-container');
         const previewFoto = document.getElementById('preview-foto');
@@ -154,45 +165,76 @@
                     previewFoto.src = e.target.result;
                     previewContainer.style.display = 'block';
                 }
-                reader.readAsDataURL(file); // Converte a imagem para mostrar na tela
+                reader.readAsDataURL(file);
             }
         });
 
-        // 3. Lógica do botão Salvar: Captura o GPS e prepara o envio
+        // 3. Captura GPS e Envia para o PHP
         document.getElementById('btnSalvar').addEventListener('click', function () {
+            const nomeLocal = document.getElementById('nomeLocal').value;
+            const arquivoFoto = document.getElementById('fotoInput').files[0];
+
+            if (!nomeLocal || !arquivoFoto) {
+                alert("Por favor, tire a foto e preencha o nome do local.");
+                return;
+            }
+
             if (!navigator.geolocation) {
                 alert('Geolocalização não suportada pelo seu navegador.');
                 return;
             }
 
-            // Altera o estado do botão para indicar carregamento
             const btn = this;
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Obtendo GPS...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Obtendo GPS e Salvando...';
             btn.disabled = true;
 
-            // Solicita a localização do usuário
             navigator.geolocation.getCurrentPosition(
                 function (position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
 
-                    document.getElementById('latInput').value = lat;
-                    document.getElementById('lngInput').value = lng;
+                    const formData = new FormData();
+                    formData.append('foto', arquivoFoto);
+                    formData.append('nomeLocal', nomeLocal);
+                    formData.append('lat', lat);
+                    formData.append('lng', lng);
 
-                    alert(`Localização capturada: Lat ${lat}, Lng ${lng}\nAqui entra a lógica de enviar para o banco de dados!`);
+                    fetch('api/salvar.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.sucesso) {
+                                // Cria um Pin temporário na tela só para dar feedback visual imediato
+                                const marker = L.marker([lat, lng]).addTo(map);
+                                marker.bindPopup(`<b>${nomeLocal}</b><br>Salvo com sucesso!`).openPopup();
+                                map.setView([lat, lng], 16); // Dá um zoom no local
 
-                    // Reseta o estado do modal após o sucesso
-                    btn.innerHTML = textoOriginal;
-                    btn.disabled = false;
-                    bootstrap.Modal.getInstance(document.getElementById('modalUpload')).hide();
+                                // Reseta o modal
+                                document.getElementById('formAdesivo').reset();
+                                previewContainer.style.display = 'none';
+                                bootstrap.Modal.getInstance(document.getElementById('modalUpload')).hide();
+                            } else {
+                                alert('Erro: ' + data.erro);
+                            }
+                        })
+                        .catch(error => {
+                            alert('Erro na comunicação com o servidor.');
+                            console.error(error);
+                        })
+                        .finally(() => {
+                            btn.innerHTML = textoOriginal;
+                            btn.disabled = false;
+                        });
                 },
                 function (error) {
-                    alert('Erro ao obter localização. Verifique as permissões de GPS do seu celular.');
+                    alert('Erro ao obter localização. Verifique o GPS do seu celular.');
                     btn.innerHTML = textoOriginal;
                     btn.disabled = false;
                 },
-                { enableHighAccuracy: true } // Exige maior precisão (usa o chip de GPS do aparelho)
+                { enableHighAccuracy: true }
             );
         });
     </script>
