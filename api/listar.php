@@ -1,23 +1,32 @@
 <?php
-// Define que a resposta será no formato JSON
 header('Content-Type: application/json');
 
 $db_file = 'banco.sqlite';
 
 try {
-    // Conecta ao banco de dados SQLite
     $pdo = new PDO("sqlite:" . $db_file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Executa a consulta para pegar todos os adesivos
-    $stmt = $pdo->query("SELECT * FROM adesivos ORDER BY data_criacao DESC");
+    // O comando JOIN junta o Adesivo (a) com o Usuário (u)
+    $sql = "SELECT 
+                a.id,
+                a.codigo,
+                a.nome_local,
+                a.lat,
+                a.lng,
+                a.foto_original AS foto_caminho, 
+                u.apelido AS quem_colou,
+                a.raridade
+            FROM adesivos a
+            JOIN usuarios u ON a.criador_id = u.id
+            ORDER BY a.data_criacao DESC";
+
+    $stmt = $pdo->query($sql);
     $adesivos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Retorna os dados em formato JSON
     echo json_encode(['sucesso' => true, 'dados' => $adesivos]);
 
 } catch (Exception $e) {
-    // Em caso de erro, retorna status 500
     http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
 }

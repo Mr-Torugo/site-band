@@ -14,17 +14,24 @@ try {
         throw new Exception("ID do adesivo não informado.");
     }
 
-    $stmt = $pdo->prepare("SELECT foto_caminho FROM adesivos WHERE id = ?");
+    // 1. Busca a foto usando o novo nome da coluna: foto_original
+    $stmt = $pdo->prepare("SELECT foto_original FROM adesivos WHERE id = ?");
     $stmt->execute([$id]);
     $adesivo = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($adesivo) {
-        $caminho_arquivo = '../' . $adesivo['foto_caminho'];
+        $caminho_arquivo = '../' . $adesivo['foto_original'];
         
-        if (file_exists($caminho_arquivo)) {
+        // Apaga a imagem física da pasta uploads se ela existir
+        if (!empty($adesivo['foto_original']) && file_exists($caminho_arquivo)) {
             unlink($caminho_arquivo); 
         }
 
+        // 2. Limpa o histórico de "descobertas" ligadas a esse adesivo para não deixar lixo no banco
+        $stmtDescobertas = $pdo->prepare("DELETE FROM descobertas WHERE adesivo_id = ?");
+        $stmtDescobertas->execute([$id]);
+
+        // 3. Deleta o adesivo principal
         $stmtDelete = $pdo->prepare("DELETE FROM adesivos WHERE id = ?");
         $stmtDelete->execute([$id]);
 

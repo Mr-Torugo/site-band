@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sticker Map</title>
+    <title>Bando Map</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -57,7 +57,7 @@
             object-fit: cover;
         }
 
-        .box-localizacao {
+        .box-destaque {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
@@ -71,7 +71,7 @@
     <div id="map"></div>
 
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload">
-        <i class="bi bi-camera-fill"></i>
+        <i class="bi bi-plus-lg"></i>
     </button>
 
     <!-- Modal de Registro de Adesivo -->
@@ -85,28 +85,37 @@
                 <div class="modal-body">
                     <form id="formAdesivo">
 
-                        <div class="mb-3">
-                            <label class="form-label">Tirar Foto do Adesivo</label>
-                            <input class="form-control" type="file" accept="image/*" capture="environment"
-                                id="fotoInput" required>
+                        <!-- SEÇÃO: ESCOLHA DE IMAGEM -->
+                        <div class="mb-3 box-destaque">
+                            <label class="form-label fw-bold">Imagem do Adesivo</label>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-primary flex-fill"
+                                    onclick="document.getElementById('fotoCamera').click()">
+                                    <i class="bi bi-camera"></i> Câmera
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary flex-fill"
+                                    onclick="document.getElementById('fotoGaleria').click()">
+                                    <i class="bi bi-image"></i> Arquivo
+                                </button>
+                            </div>
+
+                            <input type="file" accept="image/*" capture="environment" id="fotoCamera"
+                                style="display: none;">
+                            <input type="file" accept="image/*" id="fotoGaleria" style="display: none;">
                         </div>
 
                         <div id="preview-container">
                             <img id="preview-foto" src="" alt="Preview">
                         </div>
 
-                        <div class="mb-3 mt-3">
+                        <div class="mb-3 mt-4">
                             <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
                             <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Quem colou o adesivo?</label>
-                            <input type="text" class="form-control" id="quemColou" placeholder="Ex: Vitor, Yasmim..."
-                                required>
-                        </div>
+                        <!-- O campo "Quem colou" foi removido daqui pois o PHP agora pega seu ID automático! -->
 
-                        <div class="mb-3 mt-4 box-localizacao">
+                        <div class="mb-3 mt-4 box-destaque">
                             <label class="form-label fw-bold">Onde o adesivo foi colado?</label>
 
                             <div class="form-check mb-2">
@@ -148,10 +157,9 @@
         </div>
     </div>
 
-    <!-- NOVO MODAL: Visualizar Imagem em Tamanho Maior -->
+    <!-- MODAL: Visualizar Imagem em Tamanho Maior -->
     <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <!-- Fundo transparente e sem bordas para destacar a foto -->
             <div class="modal-content bg-transparent border-0">
                 <div class="modal-header border-0 pb-0">
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -174,9 +182,12 @@
             maxZoom: 19, attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        document.getElementById('fotoInput').addEventListener('change', function (event) {
+        let arquivoSelecionado = null;
+
+        function processarFoto(event) {
             const file = event.target.files[0];
             if (file) {
+                arquivoSelecionado = file;
                 const reader = new FileReader();
                 reader.onload = e => {
                     document.getElementById('preview-foto').src = e.target.result;
@@ -184,7 +195,10 @@
                 }
                 reader.readAsDataURL(file);
             }
-        });
+        }
+
+        document.getElementById('fotoCamera').addEventListener('change', processarFoto);
+        document.getElementById('fotoGaleria').addEventListener('change', processarFoto);
 
         const modoGps = document.getElementById('modoGps');
         const modoMapa = document.getElementById('modoMapa');
@@ -249,11 +263,9 @@
 
         document.getElementById('btnSalvar').addEventListener('click', function () {
             const nomeLocal = document.getElementById('nomeLocal').value;
-            const quemColou = document.getElementById('quemColou').value;
-            const arquivoFoto = document.getElementById('fotoInput').files[0];
 
-            if (!nomeLocal || !quemColou || !arquivoFoto) {
-                alert("Por favor, preencha todos os campos e tire a foto.");
+            if (!nomeLocal || !arquivoSelecionado) {
+                alert("Por favor, preencha o nome do local e selecione uma foto.");
                 return;
             }
 
@@ -266,24 +278,23 @@
 
             if (modoSelecionado === 'manual') {
                 if (!latManual || !lngManual) { alert("Busque um endereço primeiro."); btn.innerHTML = textoOriginal; btn.disabled = false; return; }
-                enviarParaServidor(latManual, lngManual, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal);
+                enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, btn, textoOriginal);
             } else if (modoSelecionado === 'mapa') {
                 if (!latMapa || !lngMapa) { alert("Selecione um lugar no mapa primeiro."); btn.innerHTML = textoOriginal; btn.disabled = false; return; }
-                enviarParaServidor(latMapa, lngMapa, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal);
+                enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, btn, textoOriginal);
             } else {
                 navigator.geolocation.getCurrentPosition(
-                    position => { enviarParaServidor(position.coords.latitude, position.coords.longitude, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal); },
+                    position => { enviarParaServidor(position.coords.latitude, position.coords.longitude, arquivoSelecionado, nomeLocal, btn, textoOriginal); },
                     error => { alert('Erro no GPS. Use a busca manual ou clique no mapa.'); btn.innerHTML = textoOriginal; btn.disabled = false; },
                     { enableHighAccuracy: true }
                 );
             }
         });
 
-        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, quemColou, btn, textoOriginal) {
+        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, btn, textoOriginal) {
             const formData = new FormData();
             formData.append('foto', arquivoFoto);
             formData.append('nomeLocal', nomeLocal);
-            formData.append('quemColou', quemColou);
             formData.append('lat', lat);
             formData.append('lng', lng);
 
@@ -304,10 +315,11 @@
                     if (data.sucesso) {
                         data.dados.forEach(adesivo => {
                             const marker = L.marker([adesivo.lat, adesivo.lng]).addTo(map);
-
-                            // Adicionada a ação onclick na tag da imagem e o cursor: pointer
                             const popupContent = `
                                 <div style="text-align: center; font-family: sans-serif;">
+                                    <span class="badge bg-primary mb-1">${adesivo.codigo}</span>
+                                    <span class="badge bg-secondary mb-1">${adesivo.raridade}</span><br>
+                                    
                                     <strong>${adesivo.nome_local}</strong><br>
                                     <small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br>
                                     
@@ -339,7 +351,6 @@
             }
         }
 
-        // NOVA FUNÇÃO: Abre a imagem clicada no Modal maior
         function abrirImagemMaior(caminhoImagem) {
             document.getElementById('imagemMaiorSrc').src = caminhoImagem;
             const modal = new bootstrap.Modal(document.getElementById('modalImagemMaior'));
