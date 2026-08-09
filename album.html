@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Álbum - O Bando</title>
+
     <!-- CONEXÕES DO PWA (APLICATIVO) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
@@ -30,6 +31,7 @@
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s;
+            height: 100%;
         }
 
         .card-figurinha:hover {
@@ -65,7 +67,6 @@
 
 <body>
 
-    <!-- Navegação Superior -->
     <nav class="navbar navbar-dark navbar-bando fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="index.html">
@@ -81,16 +82,29 @@
         <div class="text-center mb-4 mt-3">
             <h2 class="fw-bold">Sua Coleção</h2>
             <p class="text-muted" id="contadorAdesivos">Carregando...</p>
+
+            <!-- Botões para alternar as abas -->
+            <div class="btn-group mt-1 w-100" style="max-width: 400px;" role="group">
+                <button type="button" class="btn btn-primary fw-bold" id="btnAchados" onclick="mostrarAba('achados')">
+                    🔍 Encontrados
+                </button>
+                <button type="button" class="btn btn-outline-primary fw-bold" id="btnColados"
+                    onclick="mostrarAba('colados')">
+                    📍 Colados
+                </button>
+            </div>
         </div>
 
-        <!-- Onde as figurinhas vão aparecer -->
-        <div class="row g-4" id="gridAlbum">
-            <!-- Inseridas pelo JavaScript -->
+        <!-- Grade 1: Adesivos que o usuário ENCONTROU -->
+        <div class="row g-4" id="gridAchados">
+            <div class="text-center text-muted w-100">Carregando seus achados...</div>
         </div>
+
+        <!-- Grade 2: Adesivos que o usuário COLOU (escondida por padrão) -->
+        <div class="row g-4" id="gridColados" style="display: none;"></div>
     </div>
 
     <script>
-        // --- SEGURANÇA E DADOS DO USUÁRIO ---
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
 
@@ -100,52 +114,119 @@
             document.getElementById('nomeLogado').innerText = meuApelido;
         }
 
-        // --- CARREGAR O ÁLBUM DA NOVA PASTA ---
+        let listaAchados = [];
+        let listaColados = [];
+
+        function determinarCorRaridade(raridade) {
+            if (raridade === 'Raro') return 'bg-primary';
+            if (raridade === 'Lendário') return 'bg-warning text-dark';
+            return 'bg-secondary';
+        }
+
+        // Função que controla a troca de visualização
+        function mostrarAba(aba) {
+            const btnAchados = document.getElementById('btnAchados');
+            const btnColados = document.getElementById('btnColados');
+            const gridAchados = document.getElementById('gridAchados');
+            const gridColados = document.getElementById('gridColados');
+
+            if (aba === 'achados') {
+                btnAchados.className = 'btn btn-primary fw-bold';
+                btnColados.className = 'btn btn-outline-primary fw-bold';
+                gridAchados.style.display = 'flex';
+                gridColados.style.display = 'none';
+                document.getElementById('contadorAdesivos').innerText = `Você descobriu ${listaAchados.length} adesivo(s).`;
+            } else {
+                btnAchados.className = 'btn btn-outline-primary fw-bold';
+                btnColados.className = 'btn btn-primary fw-bold';
+                gridAchados.style.display = 'none';
+                gridColados.style.display = 'flex';
+                document.getElementById('contadorAdesivos').innerText = `Você espalhou ${listaColados.length} adesivo(s) no mapa.`;
+            }
+        }
+
         function carregarAlbum() {
-            fetch(`album/meu_album.php?usuario_id=${meuId}`)
+            // Agora apontando para a pasta api/
+            fetch(`api/meu_album.php?usuario_id=${meuId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.sucesso) {
-                        const grid = document.getElementById('gridAlbum');
-                        const colecao = data.dados;
+                        listaAchados = data.achados;
+                        listaColados = data.colados;
 
-                        document.getElementById('contadorAdesivos').innerText = `Você encontrou ${colecao.length} adesivo(s) até agora.`;
+                        const gridAchados = document.getElementById('gridAchados');
+                        const gridColados = document.getElementById('gridColados');
 
-                        if (colecao.length === 0) {
-                            grid.innerHTML = `<div class="col-12 text-center text-muted mt-5"><h4>Você ainda não encontrou nenhum adesivo.</h4><p>Abra o mapa e comece a caçada!</p></div>`;
-                            return;
-                        }
+                        // MONTA A GRADE DE ACHADOS
+                        if (listaAchados.length === 0) {
+                            gridAchados.innerHTML = `<div class="col-12 text-center text-muted mt-4"><h4>Nenhum adesivo encontrado ainda.</h4><p>Abra o mapa e comece a caçada!</p></div>`;
+                        } else {
+                            let htmlAchados = '';
+                            listaAchados.forEach(item => {
+                                const dataObj = new Date(item.data_descoberta);
+                                const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+                                const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie">` : '';
+                                const comentarioHtml = item.comentario ? `<p class="card-text text-muted small mt-2"><i>"${item.comentario}"</i></p>` : '';
+                                const corBadge = determinarCorRaridade(item.raridade);
 
-                        let html = '';
-                        colecao.forEach(item => {
-                            // Converte a data para um formato mais bonito
-                            const dataObj = new Date(item.data_descoberta);
-                            const dataFormatada = dataObj.toLocaleDateString('pt-BR');
-                            const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie">` : '';
-                            const comentarioHtml = item.comentario ? `<p class="card-text text-muted small mt-2"><i>"${item.comentario}"</i></p>` : '';
-
-                            html += `
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card card-figurinha">
-                                        <div class="position-relative">
-                                            <span class="badge bg-primary badge-codigo">${item.codigo}</span>
-                                            ${selfieHtml}
-                                            <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
-                                            <div class="mt-1">
-                                                <span class="badge bg-secondary">${item.raridade}</span>
-                                                <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> ${dataFormatada}</small>
+                                htmlAchados += `
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="card card-figurinha">
+                                            <div class="position-relative">
+                                                <span class="badge bg-dark badge-codigo">${item.codigo}</span>
+                                                ${selfieHtml}
+                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
                                             </div>
-                                            ${comentarioHtml}
+                                            <div class="card-body">
+                                                <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
+                                                <div class="mt-1">
+                                                    <span class="badge ${corBadge}">${item.raridade}</span>
+                                                    <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> Achado em: ${dataFormatada}</small>
+                                                </div>
+                                                ${comentarioHtml}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            `;
-                        });
+                                `;
+                            });
+                            gridAchados.innerHTML = htmlAchados;
+                        }
 
-                        grid.innerHTML = html;
+                        // MONTA A GRADE DE COLADOS
+                        if (listaColados.length === 0) {
+                            gridColados.innerHTML = `<div class="col-12 text-center text-muted mt-4"><h4>Você ainda não colou nenhum adesivo.</h4><p>Clique no botão de + no mapa para espalhar sua arte!</p></div>`;
+                        } else {
+                            let htmlColados = '';
+                            listaColados.forEach(item => {
+                                const dataObj = new Date(item.data_criacao);
+                                const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+                                const corBadge = determinarCorRaridade(item.raridade);
+
+                                htmlColados += `
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="card card-figurinha border border-2 border-primary">
+                                            <div class="position-relative">
+                                                <span class="badge bg-dark badge-codigo">${item.codigo}</span>
+                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
+                                                <div class="mt-1 mb-2">
+                                                    <span class="badge ${corBadge}">${item.raridade}</span>
+                                                    <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> Colado em: ${dataFormatada}</small>
+                                                </div>
+                                                <span class="badge bg-success w-100"><i class="bi bi-check-circle"></i> Criado por você</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            gridColados.innerHTML = htmlColados;
+                        }
+
+                        // Inicializa a tela mostrando os achados primeiro
+                        mostrarAba('achados');
+
                     } else {
                         alert("Erro ao carregar o álbum: " + data.erro);
                     }
@@ -157,12 +238,11 @@
 
         carregarAlbum();
     </script>
+
     <!-- REGISTRO DO SERVICE WORKER (PWA) -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
         }
     </script>
 </body>
