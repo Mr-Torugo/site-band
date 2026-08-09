@@ -131,13 +131,19 @@
                         data.dados.forEach(adesivo => {
                             const marker = L.marker([adesivo.lat, adesivo.lng]).addTo(map);
 
-                            // Monta o visual do balãozinho (Popup) com a foto e o nome
+                            // Monta o visual do balãozinho (Popup) com a foto, o nome e o botão de excluir
                             const popupContent = `
-                    
-                        ${adesivo.nome_local}
-                        
-                    
-                `;
+                        <div style="text-align: center; font-family: sans-serif;">
+                            <strong>${adesivo.nome_local}</strong><br>
+                            
+                            <img src="${adesivo.foto_caminho}" alt="Adesivo em ${adesivo.nome_local}" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><br>
+                            
+                            <!-- Botão de excluir passando o ID do adesivo -->
+                            <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-danger btn-sm mt-2" style="width: 100%;">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
+                    `;
 
                             // Atrela o balãozinho ao Pin
                             marker.bindPopup(popupContent);
@@ -237,6 +243,36 @@
                 { enableHighAccuracy: true }
             );
         });
+
+        // Função disparada ao clicar no botão Excluir dentro do balãozinho
+        function deletarAdesivo(id) {
+            // Pede uma confirmação para evitar cliques acidentais
+            if (confirm("Tem certeza que deseja apagar este adesivo do mapa? A foto também será excluída.")) {
+
+                // Envia o ID no formato JSON para o PHP
+                fetch('api/excluir.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso) {
+                            alert("Adesivo apagado com sucesso!");
+                            // Recarrega a página para atualizar o mapa sem o adesivo
+                            location.reload();
+                        } else {
+                            alert("Erro ao excluir: " + data.erro);
+                        }
+                    })
+                    .catch(error => {
+                        alert("Erro na comunicação com o servidor.");
+                        console.error(error);
+                    });
+            }
+        }
     </script>
 </body>
 
