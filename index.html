@@ -221,7 +221,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- BLOQUEIO DE ACESSO ---
+        // --- BLOQUEIO DE ACESSO E DADOS DO USUÁRIO ---
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
 
@@ -235,7 +235,6 @@
             localStorage.clear();
             window.location.href = 'login.html';
         }
-
 
         // --- INICIALIZAÇÃO DO MAPA ---
         const map = L.map('map').setView([-23.5505, -46.6333], 2);
@@ -359,7 +358,7 @@
             formData.append('nomeLocal', nomeLocal);
             formData.append('lat', lat);
             formData.append('lng', lng);
-            formData.append('criador_id', localStorage.getItem('bando_id'));
+            formData.append('criador_id', meuId);
 
             fetch('api/salvar.php', { method: 'POST', body: formData })
                 .then(response => response.json())
@@ -397,6 +396,16 @@
                                 historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>';
                             }
 
+                            // VERIFICA SE O USUÁRIO LOGADO É O DONO DO ADESIVO
+                            let botaoExcluirHtml = '';
+                            if (adesivo.criador_id == meuId) {
+                                botaoExcluirHtml = `
+                                    <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm mt-2" style="width: 100%;">
+                                        <i class="bi bi-trash"></i> Excluir Meu Adesivo
+                                    </button>
+                                `;
+                            }
+
                             const popupContent = `
                                 <div style="text-align: center; font-family: sans-serif; min-width: 160px;">
                                     <span class="badge bg-primary mb-1">${adesivo.codigo}</span>
@@ -413,9 +422,8 @@
                                         🎉 Encontrei!
                                     </button>
                                     
-                                    <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm mt-2" style="width: 100%;">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    <!-- SÓ APARECE SE FOR O DONO -->
+                                    ${botaoExcluirHtml}
                                 </div>
                             `;
                             marker.bindPopup(popupContent);
@@ -440,7 +448,6 @@
             const adesivoId = document.getElementById('descAdesivoId').value;
             const comentario = document.getElementById('descComentario').value;
             const selfie = document.getElementById('descSelfie').files[0];
-            const meuId = localStorage.getItem('bando_id');
 
             const btn = this;
             const textoOriginal = btn.innerHTML;
@@ -476,7 +483,7 @@
                 fetch('api/excluir.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id })
+                    body: JSON.stringify({ id: id, usuario_id: meuId })
                 })
                     .then(response => response.json())
                     .then(data => {

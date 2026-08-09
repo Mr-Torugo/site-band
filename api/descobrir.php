@@ -38,7 +38,6 @@ try {
     echo json_encode(['sucesso' => true, 'mensagem' => 'Descoberta registrada com sucesso!']);
 
 } catch (PDOException $e) {
-    // 23000 é o código do banco quando viola a regra "UNIQUE" (impede de achar 2x o mesmo adesivo)
     if ($e->getCode() == 23000) {
         http_response_code(400);
         echo json_encode(['sucesso' => false, 'erro' => 'Você já encontrou este adesivo! Ele já está no seu álbum.']);

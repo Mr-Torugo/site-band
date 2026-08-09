@@ -9,29 +9,32 @@ try {
 
     $dados = json_decode(file_get_contents('php://input'), true);
     $id = $dados['id'] ?? '';
+    $usuario_id = $dados['usuario_id'] ?? ''; // ID de quem apertou o botão
 
-    if (empty($id)) {
-        throw new Exception("ID do adesivo não informado.");
+    if (empty($id) || empty($usuario_id)) {
+        throw new Exception("Dados insuficientes para exclusão.");
     }
 
-    // 1. Busca a foto usando o novo nome da coluna: foto_original
-    $stmt = $pdo->prepare("SELECT foto_original FROM adesivos WHERE id = ?");
+    // 1. Puxa a foto e QUEM CRIOU o adesivo
+    $stmt = $pdo->prepare("SELECT foto_original, criador_id FROM adesivos WHERE id = ?");
     $stmt->execute([$id]);
     $adesivo = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($adesivo) {
+        
+        if ($adesivo['criador_id'] != $usuario_id) {
+            throw new Exception("Permissão negada! Apenas quem colou este adesivo pode excluí-lo.");
+        }
+
         $caminho_arquivo = '../' . $adesivo['foto_original'];
         
-        // Apaga a imagem física da pasta uploads se ela existir
         if (!empty($adesivo['foto_original']) && file_exists($caminho_arquivo)) {
             unlink($caminho_arquivo); 
         }
 
-        // 2. Limpa o histórico de "descobertas" ligadas a esse adesivo para não deixar lixo no banco
         $stmtDescobertas = $pdo->prepare("DELETE FROM descobertas WHERE adesivo_id = ?");
         $stmtDescobertas->execute([$id]);
 
-        // 3. Deleta o adesivo principal
         $stmtDelete = $pdo->prepare("DELETE FROM adesivos WHERE id = ?");
         $stmtDelete->execute([$id]);
 

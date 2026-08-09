@@ -10,7 +10,8 @@ try {
     // 1. Busca todos os adesivos
     $sqlAdesivos = "SELECT 
                 a.id, a.codigo, a.nome_local, a.lat, a.lng, 
-                a.foto_original AS foto_caminho, u.apelido AS quem_colou, a.raridade
+                a.foto_original AS foto_caminho, u.apelido AS quem_colou, a.raridade,
+                a.criador_id
             FROM adesivos a
             JOIN usuarios u ON a.criador_id = u.id
             ORDER BY a.data_criacao DESC";
