@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed de Atividades - O Bando</title>
 
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -53,7 +52,7 @@
         }
 
         .icone-achou {
-            background-color: #198754;
+            background-color: #212529;
         }
 
         .feed-card {
@@ -63,20 +62,15 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        /* CSS ATUALIZADO PARA FOTOS PROPORCIONAIS */
         .feed-img {
             width: 100%;
             max-height: 350px;
-            /* Limite de altura para fotos verticais não ficarem gigantes */
             height: auto;
-            /* A mágica acontece aqui: mantém a proporção natural da foto! */
             object-fit: contain;
-            /* Garante que a foto inteira apareça sem cortes */
             border-radius: 8px;
             margin-top: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             background-color: #212529;
-            /* Fundo escuro elegante para fotos mais estreitas */
         }
     </style>
 </head>
@@ -85,111 +79,71 @@
 
     <nav class="navbar navbar-dark navbar-bando fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">
-                <i class="bi bi-arrow-left me-2"></i> Voltar
-            </a>
-            <span class="navbar-text text-white fw-bold">
-                📡 Atividades
-            </span>
+            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-arrow-left me-2"></i> Voltar</a>
+            <span class="navbar-text text-white fw-bold">📡 Atividades</span>
         </div>
     </nav>
 
     <div class="container mb-5">
         <div class="text-center mb-4 mt-3">
             <h2 class="fw-bold">Radar do Bando</h2>
-            <p class="text-muted">O que está acontecendo agora no mapa?</p>
+            <p class="text-muted">A linha do tempo do mapa!</p>
         </div>
-
         <div id="listaFeed" class="mt-4">
             <div class="text-center text-muted">Carregando atividades...</div>
         </div>
     </div>
 
     <script>
-        if (!localStorage.getItem('bando_id')) {
-            window.location.href = 'login.html';
-        }
+        if (!localStorage.getItem('bando_id')) { window.location.href = 'login.html'; }
 
         function carregarFeed() {
-            fetch('api/feed.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        const lista = document.getElementById('listaFeed');
+            fetch('api/feed.php').then(res => res.json()).then(data => {
+                if (data.sucesso) {
+                    const lista = document.getElementById('listaFeed');
+                    if (data.dados.length === 0) { lista.innerHTML = `<div class="text-center text-muted mt-5"><h4>O mapa está quieto.</h4></div>`; return; }
 
-                        if (data.dados.length === 0) {
-                            lista.innerHTML = `<div class="text-center text-muted mt-5"><h4>O mapa está muito quieto.</h4><p>Seja o primeiro a colar um adesivo!</p></div>`;
-                            return;
+                    let html = '';
+                    data.dados.forEach(item => {
+                        const dataObj = new Date(item.data_acao);
+                        const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                        let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
+                        const imagemHtml = item.foto_adesivo ? `<img src="${item.foto_adesivo}" class="feed-img" alt="Foto do local">` : '';
+
+                        if (item.tipo === 'colou') {
+                            html += `
+                                <div class="feed-item">
+                                    <div class="feed-icone icone-colou"><i class="bi bi-pin-angle-fill"></i></div>
+                                    <div class="feed-card">
+                                        <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade}</span></div>
+                                        <p class="mb-0"><b>${item.quem_agiu}</b> colou um novo adesivo em <strong class="text-primary">${item.local}</strong>.</p>
+                                        ${imagemHtml}
+                                    </div>
+                                </div>`;
+                        } else if (item.tipo === 'achou') {
+                            let iconeAcao = '👁️'; let textoAcao = 'avistou o adesivo de';
+                            if (item.tipo_registro === 'conquistado') { iconeAcao = '👑'; textoAcao = 'conquistou o adesivo de'; }
+                            else if (item.tipo_registro === 'encontrado') { iconeAcao = '📸'; textoAcao = 'encontrou o adesivo de'; }
+
+                            html += `
+                                <div class="feed-item">
+                                    <div class="feed-icone icone-achou">${iconeAcao}</div>
+                                    <div class="feed-card">
+                                        <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade}</span></div>
+                                        <p class="mb-0">${iconeAcao} <b>${item.quem_agiu}</b> ${textoAcao} <b>${item.dono_adesivo}</b> em <strong class="text-success">${item.local}</strong>!</p>
+                                        ${imagemHtml}
+                                    </div>
+                                </div>`;
                         }
-
-                        let html = '';
-                        data.dados.forEach(item => {
-                            // Formatar a data
-                            const dataObj = new Date(item.data_acao);
-                            const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-                            // Determinar cores de raridade
-                            let corRaridade = 'bg-secondary';
-                            if (item.raridade === 'Raro') corRaridade = 'bg-primary';
-                            if (item.raridade === 'Lendário') corRaridade = 'bg-warning text-dark';
-
-                            // Garante que se não tiver foto, não mostre imagem quebrada
-                            const imagemHtml = item.foto_adesivo ? `<img src="${item.foto_adesivo}" class="feed-img" alt="Foto do local">` : '';
-
-                            if (item.tipo === 'colou') {
-                                html += `
-                                    <div class="feed-item">
-                                        <div class="feed-icone icone-colou"><i class="bi bi-pin-angle-fill"></i></div>
-                                        <div class="feed-card">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <small class="text-muted">${dataFormatada}</small>
-                                                <span class="badge ${corRaridade}">${item.raridade}</span>
-                                            </div>
-                                            <p class="mb-0">
-                                                <b>${item.quem_agiu}</b> colou um novo adesivo em <strong class="text-primary">${item.local}</strong>.
-                                            </p>
-                                            ${imagemHtml}
-                                        </div>
-                                    </div>
-                                `;
-                            } else if (item.tipo === 'achou') {
-                                html += `
-                                    <div class="feed-item">
-                                        <div class="feed-icone icone-achou"><i class="bi bi-search"></i></div>
-                                        <div class="feed-card">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <small class="text-muted">${dataFormatada}</small>
-                                                <span class="badge ${corRaridade}">${item.raridade}</span>
-                                            </div>
-                                            <p class="mb-0">
-                                                🎉 <b>${item.quem_agiu}</b> encontrou o adesivo de <b>${item.dono_adesivo}</b> em <strong class="text-success">${item.local}</strong>!
-                                            </p>
-                                            ${imagemHtml}
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        });
-
-                        lista.innerHTML = html;
-                    } else {
-                        alert("Erro ao carregar o feed: " + data.erro);
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('listaFeed').innerHTML = '<div class="alert alert-danger">Erro de conexão ao buscar atividades.</div>';
-                });
+                    });
+                    lista.innerHTML = html;
+                }
+            });
         }
-
         carregarFeed();
     </script>
-
-    <!-- PWA -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
-        }
-    </script>
+    <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }</script>
 </body>
 
 </html>

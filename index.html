@@ -102,7 +102,7 @@
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"><i
             class="bi bi-plus-lg"></i></button>
 
-    <!-- MODAL 1: Upload (Colar) - MANTIDO IGUAL -->
+    <!-- MODAL 1: Upload (Colar) -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -174,7 +174,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: Descoberta (NOVO SISTEMA 3 NÍVEIS) -->
+    <!-- MODAL 3: Descoberta (SISTEMA 3 NÍVEIS) -->
     <div class="modal fade" id="modalDescoberta" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -262,18 +262,12 @@
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
         function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        // MÁGICA VISUAL: Esconde e mostra o botão da câmera baseado na escolha do rádio
         function toggleFotoReq() {
             const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
             const boxFoto = document.getElementById('boxFotoDesc');
-            if (tipo === 'avistado') {
-                boxFoto.style.display = 'none';
-            } else {
-                boxFoto.style.display = 'block';
-            }
+            if (tipo === 'avistado') { boxFoto.style.display = 'none'; } else { boxFoto.style.display = 'block'; }
         }
 
-        // --- MAPA E SCRIPTS BASES ---
         const map = L.map('map').setView([-23.5505, -46.6333], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
@@ -321,7 +315,6 @@
             fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         }
 
-        // --- LISTAR NO MAPA COM LÓGICA DE NÍVEIS ---
         function carregarAdesivos() {
             fetch('api/listar.php').then(r => r.json()).then(data => {
                 if (data.sucesso) {
@@ -335,7 +328,6 @@
                         if (adesivo.descobertas && adesivo.descobertas.length > 0) {
                             historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já registraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
                             adesivo.descobertas.forEach(d => {
-                                // Ícone visual dependendo do nível
                                 let icone = d.tipo_registro === 'conquistado' ? '👑' : (d.tipo_registro === 'encontrado' ? '📸' : '👁️');
                                 historicoHtml += `<div style="margin-bottom: 3px;">${icone} <b>${d.apelido}</b></div>`;
 
@@ -386,24 +378,20 @@
             });
         }
 
-        // Prepara o Modal Descoberta escondendo as opções que o usuário já atingiu
         function abrirModalDescoberta(idAdesivo, nomeLocal, nivelAtual) {
             document.getElementById('descAdesivoId').value = idAdesivo;
             document.getElementById('descNomeLocal').innerText = nomeLocal;
             document.getElementById('descSelfie').value = '';
             document.getElementById('descComentario').value = '';
 
-            // Controle visual de quais opções aparecem
             document.getElementById('optAvistado').style.display = nivelAtual >= 1 ? 'none' : 'block';
             document.getElementById('optEncontrado').style.display = nivelAtual >= 2 ? 'none' : 'block';
 
-            // Força a seleção da próxima opção lógica
             if (nivelAtual === 2) document.querySelector('input[value="conquistado"]').checked = true;
             else if (nivelAtual === 1) document.querySelector('input[value="encontrado"]').checked = true;
             else document.querySelector('input[value="avistado"]').checked = true;
 
-            toggleFotoReq(); // Atualiza a obrigatoriedade da foto
-
+            toggleFotoReq();
             new bootstrap.Modal(document.getElementById('modalDescoberta')).show();
         }
 
@@ -431,7 +419,6 @@
                 }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         });
 
-        // --- MURAL, EXCLUIR E AMPLIAR ---
         function abrirMural(idAdesivo, nomeLocal) {
             document.getElementById('muralNomeLocal').innerText = nomeLocal; document.getElementById('conteudoMural').innerHTML = '<div class="text-center">Carregando...</div>'; new bootstrap.Modal(document.getElementById('modalMural')).show();
             fetch(`api/mural.php?adesivo_id=${idAdesivo}`).then(r => r.json()).then(data => {
@@ -440,7 +427,18 @@
                     data.dados.forEach(item => {
                         const dataF = new Date(item.data_descoberta).toLocaleString('pt-BR');
                         const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-fluid rounded mt-2 mb-2" style="max-height: 250px; width: 100%; object-fit: cover;">` : '';
-                        html += `<div class="card border-0 shadow-sm rounded-4 mb-3"><div class="card-body py-2 px-3"><div class="d-flex justify-content-between"><strong class="text-primary">${item.apelido}</strong><small class="text-muted">${dataF}</small></div><p class="mb-1">"${item.comentario || 'Passou por aqui!'}"</p>${selfieHtml}</div></div>`;
+                        let iconeNivel = item.tipo_registro === 'conquistado' ? '👑' : (item.tipo_registro === 'encontrado' ? '📸' : '👁️');
+
+                        html += `<div class="card border-0 shadow-sm rounded-4 mb-3">
+                                    <div class="card-body py-2 px-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong class="text-primary">${iconeNivel} ${item.apelido}</strong>
+                                            <small class="text-muted" style="font-size: 0.7rem;">${dataF}</small>
+                                        </div>
+                                        <p class="mb-1 mt-1">"${item.comentario || 'Passou por aqui!'}"</p>
+                                        ${selfieHtml}
+                                    </div>
+                                 </div>`;
                     });
                     document.getElementById('conteudoMural').innerHTML = html;
                 }

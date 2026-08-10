@@ -6,13 +6,14 @@ try {
     $pdo = new PDO("sqlite:" . $db_file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // TRUQUE: Cria a coluna nova silenciosamente se ela não existir
+    // TRUQUES: Cria as colunas novas silenciosamente se elas não existirem
     try { $pdo->exec("ALTER TABLE descobertas ADD COLUMN tipo_registro TEXT DEFAULT 'conquistado'"); } catch (Exception $e) {}
+    try { $pdo->exec("ALTER TABLE descobertas ADD COLUMN is_latest INTEGER DEFAULT 1"); } catch (Exception $e) {}
 
     $adesivo_id = $_POST['adesivo_id'] ?? '';
     $descobridor_id = $_POST['descobridor_id'] ?? '';
     $comentario = $_POST['comentario'] ?? '';
-    $tipo_registro = $_POST['tipo_registro'] ?? 'avistado'; // avistado, encontrado, conquistado
+    $tipo_registro = $_POST['tipo_registro'] ?? 'avistado'; 
     
     $tem_foto = isset($_FILES['selfie']) && $_FILES['selfie']['error'] === UPLOAD_ERR_OK;
 
@@ -28,16 +29,15 @@ try {
         throw new Exception("Você não pode descobrir seu próprio adesivo!");
     }
 
-    // Define o peso numérico para saber se é um "upgrade"
     $hierarquia = ['avistado' => 1, 'encontrado' => 2, 'conquistado' => 3];
     $nivel_novo = $hierarquia[$tipo_registro];
 
-    // Verifica se precisa de foto
     if ($nivel_novo > 1 && !$tem_foto) {
         throw new Exception("Para os níveis 'Encontrado' e 'Conquistado', você precisa enviar uma foto!");
     }
 
-    $stmtCheck = $pdo->prepare("SELECT id, tipo_registro FROM descobertas WHERE adesivo_id = ? AND descobridor_id = ?");
+    // Busca apenas o registro ativo (is_latest = 1)
+    $stmtCheck = $pdo->prepare("SELECT id, tipo_registro FROM descobertas WHERE adesivo_id = ? AND descobridor_id = ? AND is_latest = 1");
     $stmtCheck->execute([$adesivo_id, $descobridor_id]);
     $ja_existe = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
@@ -56,17 +56,20 @@ try {
             throw new Exception("Você já atingiu este nível ou superior neste adesivo!");
         }
 
-        // Evolui o registro do usuário
-        $stmtUp = $pdo->prepare("UPDATE descobertas SET tipo_registro = ?, foto_selfie = COALESCE(?, foto_selfie), comentario = ? WHERE id = ?");
-        $novo_com = !empty($comentario) ? $comentario : "Evoluiu o registro!";
-        $stmtUp->execute([$tipo_registro, $caminho_foto, $novo_com, $ja_existe['id']]);
+        // MARCA O ANTIGO COMO HISTÓRICO (is_latest = 0)
+        $stmtUp = $pdo->prepare("UPDATE descobertas SET is_latest = 0 WHERE adesivo_id = ? AND descobridor_id = ?");
+        $stmtUp->execute([$adesivo_id, $descobridor_id]);
+
+        // INSERE O NOVO REGISTRO (is_latest = 1) para gerar a linha do tempo!
+        $novo_com = !empty($comentario) ? $comentario : "Evoluiu o registro para " . ucfirst($tipo_registro) . "!";
+        $stmtIn = $pdo->prepare("INSERT INTO descobertas (adesivo_id, descobridor_id, comentario, foto_selfie, tipo_registro, is_latest) VALUES (?, ?, ?, ?, ?, 1)");
+        $stmtIn->execute([$adesivo_id, $descobridor_id, $novo_com, $caminho_foto, $tipo_registro]);
 
         $msg = $tipo_registro === 'conquistado' ? "👑 Upgrade para Conquistado! Você ganhou XP Total e ele foi pro seu Álbum!" : "📸 Upgrade para Encontrado! Ganhou 50% de XP!";
         echo json_encode(['sucesso' => true, 'mensagem' => $msg]);
 
     } else {
-        // Registro Inédito
-        $stmtIn = $pdo->prepare("INSERT INTO descobertas (adesivo_id, descobridor_id, comentario, foto_selfie, tipo_registro) VALUES (?, ?, ?, ?, ?)");
+        $stmtIn = $pdo->prepare("INSERT INTO descobertas (adesivo_id, descobridor_id, comentario, foto_selfie, tipo_registro, is_latest) VALUES (?, ?, ?, ?, ?, 1)");
         $stmtIn->execute([$adesivo_id, $descobridor_id, $comentario, $caminho_foto, $tipo_registro]);
 
         if ($tipo_registro === 'conquistado') $msg = "👑 Conquistado! XP Total recebido e adesivo no Álbum!";
