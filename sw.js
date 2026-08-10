@@ -1,6 +1,6 @@
-const CACHE_NAME = 'bando-map-v1';
+// Mudamos a versão para forçar os celulares a atualizarem!
+const CACHE_NAME = 'bando-map-v2';
 
-// Arquivos básicos que ele vai salvar no cache do celular para carregar rápido
 const urlsToCache = [
     './',
     './login.html',
@@ -10,25 +10,55 @@ const urlsToCache = [
     './ranking_adesivos.html'
 ];
 
-// Instala o Service Worker e salva os arquivos no cache
+// Instala o Service Worker e salva os arquivos
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                return cache.addAll(urlsToCache);
-            })
+            .then(cache => cache.addAll(urlsToCache))
     );
+    // Força a instalação imediata do novo Service Worker
+    self.skipWaiting(); 
 });
 
-// Intercepta as requisições: tenta pegar do cache, se não tiver, busca da internet
+// Limpa os caches antigos (versão v1) quando essa nova versão entra em cena
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    // Assume o controle das abas abertas imediatamente
+    self.clients.claim(); 
+});
+
+// NOVA ESTRATÉGIA: Network First (Rede Primeiro, fallback para Cache)
 self.addEventListener('fetch', event => {
+    // Ignora requisições de API (PHP) para elas nunca ficarem presas no cache
+    if (event.request.url.includes('/api/') || event.request.url.includes('/auth/')) {
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then(response => {
-                if (response) {
-                    return response; // Retorna do cache
+                // Se baixou com sucesso da internet, salva uma cópia atualizada no cache
+                if (response && response.status === 200) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseClone);
+                    });
                 }
-                return fetch(event.request); // Busca da rede
+                return response;
+            })
+            .catch(() => {
+                // Se falhou (sem internet), busca a última versão salva no cache!
+                return caches.match(event.request);
             })
     );
 });
