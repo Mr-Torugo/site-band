@@ -90,7 +90,8 @@
 
     <div
         style="position: fixed; top: 15px; right: 15px; z-index: 1000; background: white; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <small class="fw-bold">👤 <span id="nomeLogado"></span></small>
+        <small class="fw-bold">👤 <span id="nomeLogado"></span> <span id="badgeAdmin"
+                class="badge bg-danger ms-1 d-none">ADMIN</span></small>
         <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white" style="padding: 2px 8px;">📡 Radar</a>
         <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold" style="padding: 2px 8px;">Meu Álbum</a>
         <a href="ranking.html" class="btn btn-sm btn-warning ms-2 fw-bold" style="padding: 2px 8px;">🏆 Ranking</a>
@@ -98,7 +99,6 @@
     </div>
 
     <div id="map"></div>
-
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"><i
             class="bi bi-plus-lg"></i></button>
 
@@ -132,8 +132,6 @@
                             <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
                             <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
-
-                        <!-- SELETOR DE CATEGORIA (Sozinho novamente) -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Categoria</label>
                             <select class="form-select" id="categoriaAdesivo">
@@ -147,7 +145,6 @@
                                 <option value="Internacionais">Internacionais</option>
                             </select>
                         </div>
-
                         <div class="mb-3 mt-3 box-destaque">
                             <label class="form-label fw-bold">Onde o adesivo foi colado?</label>
                             <div class="form-check mb-2"><input class="form-check-input" type="radio" name="modoLocal"
@@ -171,10 +168,9 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnSalvar">Salvar no Mapa</button>
-                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary"
+                        id="btnSalvar">Salvar no Mapa</button></div>
             </div>
         </div>
     </div>
@@ -216,23 +212,17 @@
                                     class="form-check-input me-2" type="radio" name="tipoRegistro" value="conquistado"
                                     onchange="toggleFotoReq()">🤳 <b>Conquistado:</b> Selfie (100% XP + Álbum)</label>
                         </div>
-                        <div class="mb-3 box-destaque" id="boxFotoDesc" style="display: none;">
-                            <label class="form-label fw-bold">Anexe a Foto Obrigatória</label>
-                            <input class="form-control" type="file" accept="image/*" capture="environment"
-                                id="descSelfie">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Deixe um comentário</label>
-                            <textarea class="form-control" id="descComentario" rows="2"
-                                placeholder="O que achou do local?"></textarea>
-                        </div>
+                        <div class="mb-3 box-destaque" id="boxFotoDesc" style="display: none;"><label
+                                class="form-label fw-bold">Anexe a Foto Obrigatória</label><input class="form-control"
+                                type="file" accept="image/*" capture="environment" id="descSelfie"></div>
+                        <div class="mb-3"><label class="form-label fw-bold">Deixe um comentário</label><textarea
+                                class="form-control" id="descComentario" rows="2"
+                                placeholder="O que achou do local?"></textarea></div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success fw-bold" id="btnSalvarDescoberta">Registrar
-                        Ação</button>
-                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-success fw-bold"
+                        id="btnSalvarDescoberta">Registrar Ação</button></div>
             </div>
         </div>
     </div>
@@ -243,8 +233,7 @@
             <div class="modal-content bg-light">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="bi bi-chat-quote"></i> Mural: <span id="muralNomeLocal"></span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    </h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body" style="background-color: #e9ecef;">
@@ -252,6 +241,54 @@
                         <div class="text-center text-muted">Carregando...</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Editar Adesivo -->
+    <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">✏️ Editar Adesivo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditar">
+                        <input type="hidden" id="editAdesivoId">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome do Local</label>
+                            <input type="text" class="form-control" id="editNomeLocal" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Categoria</label>
+                                <select class="form-select" id="editCategoria">
+                                    <option value="Natureza">Natureza</option>
+                                    <option value="Urbano">Urbano</option>
+                                    <option value="Praia">Praia</option>
+                                    <option value="Turísticos">Turísticos</option>
+                                    <option value="Estrada">Estrada</option>
+                                    <option value="Móveis">Móveis</option>
+                                    <option value="Estados">Estados</option>
+                                    <option value="Internacionais">Internacionais</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Raridade</label>
+                                <select class="form-select" id="editRaridade">
+                                    <option value="Comum">Comum</option>
+                                    <option value="Raro">Raro</option>
+                                    <option value="Lendário">Lendário</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancelar</button><button type="button"
+                        class="btn btn-info fw-bold text-white" id="btnSalvarEdicao">Salvar Alterações</button></div>
             </div>
         </div>
     </div>
@@ -266,12 +303,7 @@
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
         function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        const iconeBando = L.icon({
-            iconUrl: 'pin-bando.png',
-            iconSize: [45, 55],
-            iconAnchor: [22, 55],
-            popupAnchor: [0, -55]
-        });
+        const iconeBando = L.icon({ iconUrl: 'pin-bando.png', iconSize: [45, 55], iconAnchor: [22, 55], popupAnchor: [0, -55] });
 
         function toggleFotoReq() {
             const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
@@ -324,72 +356,67 @@
 
         function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, categoria, btn, textoOriginal) {
             const formData = new FormData();
-            formData.append('foto', arquivoFoto);
-            formData.append('nomeLocal', nomeLocal);
-            formData.append('lat', lat);
-            formData.append('lng', lng);
-            formData.append('criador_id', meuId);
-            formData.append('categoria', categoria);
-
-            fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) { alert(data.mensagem); location.reload(); } else { alert('Erro: ' + data.erro); } }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
+            formData.append('foto', arquivoFoto); formData.append('nomeLocal', nomeLocal);
+            formData.append('lat', lat); formData.append('lng', lng);
+            formData.append('criador_id', meuId); formData.append('categoria', categoria);
+            fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         }
 
         function carregarAdesivos() {
-            fetch('api/listar.php').then(r => r.json()).then(data => {
+            fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
                 if (data.sucesso) {
+
+                    if (data.is_admin) { document.getElementById('badgeAdmin').classList.remove('d-none'); }
+
                     const marcadoresCluster = L.markerClusterGroup();
                     data.dados.forEach(adesivo => {
                         const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeBando });
-                        let historicoHtml = ''; let botaoMuralHtml = '';
-
-                        let meuNivel = 0;
+                        let historicoHtml = ''; let botaoMuralHtml = ''; let meuNivel = 0;
 
                         if (adesivo.descobertas && adesivo.descobertas.length > 0) {
                             historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já registraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
                             adesivo.descobertas.forEach(d => {
                                 let icone = d.tipo_registro === 'conquistado' ? '👑' : (d.tipo_registro === 'encontrado' ? '📸' : '👁️');
                                 historicoHtml += `<div style="margin-bottom: 3px;">${icone} <b>${d.apelido}</b></div>`;
-
                                 if (d.apelido === meuApelido) {
-                                    if (d.tipo_registro === 'conquistado') meuNivel = 3;
-                                    else if (d.tipo_registro === 'encontrado') meuNivel = 2;
-                                    else meuNivel = 1;
+                                    if (d.tipo_registro === 'conquistado') meuNivel = 3; else if (d.tipo_registro === 'encontrado') meuNivel = 2; else meuNivel = 1;
                                 }
                             });
                             historicoHtml += '</div></div>';
                             botaoMuralHtml = `<button onclick="abrirMural(${adesivo.id}, '${adesivo.nome_local}')" class="btn btn-outline-primary btn-sm mt-2 fw-bold w-100"><i class="bi bi-chat-quote"></i> Ver Mural</button>`;
-                        } else {
-                            historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>';
-                        }
+                        } else { historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>'; }
 
                         let botaoAcaoHtml = '';
                         if (adesivo.criador_id != meuId) {
-                            if (meuNivel === 3) {
-                                botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`;
-                            } else if (meuNivel === 2) {
-                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`;
-                            } else if (meuNivel === 1) {
-                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`;
-                            } else {
-                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
-                            }
+                            if (meuNivel === 3) botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`;
+                            else if (meuNivel === 2) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`;
+                            else if (meuNivel === 1) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`;
+                            else botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
                         }
 
-                        let botaoExcluirHtml = (adesivo.criador_id == meuId) ? `<button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm mt-2 w-100"><i class="bi bi-trash"></i> Excluir</button>` : '';
+                        // PASSAMOS A RARIDADE PARA A FUNÇÃO DE EDIÇÃO AQUI!
+                        let boxAdminHtml = '';
+                        if (adesivo.criador_id == meuId || data.is_admin) {
+                            boxAdminHtml = `
+                                <div class="d-flex gap-2 mt-2">
+                                    <button onclick="abrirModalEditar(${adesivo.id}, '${adesivo.nome_local.replace(/'/g, "\\'")}', '${adesivo.categoria}', '${adesivo.raridade}')" class="btn btn-outline-info btn-sm flex-fill"><i class="bi bi-pencil"></i></button>
+                                    <button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm flex-fill"><i class="bi bi-trash"></i></button>
+                                </div>
+                            `;
+                        }
+
                         let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
 
                         const popupContent = `
                             <div style="text-align: center; font-family: sans-serif; min-width: 160px;">
-                                <span class="badge bg-dark mb-1">${adesivo.codigo}</span> 
-                                <span class="badge bg-info text-dark mb-1">${adesivo.categoria || 'Urbano'}</span>
-                                <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br>
+                                <span class="badge bg-dark mb-1">${adesivo.codigo}</span> <span class="badge bg-info text-dark mb-1">${adesivo.categoria || 'Urbano'}</span> <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br>
                                 <strong>${adesivo.nome_local}</strong><br>
                                 <small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br>
                                 <img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>
                                 ${historicoHtml}
                                 ${botaoAcaoHtml}
                                 ${botaoMuralHtml}
-                                ${botaoExcluirHtml}
+                                ${boxAdminHtml}
                             </div>`;
                         marker.bindPopup(popupContent);
                         marcadoresCluster.addLayer(marker);
@@ -399,73 +426,37 @@
             });
         }
 
-        function abrirModalDescoberta(idAdesivo, nomeLocal, nivelAtual) {
-            document.getElementById('descAdesivoId').value = idAdesivo;
-            document.getElementById('descNomeLocal').innerText = nomeLocal;
-            document.getElementById('descSelfie').value = '';
-            document.getElementById('descComentario').value = '';
-
-            document.getElementById('optAvistado').style.display = nivelAtual >= 1 ? 'none' : 'block';
-            document.getElementById('optEncontrado').style.display = nivelAtual >= 2 ? 'none' : 'block';
-
-            if (nivelAtual === 2) document.querySelector('input[value="conquistado"]').checked = true;
-            else if (nivelAtual === 1) document.querySelector('input[value="encontrado"]').checked = true;
-            else document.querySelector('input[value="avistado"]').checked = true;
-
-            toggleFotoReq();
-            new bootstrap.Modal(document.getElementById('modalDescoberta')).show();
+        // --- FUNÇÕES DE EDIÇÃO E ADMIN ATUALIZADAS ---
+        function abrirModalEditar(id, nomeLocal, categoria, raridade) {
+            document.getElementById('editAdesivoId').value = id;
+            document.getElementById('editNomeLocal').value = nomeLocal;
+            document.getElementById('editCategoria').value = categoria || 'Urbano';
+            document.getElementById('editRaridade').value = raridade || 'Comum'; // Preenche a raridade atual!
+            new bootstrap.Modal(document.getElementById('modalEditar')).show();
         }
 
-        document.getElementById('btnSalvarDescoberta').addEventListener('click', function () {
-            const adesivoId = document.getElementById('descAdesivoId').value;
-            const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
+        document.getElementById('btnSalvarEdicao').addEventListener('click', function () {
             const formData = new FormData();
+            formData.append('id', document.getElementById('editAdesivoId').value);
+            formData.append('usuario_id', meuId);
+            formData.append('nomeLocal', document.getElementById('editNomeLocal').value);
+            formData.append('categoria', document.getElementById('editCategoria').value);
+            formData.append('raridade', document.getElementById('editRaridade').value); // Envia a raridade editada!
 
-            formData.append('adesivo_id', adesivoId);
-            formData.append('descobridor_id', meuId);
-            formData.append('comentario', document.getElementById('descComentario').value);
-            formData.append('tipo_registro', tipo);
+            const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Salvando...'; btn.disabled = true;
 
-            if (document.getElementById('descSelfie').files[0]) {
-                formData.append('selfie', document.getElementById('descSelfie').files[0]);
-            }
-
-            const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Enviando...'; btn.disabled = true;
-
-            fetch('api/descobrir.php', { method: 'POST', body: formData })
+            fetch('api/editar_adesivo.php', { method: 'POST', body: formData })
                 .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) { alert(data.mensagem); location.reload(); }
-                    else { alert('Aviso: ' + data.erro); }
-                }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
+                .then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); })
+                .finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         });
 
-        function abrirMural(idAdesivo, nomeLocal) {
-            document.getElementById('muralNomeLocal').innerText = nomeLocal; document.getElementById('conteudoMural').innerHTML = '<div class="text-center">Carregando...</div>'; new bootstrap.Modal(document.getElementById('modalMural')).show();
-            fetch(`api/mural.php?adesivo_id=${idAdesivo}`).then(r => r.json()).then(data => {
-                if (data.sucesso) {
-                    let html = '';
-                    data.dados.forEach(item => {
-                        const dataF = new Date(item.data_descoberta).toLocaleString('pt-BR');
-                        const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-fluid rounded mt-2 mb-2" style="max-height: 250px; width: 100%; object-fit: cover;">` : '';
-                        let iconeNivel = item.tipo_registro === 'conquistado' ? '👑' : (item.tipo_registro === 'encontrado' ? '📸' : '👁️');
+        // ---------------------------------
 
-                        html += `<div class="card border-0 shadow-sm rounded-4 mb-3">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong class="text-primary">${iconeNivel} ${item.apelido}</strong>
-                                            <small class="text-muted" style="font-size: 0.7rem;">${dataF}</small>
-                                        </div>
-                                        <p class="mb-1 mt-1">"${item.comentario || 'Passou por aqui!'}"</p>
-                                        ${selfieHtml}
-                                    </div>
-                                 </div>`;
-                    });
-                    document.getElementById('conteudoMural').innerHTML = html;
-                }
-            });
-        }
-        function deletarAdesivo(id) { if (confirm("Apagar adesivo?")) { fetch('api/excluir.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, usuario_id: meuId }) }).then(r => r.json()).then(d => { if (d.sucesso) location.reload(); }); } }
+        function abrirModalDescoberta(idAdesivo, nomeLocal, nivelAtual) { document.getElementById('descAdesivoId').value = idAdesivo; document.getElementById('descNomeLocal').innerText = nomeLocal; document.getElementById('descSelfie').value = ''; document.getElementById('descComentario').value = ''; document.getElementById('optAvistado').style.display = nivelAtual >= 1 ? 'none' : 'block'; document.getElementById('optEncontrado').style.display = nivelAtual >= 2 ? 'none' : 'block'; if (nivelAtual === 2) document.querySelector('input[value="conquistado"]').checked = true; else if (nivelAtual === 1) document.querySelector('input[value="encontrado"]').checked = true; else document.querySelector('input[value="avistado"]').checked = true; toggleFotoReq(); new bootstrap.Modal(document.getElementById('modalDescoberta')).show(); }
+        document.getElementById('btnSalvarDescoberta').addEventListener('click', function () { const adesivoId = document.getElementById('descAdesivoId').value; const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value; const formData = new FormData(); formData.append('adesivo_id', adesivoId); formData.append('descobridor_id', meuId); formData.append('comentario', document.getElementById('descComentario').value); formData.append('tipo_registro', tipo); if (document.getElementById('descSelfie').files[0]) { formData.append('selfie', document.getElementById('descSelfie').files[0]); } const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Enviando...'; btn.disabled = true; fetch('api/descobrir.php', { method: 'POST', body: formData }).then(res => res.json()).then(data => { if (data.sucesso) { alert(data.mensagem); location.reload(); } else { alert('Aviso: ' + data.erro); } }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; }); });
+        function abrirMural(idAdesivo, nomeLocal) { document.getElementById('muralNomeLocal').innerText = nomeLocal; document.getElementById('conteudoMural').innerHTML = '<div class="text-center">Carregando...</div>'; new bootstrap.Modal(document.getElementById('modalMural')).show(); fetch(`api/mural.php?adesivo_id=${idAdesivo}`).then(r => r.json()).then(data => { if (data.sucesso) { let html = ''; data.dados.forEach(item => { const dataF = new Date(item.data_descoberta).toLocaleString('pt-BR'); const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-fluid rounded mt-2 mb-2" style="max-height: 250px; width: 100%; object-fit: cover;">` : ''; let iconeNivel = item.tipo_registro === 'conquistado' ? '👑' : (item.tipo_registro === 'encontrado' ? '📸' : '👁️'); html += `<div class="card border-0 shadow-sm rounded-4 mb-3"><div class="card-body py-2 px-3"><div class="d-flex justify-content-between align-items-center"><strong class="text-primary">${iconeNivel} ${item.apelido}</strong><small class="text-muted" style="font-size: 0.7rem;">${dataF}</small></div><p class="mb-1 mt-1">"${item.comentario || 'Passou por aqui!'}"</p>${selfieHtml}</div></div>`; }); document.getElementById('conteudoMural').innerHTML = html; } }); }
+        function deletarAdesivo(id) { if (confirm("Tem certeza que deseja apagar este adesivo?")) { fetch('api/excluir.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, usuario_id: meuId }) }).then(r => r.json()).then(d => { if (d.sucesso) location.reload(); else alert("Erro: " + d.erro); }); } }
         function abrirImagemMaior(caminho) { document.getElementById('imagemMaiorSrc').src = caminho; new bootstrap.Modal(document.getElementById('modalImagemMaior')).show(); }
 
         carregarAdesivos();

@@ -4,9 +4,16 @@ $db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
-    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
-    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN raridade TEXT DEFAULT 'Comum'"); } catch (Exception $e) {}
+    try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN is_admin INTEGER DEFAULT 0"); } catch (Exception $e) {}
     
+    $usuario_id = $_GET['usuario_id'] ?? 0;
+    
+    // Descobre se quem pediu a lista é Admin
+    $stmtAdmin = $pdo->prepare("SELECT is_admin FROM usuarios WHERE id = ?");
+    $stmtAdmin->execute([$usuario_id]);
+    $user = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+    $is_admin = $user ? (bool)$user['is_admin'] : false;
+
     $sql = "SELECT a.id, a.nome_local, a.lat, a.lng, a.foto_original as foto_caminho, a.raridade, a.criador_id, a.categoria, u.apelido as quem_colou
             FROM adesivos a JOIN usuarios u ON a.criador_id = u.id ORDER BY a.id ASC";
             
@@ -16,7 +23,6 @@ try {
     foreach ($adesivos as &$ad) {
         $ad['codigo'] = '#' . str_pad($ad['id'], 2, "0", STR_PAD_LEFT);
         if(empty($ad['categoria'])) $ad['categoria'] = 'Urbano';
-        if(empty($ad['raridade'])) $ad['raridade'] = 'Comum';
         
         $stmtDesc = $pdo->prepare("SELECT u.apelido, d.foto_selfie, d.tipo_registro FROM descobertas d JOIN usuarios u ON d.descobridor_id = u.id WHERE d.adesivo_id = ? AND d.is_latest = 1 ORDER BY d.data_descoberta ASC");
         $stmtDesc->execute([$ad['id']]);
@@ -29,7 +35,8 @@ try {
         $ad['descobertas'] = $descobertas;
     }
 
-    echo json_encode(['sucesso' => true, 'dados' => $adesivos]);
+    // Retorna a flag is_admin junto com os dados!
+    echo json_encode(['sucesso' => true, 'is_admin' => $is_admin, 'dados' => $adesivos]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
