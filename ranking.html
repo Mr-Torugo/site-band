@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking - O Bando</title>
-    <!-- CONEXÕES DO PWA (APLICATIVO) -->
+    <title>Ranking do Bando</title>
+
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -24,45 +25,49 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .podio-card {
-            border: none;
+        .rank-card {
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            padding: 15px;
-            background: white;
+            justify-content: space-between;
+            border-left: 5px solid transparent;
         }
 
-        .podio-posicao {
+        .rank-1 {
+            border-left-color: #FFD700;
+            background: linear-gradient(to right, #fffdf0, #ffffff);
+        }
+
+        .rank-2 {
+            border-left-color: #C0C0C0;
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+        }
+
+        .rank-3 {
+            border-left-color: #CD7F32;
+            background: linear-gradient(to right, #fffaf5, #ffffff);
+        }
+
+        .rank-pos {
             font-size: 1.5rem;
             font-weight: bold;
-            width: 50px;
+            color: #6c757d;
+            width: 40px;
             text-align: center;
         }
 
-        .podio-info {
-            flex-grow: 1;
+        .medalha {
+            font-size: 1.5rem;
         }
 
-        .podio-pontos {
-            text-align: right;
-        }
-
-        .destaque-1 {
-            border-left: 5px solid #FFD700;
-            background: #fffdf0;
-        }
-
-        .destaque-2 {
-            border-left: 5px solid #C0C0C0;
-            background: #f8f9fa;
-        }
-
-        .destaque-3 {
-            border-left: 5px solid #CD7F32;
-            background: #fffaf5;
+        .xp-text {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #198754;
         }
     </style>
 </head>
@@ -72,31 +77,27 @@
     <nav class="navbar navbar-dark navbar-bando fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="index.html">
-                <i class="bi bi-arrow-left me-2"></i> Voltar ao Mapa
+                <i class="bi bi-arrow-left me-2"></i> Voltar
             </a>
             <span class="navbar-text text-white fw-bold">
-                🏆 Ranking Oficial
+                🏆 Tabela de Líderes
             </span>
         </div>
     </nav>
 
     <div class="container mb-5">
         <div class="text-center mb-4 mt-3">
-            <h2 class="fw-bold">Líderes da Caçada</h2>
-            <p class="text-muted">Quem encontrou mais adesivos?</p>
-
-            <div class="btn-group mt-2" role="group">
-                <a href="ranking.html" class="btn btn-primary active">Ranking de Caçadores</a>
-                <a href="ranking_adesivos.html" class="btn btn-outline-primary">Ranking de Adesivos</a>
-            </div>
+            <h2 class="fw-bold">Top Caçadores</h2>
+            <p class="text-muted">Quem domina o mapa do Bando?</p>
         </div>
 
-        <div id="listaRanking">
-            <div class="text-center text-muted mt-5">Carregando ranking...</div>
+        <div id="listaRanking" class="mt-4">
+            <div class="text-center text-muted">Calculando pontuações...</div>
         </div>
     </div>
 
     <script>
+        // Redireciona se não estiver logado
         if (!localStorage.getItem('bando_id')) {
             window.location.href = 'login.html';
         }
@@ -107,30 +108,49 @@
                 .then(data => {
                     if (data.sucesso) {
                         const lista = document.getElementById('listaRanking');
+
+                        if (data.dados.length === 0) {
+                            lista.innerHTML = `<div class="text-center text-muted mt-5">Ninguém pontuou ainda. Seja o primeiro!</div>`;
+                            return;
+                        }
+
                         let html = '';
+                        data.dados.forEach((item, index) => {
+                            const posicao = index + 1;
 
-                        data.dados.forEach((user, index) => {
-                            let classeCard = '';
-                            let medalha = `${index + 1}º`;
+                            // Lógica visual para o pódio (Top 3)
+                            let classeCard = 'rank-card';
+                            let iconePosicao = `<div class="rank-pos">${posicao}º</div>`;
 
-                            if (index === 0) { classeCard = 'destaque-1'; medalha = '🥇'; }
-                            else if (index === 1) { classeCard = 'destaque-2'; medalha = '🥈'; }
-                            else if (index === 2) { classeCard = 'destaque-3'; medalha = '🥉'; }
+                            if (posicao === 1) {
+                                classeCard += ' rank-1';
+                                iconePosicao = `<div class="rank-pos medalha" title="1º Lugar">🥇</div>`;
+                            }
+                            else if (posicao === 2) {
+                                classeCard += ' rank-2';
+                                iconePosicao = `<div class="rank-pos medalha" title="2º Lugar">🥈</div>`;
+                            }
+                            else if (posicao === 3) {
+                                classeCard += ' rank-3';
+                                iconePosicao = `<div class="rank-pos medalha" title="3º Lugar">🥉</div>`;
+                            }
 
-                            const isMe = user.id == localStorage.getItem('bando_id');
-                            const labelVoce = isMe ? ' <span class="badge bg-primary ms-1">Você</span>' : '';
-
+                            // Monta o cartão do jogador
                             html += `
-                                <div class="podio-card ${classeCard} ${isMe ? 'border border-primary' : ''}">
-                                    <div class="podio-posicao">${medalha}</div>
-                                    <div class="podio-info">
-                                        <h5 class="mb-0 fw-bold">${user.apelido} ${labelVoce}</h5>
-                                        <small class="text-muted">Colou ${user.colados} | Achou ${user.achados}</small><br>
-                                        <span style="font-size: 1.2rem;" title="Conquistas">${user.badges}</span>
+                                <div class="${classeCard}">
+                                    <div class="d-flex align-items-center">
+                                        ${iconePosicao}
+                                        <div class="ms-3">
+                                            <h5 class="mb-0 fw-bold text-dark">${item.apelido}</h5>
+                                            <small class="text-muted d-block" style="font-size: 0.85rem;">
+                                                Colou ${item.adesivos_colados} | Achou ${item.adesivos_achados}
+                                            </small>
+                                            <span class="badge bg-secondary mt-1">${item.titulo || 'Membro'}</span>
+                                        </div>
                                     </div>
-                                    <div class="podio-pontos">
-                                        <h4 class="mb-0 fw-bold text-success">${user.xp_total}</h4>
-                                        <small class="text-muted">XP</small>
+                                    <div class="text-end">
+                                        <div class="xp-text">${item.xp_total}</div>
+                                        <small class="text-muted fw-bold">XP</small>
                                     </div>
                                 </div>
                             `;
@@ -148,12 +168,11 @@
 
         carregarRanking();
     </script>
-    <!-- REGISTRO DO SERVICE WORKER (PWA) -->
+
+    <!-- PWA -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
         }
     </script>
 </body>

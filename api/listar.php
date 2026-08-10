@@ -1,43 +1,39 @@
 <?php
 header('Content-Type: application/json');
-
-$db_file = 'banco.sqlite';
+$db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // 1. Busca todos os adesivos
-    $sqlAdesivos = "SELECT 
-                a.id, a.codigo, a.nome_local, a.lat, a.lng, 
-                a.foto_original AS foto_caminho, u.apelido AS quem_colou, a.raridade,
-                a.criador_id
+    
+    $sql = "SELECT a.id, a.nome_local, a.lat, a.lng, a.foto_original as foto_caminho, a.raridade, a.criador_id, u.apelido as quem_colou
             FROM adesivos a
             JOIN usuarios u ON a.criador_id = u.id
-            ORDER BY a.data_criacao DESC";
-    $stmt = $pdo->query($sqlAdesivos);
+            ORDER BY a.id ASC";
+            
+    $stmt = $pdo->query($sql);
     $adesivos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Busca todo o histórico de descobertas
-    $sqlDesc = "SELECT d.adesivo_id, u.apelido, d.foto_selfie 
-                FROM descobertas d
-                JOIN usuarios u ON d.descobridor_id = u.id
-                ORDER BY d.data_descoberta ASC";
-    $stmtDesc = $pdo->query($sqlDesc);
-    $descobertas = $stmtDesc->fetchAll(PDO::FETCH_ASSOC);
-
-    // 3. Organiza as descobertas dentro do ID de cada adesivo
-    $historico = [];
-    foreach ($descobertas as $desc) {
-        $historico[$desc['adesivo_id']][] = [
-            'apelido' => $desc['apelido'],
-            'tem_selfie' => !empty($desc['foto_selfie'])
-        ];
-    }
-
-    // 4. Cola o histórico dentro do adesivo correspondente
-    foreach ($adesivos as &$adesivo) {
-        $adesivo['descobertas'] = $historico[$adesivo['id']] ?? [];
+    // Adiciona o histórico de descobertas a cada adesivo e formata o código
+    foreach ($adesivos as &$ad) {
+        
+        // 🪄 A MÁGICA: Substitui o hash velho pelo ID formatado (#01, #02...)
+        $ad['codigo'] = '#' . str_pad($ad['id'], 2, "0", STR_PAD_LEFT);
+        
+        $stmtDesc = $pdo->prepare("
+            SELECT u.apelido, d.foto_selfie 
+            FROM descobertas d 
+            JOIN usuarios u ON d.descobridor_id = u.id 
+            WHERE d.adesivo_id = ? 
+            ORDER BY d.data_descoberta ASC
+        ");
+        $stmtDesc->execute([$ad['id']]);
+        $descobertas = $stmtDesc->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Prepara os dados para o frontend saber se a pessoa mandou selfie ou não
+        foreach($descobertas as &$desc) {
+            $desc['tem_selfie'] = !empty($desc['foto_selfie']);
+        }
+        $ad['descobertas'] = $descobertas;
     }
 
     echo json_encode(['sucesso' => true, 'dados' => $adesivos]);

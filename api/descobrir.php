@@ -1,7 +1,6 @@
 <?php
 header('Content-Type: application/json');
 $db_file = __DIR__ . '/banco.sqlite';
-$upload_dir = __DIR__ . '/../uploads/';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
@@ -10,41 +9,67 @@ try {
     $adesivo_id = $_POST['adesivo_id'] ?? '';
     $descobridor_id = $_POST['descobridor_id'] ?? '';
     $comentario = $_POST['comentario'] ?? '';
-    $foto = $_FILES['selfie'] ?? null;
+    $tem_foto = isset($_FILES['selfie']) && $_FILES['selfie']['error'] === UPLOAD_ERR_OK;
 
     if (empty($adesivo_id) || empty($descobridor_id)) {
-        throw new Exception("Faltam dados da descoberta.");
+        throw new Exception("Dados incompletos.");
     }
 
-    $caminho_banco = null;
+    // Impede o usuário de pegar a própria figurinha
+    $stmtAd = $pdo->prepare("SELECT criador_id FROM adesivos WHERE id = ?");
+    $stmtAd->execute([$adesivo_id]);
+    $adesivo = $stmtAd->fetch(PDO::FETCH_ASSOC);
+    
+    if ($adesivo['criador_id'] == $descobridor_id) {
+        throw new Exception("Você não pode descobrir seu próprio adesivo!");
+    }
 
-    // Processa a selfie, se o usuário tiver enviado uma
-    if ($foto && $foto['error'] === UPLOAD_ERR_OK) {
-        $extensao = pathinfo($foto['name'], PATHINFO_EXTENSION);
-        $novo_nome = uniqid('selfie_') . '.' . $extensao;
-        $caminho_destino = $upload_dir . $novo_nome;
+    // Verifica se o usuário já descobriu isso antes
+    $stmtCheck = $pdo->prepare("SELECT id, foto_selfie FROM descobertas WHERE adesivo_id = ? AND descobridor_id = ?");
+    $stmtCheck->execute([$adesivo_id, $descobridor_id]);
+    $ja_existe = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
-        if (move_uploaded_file($foto['tmp_name'], $caminho_destino)) {
-            $caminho_banco = 'uploads/' . $novo_nome;
-        } else {
-            throw new Exception("Erro ao salvar a selfie na pasta uploads.");
+    $caminho_foto = null;
+    if ($tem_foto) {
+        $extensao = pathinfo($_FILES['selfie']['name'], PATHINFO_EXTENSION);
+        $nome_arquivo = 'selfie_' . time() . '_' . rand(1000, 9999) . '.' . $extensao;
+        $caminho_absoluto = __DIR__ . '/../uploads/' . $nome_arquivo;
+        
+        if (!move_uploaded_file($_FILES['selfie']['tmp_name'], $caminho_absoluto)) {
+            throw new Exception("Erro ao salvar a imagem.");
         }
+        $caminho_foto = 'uploads/' . $nome_arquivo;
     }
 
-    // Grava a descoberta no banco
-    $stmt = $pdo->prepare("INSERT INTO descobertas (adesivo_id, descobridor_id, foto_selfie, comentario) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$adesivo_id, $descobridor_id, $caminho_banco, $comentario]);
+    if ($ja_existe) {
+        
+        if (!empty($ja_existe['foto_selfie'])) {
+            throw new Exception("Você já anexou a foto antes e resgatou 100% do XP!");
+        }
+        if (!$tem_foto) {
+            throw new Exception("Você já registrou sem foto. Envie uma imagem agora para ganhar o restante do XP!");
+        }
 
-    echo json_encode(['sucesso' => true, 'mensagem' => 'Descoberta registrada com sucesso!']);
+        // Se ele chegou aqui, é porque voltou com a foto! (Atualiza a descoberta)
+        $stmtUp = $pdo->prepare("UPDATE descobertas SET foto_selfie = ?, comentario = ? WHERE id = ?");
+        $novo_com = !empty($comentario) ? $comentario : "Voltei para deixar minha selfie!";
+        $stmtUp->execute([$caminho_foto, $novo_com, $ja_existe['id']]);
 
-} catch (PDOException $e) {
-    if ($e->getCode() == 23000) {
-        http_response_code(400);
-        echo json_encode(['sucesso' => false, 'erro' => 'Você já encontrou este adesivo! Ele já está no seu álbum.']);
+        echo json_encode(['sucesso' => true, 'mensagem' => '📸 Selfie adicionada com sucesso! Você garantiu os outros 50% de XP!']);
+
     } else {
-        http_response_code(500);
-        echo json_encode(['sucesso' => false, 'erro' => 'Erro no banco: ' . $e->getMessage()]);
+        // É UMA DESCOBERTA INÉDITA
+        $stmtIn = $pdo->prepare("INSERT INTO descobertas (adesivo_id, descobridor_id, comentario, foto_selfie) VALUES (?, ?, ?, ?)");
+        $stmtIn->execute([$adesivo_id, $descobridor_id, $comentario, $caminho_foto]);
+
+        // Define a mensagem dependendo se mandou foto ou não
+        $msg = $tem_foto 
+            ? "🎉 Descoberta completa! Você ganhou 100% do XP!" 
+            : "✅ Adesivo achado! Ganhou 50% do XP. Volte depois e adicione uma foto para ganhar o resto!";
+            
+        echo json_encode(['sucesso' => true, 'mensagem' => $msg]);
     }
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
