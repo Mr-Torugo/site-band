@@ -61,3 +61,29 @@ site-bando/
 ├── ranking_adesivos.html    # Locais mais populares
 ├── manifest.json            # Configurações do App (PWA)
 └── sw.js                    # Service Worker (Cache management)
+
+```
+
+## ⚙️ Como Executar o Projeto Localmente
+
+1. Certifique-se de ter um servidor local PHP configurado (como [XAMPP](https://www.apachefriends.org/pt_br/index.html) ou Laragon).
+
+2. Clone este repositório para a pasta pública do seu servidor (ex: `htdocs` no XAMPP):
+
+```bash
+   git clone [https://github.com/Mr-Torugo/site-bando.git](https://github.com/Mr-Torugo/site-bando.git)
+```
+
+3. Acesse a pasta do projeto e crie o diretório uploads/ na raiz, caso não exista, e garanta que ele tem permissões de leitura/escrita.
+
+4. O banco de dados SQLite será gerado e estruturado automaticamente pelo script auth/registrar.php no primeiro cadastro de usuário.
+
+5. Acesse no navegador: http://localhost/site-bando/
+
+##👨‍💻 Autor
+
+Vitor Hugo
+
+[Github]([https://site.com](https://www.linkedin.com/in/vitor-hugo-05b2b91a7/))
+
+Estudante de Sistemas para Internet no Senac e Analista Junior.
