@@ -4,8 +4,10 @@ $db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
+    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
+    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN raridade TEXT DEFAULT 'Comum'"); } catch (Exception $e) {}
     
-    $sql = "SELECT a.id, a.nome_local, a.lat, a.lng, a.foto_original as foto_caminho, a.raridade, a.criador_id, u.apelido as quem_colou
+    $sql = "SELECT a.id, a.nome_local, a.lat, a.lng, a.foto_original as foto_caminho, a.raridade, a.criador_id, a.categoria, u.apelido as quem_colou
             FROM adesivos a JOIN usuarios u ON a.criador_id = u.id ORDER BY a.id ASC";
             
     $stmt = $pdo->query($sql);
@@ -13,8 +15,9 @@ try {
 
     foreach ($adesivos as &$ad) {
         $ad['codigo'] = '#' . str_pad($ad['id'], 2, "0", STR_PAD_LEFT);
+        if(empty($ad['categoria'])) $ad['categoria'] = 'Urbano';
+        if(empty($ad['raridade'])) $ad['raridade'] = 'Comum';
         
-        // No popup do mapa, mostramos apenas o último status do jogador (is_latest = 1)
         $stmtDesc = $pdo->prepare("SELECT u.apelido, d.foto_selfie, d.tipo_registro FROM descobertas d JOIN usuarios u ON d.descobridor_id = u.id WHERE d.adesivo_id = ? AND d.is_latest = 1 ORDER BY d.data_descoberta ASC");
         $stmtDesc->execute([$ad['id']]);
         $descobertas = $stmtDesc->fetchAll(PDO::FETCH_ASSOC);

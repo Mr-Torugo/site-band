@@ -5,14 +5,14 @@ $db_file = __DIR__ . '/banco.sqlite';
 try {
     $pdo = new PDO("sqlite:" . $db_file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
 
     $usuario_id = $_GET['usuario_id'] ?? '';
     if (empty($usuario_id)) throw new Exception("Usuário não informado.");
 
-    // SÓ APARECE NO ÁLBUM SE FOR "CONQUISTADO" E FOR A VERSÃO MAIS RECENTE
     $sqlAchados = "SELECT 
                     d.data_descoberta, d.foto_selfie, d.comentario, 
-                    a.id, a.nome_local, a.foto_original, a.raridade 
+                    a.id, a.nome_local, a.foto_original, a.raridade, a.categoria 
                    FROM descobertas d
                    JOIN adesivos a ON d.adesivo_id = a.id
                    WHERE d.descobridor_id = ? AND d.tipo_registro = 'conquistado' AND d.is_latest = 1
@@ -21,13 +21,19 @@ try {
     $stmtAchados->execute([$usuario_id]);
     $achados = $stmtAchados->fetchAll(PDO::FETCH_ASSOC);
 
-    $sqlColados = "SELECT id, nome_local, foto_original, raridade, data_criacao FROM adesivos WHERE criador_id = ? ORDER BY id ASC";
+    $sqlColados = "SELECT id, nome_local, foto_original, raridade, categoria, data_criacao FROM adesivos WHERE criador_id = ? ORDER BY id ASC";
     $stmtColados = $pdo->prepare($sqlColados);
     $stmtColados->execute([$usuario_id]);
     $colados = $stmtColados->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($achados as &$item) { $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); }
-    foreach ($colados as &$item) { $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); }
+    foreach ($achados as &$item) { 
+        $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); 
+        if(empty($item['categoria'])) $item['categoria'] = 'Urbano';
+    }
+    foreach ($colados as &$item) { 
+        $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); 
+        if(empty($item['categoria'])) $item['categoria'] = 'Urbano';
+    }
 
     echo json_encode(['sucesso' => true, 'achados' => $achados, 'colados' => $colados]);
 } catch (Exception $e) {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mapa dos Bandesivos</title>
+    <title>Bando Map</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
@@ -102,7 +102,7 @@
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"><i
             class="bi bi-plus-lg"></i></button>
 
-    <!-- MODAL 1: Upload (Colar) -->
+    <!-- MODAL 1: Upload -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -127,11 +127,28 @@
                             <input type="file" accept="image/*" id="fotoGaleria" style="display: none;">
                         </div>
                         <div id="preview-container"><img id="preview-foto" src="" alt="Preview"></div>
-                        <div class="mb-3 mt-4">
+
+                        <div class="mb-3 mt-3">
                             <label class="form-label">Nome do Local (Ex: Poste da Rua X)</label>
                             <input type="text" class="form-control" id="nomeLocal" required>
                         </div>
-                        <div class="mb-3 mt-4 box-destaque">
+
+                        <!-- SELETOR DE CATEGORIA (Sozinho novamente) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Categoria</label>
+                            <select class="form-select" id="categoriaAdesivo">
+                                <option value="Natureza">Natureza</option>
+                                <option value="Urbano" selected>Urbano</option>
+                                <option value="Praia">Praia</option>
+                                <option value="Turísticos">Turísticos</option>
+                                <option value="Estrada">Estrada</option>
+                                <option value="Móveis">Móveis</option>
+                                <option value="Estados">Estados</option>
+                                <option value="Internacionais">Internacionais</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 mt-3 box-destaque">
                             <label class="form-label fw-bold">Onde o adesivo foi colado?</label>
                             <div class="form-check mb-2"><input class="form-check-input" type="radio" name="modoLocal"
                                     id="modoGps" value="gps" checked><label class="form-check-label" for="modoGps">Usar
@@ -174,7 +191,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: Descoberta (SISTEMA 3 NÍVEIS) -->
+    <!-- MODAL 3: Descoberta -->
     <div class="modal fade" id="modalDescoberta" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -185,38 +202,25 @@
                 </div>
                 <div class="modal-body">
                     <p class="text-center mb-3">Você está no <b id="descNomeLocal"></b>!</p>
-
                     <form id="formDescoberta">
                         <input type="hidden" id="descAdesivoId">
-
                         <div class="mb-3">
                             <label class="form-label fw-bold">Como você quer registrar?</label>
-
-                            <label class="d-block registro-opcao" id="optAvistado">
-                                <input class="form-check-input me-2" type="radio" name="tipoRegistro" value="avistado"
-                                    onchange="toggleFotoReq()" checked>
-                                👁️ <b>Avistado:</b> Só vi o adesivo (0 XP)
-                            </label>
-
-                            <label class="d-block registro-opcao" id="optEncontrado">
-                                <input class="form-check-input me-2" type="radio" name="tipoRegistro" value="encontrado"
-                                    onchange="toggleFotoReq()">
-                                📸 <b>Encontrado:</b> Foto do adesivo (50% XP)
-                            </label>
-
-                            <label class="d-block registro-opcao" id="optConquistado">
-                                <input class="form-check-input me-2" type="radio" name="tipoRegistro"
-                                    value="conquistado" onchange="toggleFotoReq()">
-                                🤳 <b>Conquistado:</b> Selfie (100% XP + Álbum)
-                            </label>
+                            <label class="d-block registro-opcao" id="optAvistado"><input class="form-check-input me-2"
+                                    type="radio" name="tipoRegistro" value="avistado" onchange="toggleFotoReq()"
+                                    checked>👁️ <b>Avistado:</b> Só vi o adesivo (0 XP)</label>
+                            <label class="d-block registro-opcao" id="optEncontrado"><input
+                                    class="form-check-input me-2" type="radio" name="tipoRegistro" value="encontrado"
+                                    onchange="toggleFotoReq()">📸 <b>Encontrado:</b> Foto do adesivo (50% XP)</label>
+                            <label class="d-block registro-opcao" id="optConquistado"><input
+                                    class="form-check-input me-2" type="radio" name="tipoRegistro" value="conquistado"
+                                    onchange="toggleFotoReq()">🤳 <b>Conquistado:</b> Selfie (100% XP + Álbum)</label>
                         </div>
-
                         <div class="mb-3 box-destaque" id="boxFotoDesc" style="display: none;">
                             <label class="form-label fw-bold">Anexe a Foto Obrigatória</label>
                             <input class="form-control" type="file" accept="image/*" capture="environment"
                                 id="descSelfie">
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold">Deixe um comentário</label>
                             <textarea class="form-control" id="descComentario" rows="2"
@@ -257,18 +261,17 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // --- ÍCONE PERSONALIZADO DO PIN ---
-        const iconeBando = L.icon({
-            iconUrl: 'pin-bando.png',
-            iconSize: [45, 55],     // Largura e Altura em pixels (ajuste se quiser maior/menor)
-            iconAnchor: [22, 55],   // O ponto exato da ponta do pino que aponta para o mapa
-            popupAnchor: [0, -55]   // Onde o balãozinho vai abrir em relação ao topo do pino
-        });
-
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
         function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        const iconeBando = L.icon({
+            iconUrl: 'pin-bando.png',
+            iconSize: [45, 55],
+            iconAnchor: [22, 55],
+            popupAnchor: [0, -55]
+        });
 
         function toggleFotoReq() {
             const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
@@ -309,18 +312,26 @@
 
         document.getElementById('btnSalvar').addEventListener('click', function () {
             const nomeLocal = document.getElementById('nomeLocal').value;
+            const categoria = document.getElementById('categoriaAdesivo').value;
             if (!nomeLocal || !arquivoSelecionado) { alert("Preencha o nome e foto."); return; }
             const modoSelecionado = document.querySelector('input[name="modoLocal"]:checked').value;
             const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Salvando...'; btn.disabled = true;
 
-            if (modoSelecionado === 'manual' && latManual) { enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, btn, textoOriginal); }
-            else if (modoSelecionado === 'mapa' && latMapa) { enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, btn, textoOriginal); }
-            else { navigator.geolocation.getCurrentPosition(pos => { enviarParaServidor(pos.coords.latitude, pos.coords.longitude, arquivoSelecionado, nomeLocal, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); }
+            if (modoSelecionado === 'manual' && latManual) { enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }
+            else if (modoSelecionado === 'mapa' && latMapa) { enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }
+            else { navigator.geolocation.getCurrentPosition(pos => { enviarParaServidor(pos.coords.latitude, pos.coords.longitude, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); }
         });
 
-        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, btn, textoOriginal) {
-            const formData = new FormData(); formData.append('foto', arquivoFoto); formData.append('nomeLocal', nomeLocal); formData.append('lat', lat); formData.append('lng', lng); formData.append('criador_id', meuId);
-            fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
+        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, categoria, btn, textoOriginal) {
+            const formData = new FormData();
+            formData.append('foto', arquivoFoto);
+            formData.append('nomeLocal', nomeLocal);
+            formData.append('lat', lat);
+            formData.append('lng', lng);
+            formData.append('criador_id', meuId);
+            formData.append('categoria', categoria);
+
+            fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) { alert(data.mensagem); location.reload(); } else { alert('Erro: ' + data.erro); } }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         }
 
         function carregarAdesivos() {
@@ -331,7 +342,7 @@
                         const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeBando });
                         let historicoHtml = ''; let botaoMuralHtml = '';
 
-                        let meuNivel = 0; // 0 = Nada, 1 = Avistado, 2 = Encontrado, 3 = Conquistado
+                        let meuNivel = 0;
 
                         if (adesivo.descobertas && adesivo.descobertas.length > 0) {
                             historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já registraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
@@ -369,7 +380,9 @@
 
                         const popupContent = `
                             <div style="text-align: center; font-family: sans-serif; min-width: 160px;">
-                                <span class="badge bg-dark mb-1">${adesivo.codigo}</span> <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br>
+                                <span class="badge bg-dark mb-1">${adesivo.codigo}</span> 
+                                <span class="badge bg-info text-dark mb-1">${adesivo.categoria || 'Urbano'}</span>
+                                <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br>
                                 <strong>${adesivo.nome_local}</strong><br>
                                 <small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br>
                                 <img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>

@@ -1,70 +1,63 @@
 <?php
 header('Content-Type: application/json');
-
-$db_file = 'banco.sqlite'; 
-$upload_dir = '../uploads/'; 
+$db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
+
     $nome_local = $_POST['nomeLocal'] ?? '';
-    $lat = $_POST['lat'] ?? '';
-    $lng = $_POST['lng'] ?? '';
-    $criador_id = $_POST['criador_id'] ?? ''; 
-    $foto = $_FILES['foto'] ?? null;
+    $lat = (float)($_POST['lat'] ?? 0);
+    $lng = (float)($_POST['lng'] ?? 0);
+    $criador_id = $_POST['criador_id'] ?? '';
+    $categoria = $_POST['categoria'] ?? 'Urbano'; 
 
-    if (empty($criador_id)) {
-        throw new Exception("Você precisa estar logado para colar um adesivo.");
+    if (empty($nome_local) || empty($lat) || empty($lng) || empty($criador_id)) {
+        throw new Exception("Preencha todos os campos obrigatórios.");
     }
 
-    if (empty($nome_local) || empty($lat) || empty($lng) || !$foto) {
-        throw new Exception("Preencha todos os campos e envie uma foto.");
+    if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception("A foto do adesivo é obrigatória.");
     }
 
-    $codigo = '#' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+    $nome_arquivo = 'adesivo_' . time() . '_' . rand(1000, 9999) . '.' . $extensao;
+    $caminho_absoluto = __DIR__ . '/../uploads/' . $nome_arquivo;
 
-    // --- NOVA LÓGICA DE RARIDADE POR DISTÂNCIA DE SÃO PAULO ---
-    $lat_sp = -23.5505;
-    $lon_sp = -46.6333;
-    
-    $lat_adesivo = (float) $lat;
-    $lon_adesivo = (float) $lng;
+    if (!move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_absoluto)) {
+        throw new Exception("Erro ao salvar o arquivo de imagem.");
+    }
 
-    // Cálculo de Distância (Fórmula de Haversine) em Quilômetros
-    $raio_terra = 6371;
-    
-    $dLat = deg2rad($lat_adesivo - $lat_sp);
-    $dLon = deg2rad($lon_adesivo - $lon_sp);
-    
-    $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat_sp)) * cos(deg2rad($lat_adesivo)) * sin($dLon/2) * sin($dLon/2);
-    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-    $distancia = $raio_terra * $c; 
+    $foto_caminho = 'uploads/' . $nome_arquivo;
 
-    // Define a raridade baseada nos Km de distância
-    if ($distancia <= 100) {
+    // --- MÁGICA DA DISTÂNCIA (FÓRMULA DE HAVERSINE) ---
+    // Coordenadas do Marco Zero de São Paulo
+    $sp_lat = -23.550520;
+    $sp_lng = -46.633308;
+
+    $earth_radius = 6371; // Raio da Terra em KM
+    $dLat = deg2rad($lat - $sp_lat);
+    $dLon = deg2rad($lng - $sp_lng);
+    $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($sp_lat)) * cos(deg2rad($lat)) * sin($dLon/2) * sin($dLon/2);
+    $c = 2 * asin(sqrt($a));
+    $distancia_km = $earth_radius * $c;
+
+    // Define a Raridade com base na distância de SP
+    if ($distancia_km <= 100) {
         $raridade = 'Comum';
-    } elseif ($distancia <= 700) {
+    } elseif ($distancia_km <= 300) {
         $raridade = 'Raro';
     } else {
         $raridade = 'Lendário';
     }
+    // ----------------------------------------------------
 
-    $extensao = pathinfo($foto['name'], PATHINFO_EXTENSION);
-    $novo_nome = uniqid('adesivo_') . '.' . $extensao; 
-    $caminho_destino = $upload_dir . $novo_nome;
+    $stmt = $pdo->prepare("INSERT INTO adesivos (nome_local, lat, lng, foto_original, criador_id, raridade, categoria) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$nome_local, $lat, $lng, $foto_caminho, $criador_id, $raridade, $categoria]);
 
-    if (move_uploaded_file($foto['tmp_name'], $caminho_destino)) {
-        
-        $caminho_banco = 'uploads/' . $novo_nome;
-
-        $stmt = $pdo->prepare("INSERT INTO adesivos (codigo, criador_id, nome_local, lat, lng, foto_original, raridade) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$codigo, $criador_id, $nome_local, $lat, $lng, $caminho_banco, $raridade]);
-
-        echo json_encode(['sucesso' => true, 'mensagem' => 'Adesivo salvo com sucesso!']);
-    } else {
-        throw new Exception("Erro ao salvar a imagem na pasta uploads.");
-    }
+    echo json_encode(['sucesso' => true, 'mensagem' => 'Adesivo Registrado com sucesso! Raridade: ' . $raridade]);
 
 } catch (Exception $e) {
     http_response_code(500);
