@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bando Map</title>
+    <title>Mapa dos Bandesivos</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
@@ -257,6 +257,14 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
+        // --- ÍCONE PERSONALIZADO DO PIN ---
+        const iconeBando = L.icon({
+            iconUrl: 'pin-bando.png',
+            iconSize: [45, 55],     // Largura e Altura em pixels (ajuste se quiser maior/menor)
+            iconAnchor: [22, 55],   // O ponto exato da ponta do pino que aponta para o mapa
+            popupAnchor: [0, -55]   // Onde o balãozinho vai abrir em relação ao topo do pino
+        });
+
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
@@ -285,7 +293,7 @@
         map.on('click', function (e) {
             latMapa = e.latlng.lat; lngMapa = e.latlng.lng;
             if (marcadorTemp) map.removeLayer(marcadorTemp);
-            marcadorTemp = L.marker([latMapa, lngMapa]).addTo(map);
+            marcadorTemp = L.marker([latMapa, lngMapa], { icon: iconeBando }).addTo(map);
             marcadorTemp.bindPopup(`<div style="text-align:center;"><strong>Colar aqui?</strong><br><button class="btn btn-primary btn-sm mt-2" onclick="abrirModalPeloMapa()">Sim</button></div>`).openPopup();
         });
         function abrirModalPeloMapa() { document.getElementById('modoMapa').checked = true; boxEndereco.style.display = 'none'; new bootstrap.Modal(document.getElementById('modalUpload')).show(); if (marcadorTemp) marcadorTemp.closePopup(); }
@@ -320,7 +328,7 @@
                 if (data.sucesso) {
                     const marcadoresCluster = L.markerClusterGroup();
                     data.dados.forEach(adesivo => {
-                        const marker = L.marker([adesivo.lat, adesivo.lng]);
+                        const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeBando });
                         let historicoHtml = ''; let botaoMuralHtml = '';
 
                         let meuNivel = 0; // 0 = Nada, 1 = Avistado, 2 = Encontrado, 3 = Conquistado
