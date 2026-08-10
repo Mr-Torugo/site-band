@@ -84,6 +84,6 @@ site-bando/
 
 Vitor Hugo
 
-[Github]([https://site.com](https://www.linkedin.com/in/vitor-hugo-05b2b91a7/))
+[Linkedin](https://www.linkedin.com/in/vitor-hugo-05b2b91a7/)
 
 Estudante de Sistemas para Internet no Senac e Analista Junior.
