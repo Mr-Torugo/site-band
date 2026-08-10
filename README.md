@@ -80,7 +80,7 @@ site-bando/
 
 5. Acesse no navegador: http://localhost/site-bando/
 
-##👨‍💻 Autor
+## 👨‍💻 Autor
 
 Vitor Hugo
 
