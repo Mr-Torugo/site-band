@@ -11,8 +11,6 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- CSS DO LEAFLET E MARKERCLUSTER -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -71,12 +69,25 @@
             border-radius: 8px;
             padding: 15px;
         }
+
+        .registro-opcao {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+        }
+
+        .registro-opcao:hover {
+            border-color: #0d6efd;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Navegação -->
     <div
         style="position: fixed; top: 15px; right: 15px; z-index: 1000; background: white; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
         <small class="fw-bold">👤 <span id="nomeLogado"></span></small>
@@ -86,14 +97,12 @@
         <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold" style="padding: 0;">Sair</button>
     </div>
 
-    <!-- Mapa -->
     <div id="map"></div>
 
-    <!-- Botão Registrar -->
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"><i
             class="bi bi-plus-lg"></i></button>
 
-    <!-- MODAL 1: Upload (Colar) -->
+    <!-- MODAL 1: Upload (Colar) - MANTIDO IGUAL -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -165,33 +174,60 @@
         </div>
     </div>
 
-    <!-- MODAL 3: Descoberta -->
+    <!-- MODAL 3: Descoberta (NOVO SISTEMA 3 NÍVEIS) -->
     <div class="modal fade" id="modalDescoberta" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">🎉 Resgatar Adesivo</h5>
+                    <h5 class="modal-title">🎉 Registrar Descoberta</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-center mb-3">Você está no <b id="descNomeLocal"></b>!</p>
+
                     <form id="formDescoberta">
                         <input type="hidden" id="descAdesivoId">
-                        <div class="mb-3 box-destaque">
-                            <label class="form-label fw-bold">Tire uma Selfie (+50% de XP!)</label>
-                            <input class="form-control" type="file" accept="image/*" capture="user" id="descSelfie">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Como você quer registrar?</label>
+
+                            <label class="d-block registro-opcao" id="optAvistado">
+                                <input class="form-check-input me-2" type="radio" name="tipoRegistro" value="avistado"
+                                    onchange="toggleFotoReq()" checked>
+                                👁️ <b>Avistado:</b> Só vi o adesivo (0 XP)
+                            </label>
+
+                            <label class="d-block registro-opcao" id="optEncontrado">
+                                <input class="form-check-input me-2" type="radio" name="tipoRegistro" value="encontrado"
+                                    onchange="toggleFotoReq()">
+                                📸 <b>Encontrado:</b> Foto do adesivo (50% XP)
+                            </label>
+
+                            <label class="d-block registro-opcao" id="optConquistado">
+                                <input class="form-check-input me-2" type="radio" name="tipoRegistro"
+                                    value="conquistado" onchange="toggleFotoReq()">
+                                🤳 <b>Conquistado:</b> Selfie (100% XP + Álbum)
+                            </label>
                         </div>
+
+                        <div class="mb-3 box-destaque" id="boxFotoDesc" style="display: none;">
+                            <label class="form-label fw-bold">Anexe a Foto Obrigatória</label>
+                            <input class="form-control" type="file" accept="image/*" capture="environment"
+                                id="descSelfie">
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Deixe um comentário</label>
                             <textarea class="form-control" id="descComentario" rows="2"
-                                placeholder="Estava bem escondido..."></textarea>
+                                placeholder="O que achou do local?"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success fw-bold" id="btnSalvarDescoberta">Registrar</button>
+                    <button type="button" class="btn btn-success fw-bold" id="btnSalvarDescoberta">Registrar
+                        Ação</button>
                 </div>
             </div>
         </div>
@@ -226,22 +262,27 @@
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
         function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        // --- MAPA ---
+        // MÁGICA VISUAL: Esconde e mostra o botão da câmera baseado na escolha do rádio
+        function toggleFotoReq() {
+            const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
+            const boxFoto = document.getElementById('boxFotoDesc');
+            if (tipo === 'avistado') {
+                boxFoto.style.display = 'none';
+            } else {
+                boxFoto.style.display = 'block';
+            }
+        }
+
+        // --- MAPA E SCRIPTS BASES ---
         const map = L.map('map').setView([-23.5505, -46.6333], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         let arquivoSelecionado = null;
         function processarFoto(event) {
             const file = event.target.files[0];
-            if (file) {
-                arquivoSelecionado = file;
-                const reader = new FileReader();
-                reader.onload = e => { document.getElementById('preview-foto').src = e.target.result; document.getElementById('preview-container').style.display = 'block'; }
-                reader.readAsDataURL(file);
-            }
+            if (file) { arquivoSelecionado = file; const reader = new FileReader(); reader.onload = e => { document.getElementById('preview-foto').src = e.target.result; document.getElementById('preview-container').style.display = 'block'; }; reader.readAsDataURL(file); }
         }
-        document.getElementById('fotoCamera').addEventListener('change', processarFoto);
-        document.getElementById('fotoGaleria').addEventListener('change', processarFoto);
+        document.getElementById('fotoCamera').addEventListener('change', processarFoto); document.getElementById('fotoGaleria').addEventListener('change', processarFoto);
 
         const modoGps = document.getElementById('modoGps'); const modoMapa = document.getElementById('modoMapa'); const modoManual = document.getElementById('modoManual'); const boxEndereco = document.getElementById('boxEndereco');
         modoGps.addEventListener('change', () => boxEndereco.style.display = 'none'); modoMapa.addEventListener('change', () => boxEndereco.style.display = 'none'); modoManual.addEventListener('change', () => boxEndereco.style.display = 'block');
@@ -249,7 +290,7 @@
         let latMapa = null; let lngMapa = null; let marcadorTemp = null;
         map.on('click', function (e) {
             latMapa = e.latlng.lat; lngMapa = e.latlng.lng;
-            if (marcadorTemp) { map.removeLayer(marcadorTemp); }
+            if (marcadorTemp) map.removeLayer(marcadorTemp);
             marcadorTemp = L.marker([latMapa, lngMapa]).addTo(map);
             marcadorTemp.bindPopup(`<div style="text-align:center;"><strong>Colar aqui?</strong><br><button class="btn btn-primary btn-sm mt-2" onclick="abrirModalPeloMapa()">Sim</button></div>`).openPopup();
         });
@@ -257,15 +298,13 @@
 
         let latManual = null; let lngManual = null;
         document.getElementById('btnBuscarEnd').addEventListener('click', function () {
-            const endereco = document.getElementById('inputEndereco').value; const status = document.getElementById('statusBusca');
-            if (!endereco) return;
+            const endereco = document.getElementById('inputEndereco').value; const status = document.getElementById('statusBusca'); if (!endereco) return;
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`).then(res => res.json()).then(data => {
                 if (data.length > 0) { latManual = data[0].lat; lngManual = data[0].lon; status.innerHTML = `✅ Encontrado: ${data[0].display_name}`; status.style.color = "green"; }
                 else { status.innerText = "❌ Local não encontrado."; }
             });
         });
 
-        // --- SALVAR NOVO ADESIVO ---
         document.getElementById('btnSalvar').addEventListener('click', function () {
             const nomeLocal = document.getElementById('nomeLocal').value;
             if (!nomeLocal || !arquivoSelecionado) { alert("Preencha o nome e foto."); return; }
@@ -274,7 +313,7 @@
 
             if (modoSelecionado === 'manual' && latManual) { enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, btn, textoOriginal); }
             else if (modoSelecionado === 'mapa' && latMapa) { enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, btn, textoOriginal); }
-            else { navigator.geolocation.getCurrentPosition(position => { enviarParaServidor(position.coords.latitude, position.coords.longitude, arquivoSelecionado, nomeLocal, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); }
+            else { navigator.geolocation.getCurrentPosition(pos => { enviarParaServidor(pos.coords.latitude, pos.coords.longitude, arquivoSelecionado, nomeLocal, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); }
         });
 
         function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, btn, textoOriginal) {
@@ -282,30 +321,28 @@
             fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         }
 
-        // --- LISTAR ADESIVOS E BOTÕES INTELIGENTES ---
+        // --- LISTAR NO MAPA COM LÓGICA DE NÍVEIS ---
         function carregarAdesivos() {
             fetch('api/listar.php').then(r => r.json()).then(data => {
                 if (data.sucesso) {
                     const marcadoresCluster = L.markerClusterGroup();
-
                     data.dados.forEach(adesivo => {
                         const marker = L.marker([adesivo.lat, adesivo.lng]);
                         let historicoHtml = ''; let botaoMuralHtml = '';
 
-                        // Lógica inteligente para saber o status do usuário
-                        let jaEncontrou = false;
-                        let temMinhaSelfie = false;
+                        let meuNivel = 0; // 0 = Nada, 1 = Avistado, 2 = Encontrado, 3 = Conquistado
 
                         if (adesivo.descobertas && adesivo.descobertas.length > 0) {
-                            historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já encontraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
+                            historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já registraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
                             adesivo.descobertas.forEach(d => {
-                                let icone = d.tem_selfie ? '📸' : '📍';
+                                // Ícone visual dependendo do nível
+                                let icone = d.tipo_registro === 'conquistado' ? '👑' : (d.tipo_registro === 'encontrado' ? '📸' : '👁️');
                                 historicoHtml += `<div style="margin-bottom: 3px;">${icone} <b>${d.apelido}</b></div>`;
 
-                                // Verifica o status do usuário
                                 if (d.apelido === meuApelido) {
-                                    jaEncontrou = true;
-                                    if (d.tem_selfie) temMinhaSelfie = true;
+                                    if (d.tipo_registro === 'conquistado') meuNivel = 3;
+                                    else if (d.tipo_registro === 'encontrado') meuNivel = 2;
+                                    else meuNivel = 1;
                                 }
                             });
                             historicoHtml += '</div></div>';
@@ -314,17 +351,16 @@
                             historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>';
                         }
 
-                        // Define o Botão Principal baseado no Status
                         let botaoAcaoHtml = '';
-                        if (adesivo.criador_id != meuId) { // Não exibe botão se for o criador
-                            if (jaEncontrou) {
-                                if (temMinhaSelfie) {
-                                    botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>✅ 100% XP Garantido</button>`;
-                                } else {
-                                    botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}')" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">📸 Enviar Selfie (+50% XP)</button>`;
-                                }
+                        if (adesivo.criador_id != meuId) {
+                            if (meuNivel === 3) {
+                                botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`;
+                            } else if (meuNivel === 2) {
+                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`;
+                            } else if (meuNivel === 1) {
+                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`;
                             } else {
-                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}')" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Encontrei!</button>`;
+                                botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
                             }
                         }
 
@@ -350,36 +386,54 @@
             });
         }
 
-        // --- CAÇA AO TESOURO ---
-        function abrirModalDescoberta(idAdesivo, nomeLocal) {
-            document.getElementById('descAdesivoId').value = idAdesivo; document.getElementById('descNomeLocal').innerText = nomeLocal;
-            document.getElementById('descSelfie').value = ''; document.getElementById('descComentario').value = '';
+        // Prepara o Modal Descoberta escondendo as opções que o usuário já atingiu
+        function abrirModalDescoberta(idAdesivo, nomeLocal, nivelAtual) {
+            document.getElementById('descAdesivoId').value = idAdesivo;
+            document.getElementById('descNomeLocal').innerText = nomeLocal;
+            document.getElementById('descSelfie').value = '';
+            document.getElementById('descComentario').value = '';
+
+            // Controle visual de quais opções aparecem
+            document.getElementById('optAvistado').style.display = nivelAtual >= 1 ? 'none' : 'block';
+            document.getElementById('optEncontrado').style.display = nivelAtual >= 2 ? 'none' : 'block';
+
+            // Força a seleção da próxima opção lógica
+            if (nivelAtual === 2) document.querySelector('input[value="conquistado"]').checked = true;
+            else if (nivelAtual === 1) document.querySelector('input[value="encontrado"]').checked = true;
+            else document.querySelector('input[value="avistado"]').checked = true;
+
+            toggleFotoReq(); // Atualiza a obrigatoriedade da foto
+
             new bootstrap.Modal(document.getElementById('modalDescoberta')).show();
         }
 
         document.getElementById('btnSalvarDescoberta').addEventListener('click', function () {
             const adesivoId = document.getElementById('descAdesivoId').value;
+            const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value;
             const formData = new FormData();
-            formData.append('adesivo_id', adesivoId); formData.append('descobridor_id', meuId); formData.append('comentario', document.getElementById('descComentario').value);
-            if (document.getElementById('descSelfie').files[0]) { formData.append('selfie', document.getElementById('descSelfie').files[0]); }
+
+            formData.append('adesivo_id', adesivoId);
+            formData.append('descobridor_id', meuId);
+            formData.append('comentario', document.getElementById('descComentario').value);
+            formData.append('tipo_registro', tipo);
+
+            if (document.getElementById('descSelfie').files[0]) {
+                formData.append('selfie', document.getElementById('descSelfie').files[0]);
+            }
 
             const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Enviando...'; btn.disabled = true;
 
             fetch('api/descobrir.php', { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.sucesso) {
-                        alert(data.mensagem); // A mensagem que vai aparecer agora é inteligente!
-                        location.reload();
-                    } else { alert('Aviso: ' + data.erro); }
+                    if (data.sucesso) { alert(data.mensagem); location.reload(); }
+                    else { alert('Aviso: ' + data.erro); }
                 }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
         });
 
-        // --- MURAL E EXCLUIR ---
+        // --- MURAL, EXCLUIR E AMPLIAR ---
         function abrirMural(idAdesivo, nomeLocal) {
-            document.getElementById('muralNomeLocal').innerText = nomeLocal;
-            document.getElementById('conteudoMural').innerHTML = '<div class="text-center">Carregando...</div>';
-            new bootstrap.Modal(document.getElementById('modalMural')).show();
+            document.getElementById('muralNomeLocal').innerText = nomeLocal; document.getElementById('conteudoMural').innerHTML = '<div class="text-center">Carregando...</div>'; new bootstrap.Modal(document.getElementById('modalMural')).show();
             fetch(`api/mural.php?adesivo_id=${idAdesivo}`).then(r => r.json()).then(data => {
                 if (data.sucesso) {
                     let html = '';

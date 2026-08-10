@@ -4,8 +4,8 @@ $db_file = __DIR__ . '/banco.sqlite';
 
 try {
     $pdo = new PDO("sqlite:" . $db_file);
+    try { $pdo->exec("ALTER TABLE descobertas ADD COLUMN tipo_registro TEXT DEFAULT 'conquistado'"); } catch (Exception $e) {}
     
-    // A query agora busca o nome, conta os adesivos colados/achados e faz a matemática do XP
     $sql = "
         SELECT 
             u.id,
@@ -15,14 +15,14 @@ try {
             COALESCE((
                 SELECT SUM(
                     CASE 
-                        WHEN a.raridade = 'Comum' AND d.foto_selfie IS NOT NULL THEN 10
-                        WHEN a.raridade = 'Comum' AND d.foto_selfie IS NULL THEN 5
+                        WHEN a.raridade = 'Comum' AND d.tipo_registro = 'conquistado' THEN 10
+                        WHEN a.raridade = 'Comum' AND d.tipo_registro = 'encontrado' THEN 5
                         
-                        WHEN a.raridade = 'Raro' AND d.foto_selfie IS NOT NULL THEN 50
-                        WHEN a.raridade = 'Raro' AND d.foto_selfie IS NULL THEN 25
+                        WHEN a.raridade = 'Raro' AND d.tipo_registro = 'conquistado' THEN 50
+                        WHEN a.raridade = 'Raro' AND d.tipo_registro = 'encontrado' THEN 25
                         
-                        WHEN a.raridade = 'Lendário' AND d.foto_selfie IS NOT NULL THEN 100
-                        WHEN a.raridade = 'Lendário' AND d.foto_selfie IS NULL THEN 50
+                        WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'conquistado' THEN 100
+                        WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'encontrado' THEN 50
                         ELSE 0
                     END
                 )
@@ -47,7 +47,6 @@ try {
     }
 
     echo json_encode(['sucesso' => true, 'dados' => $ranking]);
-
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
