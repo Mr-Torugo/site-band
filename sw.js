@@ -1,5 +1,5 @@
-// Mudamos a versão para forçar os celulares a atualizarem!
-const CACHE_NAME = 'bando-map-v2';
+// Aumentamos para a versão v3 para forçar o celular/PC a deletar o código antigo!
+const CACHE_NAME = 'bando-map-v3';
 
 const urlsToCache = [
     './',
@@ -7,7 +7,8 @@ const urlsToCache = [
     './index.html',
     './album.html',
     './ranking.html',
-    './ranking_adesivos.html'
+    './ranking_adesivos.html',
+    './feed.html' // Aproveitei para colocar nossa nova página do feed no cache também!
 ];
 
 // Instala o Service Worker e salva os arquivos
@@ -20,7 +21,7 @@ self.addEventListener('install', event => {
     self.skipWaiting(); 
 });
 
-// Limpa os caches antigos (versão v1) quando essa nova versão entra em cena
+// Limpa os caches antigos (versões v1 e v2) quando essa nova versão entra em cena
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -37,9 +38,16 @@ self.addEventListener('activate', event => {
     self.clients.claim(); 
 });
 
-// NOVA ESTRATÉGIA: Network First (Rede Primeiro, fallback para Cache)
+// ESTRATÉGIA: Network First (Rede Primeiro, fallback para Cache)
 self.addEventListener('fetch', event => {
-    // Ignora requisições de API (PHP) para elas nunca ficarem presas no cache
+    
+    // 1. A REGRA DE OURO PARA O ERRO DA EXTENSÃO:
+    // Só permite salvar no cache se o link começar estritamente com http ou https
+    if (!event.request.url.startsWith('http')) {
+        return;
+    }
+
+    // 2. Ignora requisições de API (PHP) para elas nunca ficarem presas no cache
     if (event.request.url.includes('/api/') || event.request.url.includes('/auth/')) {
         return;
     }
@@ -47,8 +55,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         fetch(event.request)
             .then(response => {
-                // Se baixou com sucesso da internet, salva uma cópia atualizada no cache
-                if (response && response.status === 200) {
+                // Se baixou com sucesso e é um arquivo do nosso próprio site (basic)
+                if (response && response.status === 200 && response.type === 'basic') {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then(cache => {
                         cache.put(event.request, responseClone);
