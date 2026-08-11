@@ -134,6 +134,29 @@
             margin-top: 2px;
             text-align: right;
         }
+
+        /* ANIMAÇÃO DA ETIQUETA DO TESOURO NO FEED */
+        @keyframes pulse-gold {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
+        }
+
+        .badge-tesouro {
+            background-color: #dc3545;
+            color: white;
+            animation: pulse-gold 2s infinite;
+            border: 2px solid #ffc107;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -202,7 +225,9 @@
                         data.dados.forEach(item => {
                             const dataObj = new Date(item.data_acao);
                             const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                            let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
+
+                            // LÓGICA DE CORES ATUALIZADA (INCLUINDO TESOURO)
+                            let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : (item.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
                             const fotoParaExibir = item.foto_registro || item.foto_adesivo;
                             const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação">` : '';
@@ -310,7 +335,6 @@
                         });
                         lista.innerHTML = html;
 
-                        // Rola a conversa lá para baixo (para ver o comentário mais novo)
                         const modalBody = document.querySelector('#modalComentarios .modal-body');
                         modalBody.scrollTop = modalBody.scrollHeight;
                     }
@@ -341,7 +365,6 @@
                         input.value = '';
                         carregarComentariosDaAcao(tipoAcao, acaoId);
 
-                        // Atualiza o contador de balõezinhos que fica atrás do modal
                         let contadorSpan = document.getElementById(`contador-coment-${tipoAcao}-${acaoId}`);
                         if (contadorSpan) {
                             contadorSpan.innerText = parseInt(contadorSpan.innerText) + 1;
@@ -353,7 +376,6 @@
                 .finally(() => { btn.disabled = false; });
         }
 
-        // Permite enviar apertando a tecla Enter
         document.getElementById('inputNovoComentario').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') enviarComentario();
         });
