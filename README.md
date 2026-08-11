@@ -1,4 +1,4 @@
-<h1 align="center">🗺️ Bando Map </h1>
+<h1 align="center">🗺️ Mapa dos Bandesivos </h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
@@ -9,7 +9,7 @@
 </p>
 
 ## 📌 Sobre o Projeto
-O **Bando Map** é um Progressive Web App (PWA) interativo de caça ao tesouro focado em exploração urbana e gamificação. Os usuários podem espalhar adesivos pelo mapa global e registrar descobertas ao encontrar os adesivos deixados por outros caçadores. 
+O **Mapa dos Bandesivos** é um Progressive Web App (PWA) interativo de caça ao tesouro focado em exploração urbana e gamificação. Os usuários podem espalhar adesivos pelo mapa global e registrar descobertas ao encontrar os adesivos deixados por outros caçadores. 
 
 O sistema utiliza geolocalização e cálculos matemáticos (Fórmula de Haversine) para gerar raridades dinâmicas e distribuir pontos de experiência (XP), criando uma competição real entre os usuários.
 
