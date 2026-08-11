@@ -72,6 +72,68 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             background-color: #212529;
         }
+
+        .curtidas-box {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-curtir {
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+            padding: 0 5px;
+            color: #6c757d;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+        }
+
+        .btn-curtir.curtido {
+            color: #e63946;
+        }
+
+        .btn-curtir:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-curtir:active {
+            transform: scale(0.9);
+        }
+
+        .chat-balao {
+            background-color: #e9ecef;
+            padding: 10px 14px;
+            border-radius: 15px;
+            border-bottom-left-radius: 4px;
+            display: inline-block;
+            max-width: 90%;
+        }
+
+        .chat-nome {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0d6efd;
+            margin-bottom: 2px;
+        }
+
+        .chat-texto {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .chat-data {
+            font-size: 0.7rem;
+            color: #adb5bd;
+            margin-top: 2px;
+            text-align: right;
+        }
     </style>
 </head>
 
@@ -94,55 +156,208 @@
         </div>
     </div>
 
+    <!-- MODAL DE COMENTÁRIOS -->
+    <div class="modal fade" id="modalComentarios" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="height: 80vh;">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><i class="bi bi-chat-text"></i> Comentários</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="background-color: #f8f9fa;">
+                    <div id="listaDeComentarios" class="d-flex flex-column gap-3">
+                        <div class="text-center text-muted">Carregando comentários...</div>
+                    </div>
+                </div>
+                <div class="modal-footer d-block bg-white p-2">
+                    <input type="hidden" id="comentTipoAcao">
+                    <input type="hidden" id="comentAcaoId">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="inputNovoComentario"
+                            placeholder="Escreva um comentário..." autocomplete="off">
+                        <button class="btn btn-primary fw-bold" id="btnEnviarComentario"
+                            onclick="enviarComentario()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        if (!localStorage.getItem('bando_id')) { window.location.href = 'login.html'; }
+        const meuId = localStorage.getItem('bando_id');
+        const meuApelido = localStorage.getItem('bando_apelido');
+        if (!meuId) { window.location.href = 'login.html'; }
 
         function carregarFeed() {
-            fetch('api/feed.php').then(res => res.json()).then(data => {
-                if (data.sucesso) {
-                    const lista = document.getElementById('listaFeed');
-                    if (data.dados.length === 0) { lista.innerHTML = `<div class="text-center text-muted mt-5"><h4>O mapa está quieto.</h4></div>`; return; }
+            fetch('api/feed.php?usuario_id=' + meuId + '&nocache=' + new Date().getTime())
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const lista = document.getElementById('listaFeed');
+                        if (data.dados.length === 0) { lista.innerHTML = `<div class="text-center text-muted mt-5"><h4>O mapa está quieto.</h4></div>`; return; }
 
-                    let html = '';
-                    data.dados.forEach(item => {
-                        const dataObj = new Date(item.data_acao);
-                        const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        let html = '';
+                        data.dados.forEach(item => {
+                            const dataObj = new Date(item.data_acao);
+                            const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                            let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
 
-                        let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
+                            const fotoParaExibir = item.foto_registro || item.foto_adesivo;
+                            const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação">` : '';
 
-                        // AGORA ELE LÊ A FOTO DO REGISTRO EXATO DA AÇÃO!
-                        const imagemHtml = item.foto_registro ? `<img src="${item.foto_registro}" class="feed-img" alt="Foto da ação">` : '';
+                            let iconeCoracao = item.curtiu_mim ? 'bi-heart-fill' : 'bi-heart';
+                            let classeCurtido = item.curtiu_mim ? 'curtido' : '';
 
-                        if (item.tipo === 'colou') {
-                            html += `
+                            let htmlAcoes = `
+                            <div class="curtidas-box">
+                                <button class="btn-curtir ${classeCurtido}" onclick="toggleCurtida('${item.tipo}', ${item.acao_id}, this)">
+                                    <i class="bi ${iconeCoracao}"></i> <span class="contador">${item.total_curtidas}</span>
+                                </button>
+                                <button class="btn-curtir ms-4 text-dark" onclick="abrirModalComentarios('${item.tipo}', ${item.acao_id})">
+                                    <i class="bi bi-chat-text"></i> <span class="contador" id="contador-coment-${item.tipo}-${item.acao_id}">${item.total_comentarios}</span>
+                                </button>
+                            </div>
+                        `;
+
+                            if (item.tipo === 'colou') {
+                                html += `
                                 <div class="feed-item">
                                     <div class="feed-icone icone-colou"><i class="bi bi-pin-angle-fill"></i></div>
                                     <div class="feed-card">
                                         <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade}</span></div>
                                         <p class="mb-0"><b>${item.quem_agiu}</b> colou um novo adesivo em <strong class="text-primary">${item.local}</strong>.</p>
                                         ${imagemHtml}
+                                        ${htmlAcoes}
                                     </div>
                                 </div>`;
-                        } else if (item.tipo === 'achou') {
-                            let iconeAcao = '👁️'; let textoAcao = 'avistou o adesivo de';
-                            if (item.tipo_registro === 'conquistado') { iconeAcao = '👑'; textoAcao = 'conquistou o adesivo de'; }
-                            else if (item.tipo_registro === 'encontrado') { iconeAcao = '📸'; textoAcao = 'encontrou o adesivo de'; }
+                            } else if (item.tipo === 'achou') {
+                                let iconeAcao = '👁️'; let textoAcao = 'avistou o adesivo de';
+                                if (item.tipo_registro === 'conquistado') { iconeAcao = '👑'; textoAcao = 'conquistou o adesivo de'; }
+                                else if (item.tipo_registro === 'encontrado') { iconeAcao = '📸'; textoAcao = 'encontrou o adesivo de'; }
 
-                            html += `
+                                html += `
                                 <div class="feed-item">
                                     <div class="feed-icone icone-achou">${iconeAcao}</div>
                                     <div class="feed-card">
                                         <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade}</span></div>
                                         <p class="mb-0">${iconeAcao} <b>${item.quem_agiu}</b> ${textoAcao} <b>${item.dono_adesivo}</b> em <strong class="text-success">${item.local}</strong>!</p>
                                         ${imagemHtml}
+                                        ${htmlAcoes}
                                     </div>
                                 </div>`;
-                        }
-                    });
-                    lista.innerHTML = html;
-                }
-            });
+                            }
+                        });
+                        lista.innerHTML = html;
+                    }
+                });
         }
+
+        // ===================================
+        // FUNÇÃO DE CURTIR
+        // ===================================
+        function toggleCurtida(tipoAcao, acaoId, btnElement) {
+            const formData = new FormData(); formData.append('usuario_id', meuId); formData.append('tipo_acao', tipoAcao); formData.append('acao_id', acaoId);
+            let icon = btnElement.querySelector('i'); let countSpan = btnElement.querySelector('.contador'); let curCount = parseInt(countSpan.innerText) || 0;
+            if (btnElement.classList.contains('curtido')) {
+                btnElement.classList.remove('curtido'); icon.classList.remove('bi-heart-fill'); icon.classList.add('bi-heart'); countSpan.innerText = Math.max(0, curCount - 1);
+            } else {
+                btnElement.classList.add('curtido'); icon.classList.remove('bi-heart'); icon.classList.add('bi-heart-fill'); countSpan.innerText = curCount + 1;
+            }
+            fetch('api/curtir.php', { method: 'POST', body: formData }).then(r => r.json()).catch(e => console.log(e));
+        }
+
+        // ===================================
+        // SISTEMA DE COMENTÁRIOS
+        // ===================================
+        const modalComentarios = new bootstrap.Modal(document.getElementById('modalComentarios'));
+
+        function abrirModalComentarios(tipoAcao, acaoId) {
+            document.getElementById('comentTipoAcao').value = tipoAcao;
+            document.getElementById('comentAcaoId').value = acaoId;
+            document.getElementById('inputNovoComentario').value = '';
+            document.getElementById('listaDeComentarios').innerHTML = '<div class="text-center text-muted mt-3">Carregando comentários...</div>';
+            modalComentarios.show();
+            carregarComentariosDaAcao(tipoAcao, acaoId);
+        }
+
+        function carregarComentariosDaAcao(tipoAcao, acaoId) {
+            fetch(`api/feed_comentarios_listar.php?tipo_acao=${tipoAcao}&acao_id=${acaoId}&nocache=` + new Date().getTime())
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const lista = document.getElementById('listaDeComentarios');
+                        if (data.dados.length === 0) {
+                            lista.innerHTML = '<div class="text-center text-muted mt-4">Nenhum comentário ainda. Seja o primeiro!</div>';
+                            return;
+                        }
+
+                        let html = '';
+                        data.dados.forEach(c => {
+                            const dataObj = new Date(c.data_comentario);
+                            const strData = dataObj.toLocaleDateString('pt-BR') + ' ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                            html += `
+                            <div class="d-flex flex-column align-items-start">
+                                <div class="chat-balao shadow-sm">
+                                    <div class="chat-nome">${c.apelido}</div>
+                                    <p class="chat-texto">${c.comentario}</p>
+                                </div>
+                                <div class="chat-data w-100 ps-1" style="text-align: left;">${strData}</div>
+                            </div>
+                        `;
+                        });
+                        lista.innerHTML = html;
+
+                        // Rola a conversa lá para baixo (para ver o comentário mais novo)
+                        const modalBody = document.querySelector('#modalComentarios .modal-body');
+                        modalBody.scrollTop = modalBody.scrollHeight;
+                    }
+                });
+        }
+
+        function enviarComentario() {
+            const input = document.getElementById('inputNovoComentario');
+            const texto = input.value.trim();
+            if (texto === '') return;
+
+            const tipoAcao = document.getElementById('comentTipoAcao').value;
+            const acaoId = document.getElementById('comentAcaoId').value;
+            const btn = document.getElementById('btnEnviarComentario');
+
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('usuario_id', meuId);
+            formData.append('tipo_acao', tipoAcao);
+            formData.append('acao_id', acaoId);
+            formData.append('comentario', texto);
+
+            fetch('api/feed_comentar.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        input.value = '';
+                        carregarComentariosDaAcao(tipoAcao, acaoId);
+
+                        // Atualiza o contador de balõezinhos que fica atrás do modal
+                        let contadorSpan = document.getElementById(`contador-coment-${tipoAcao}-${acaoId}`);
+                        if (contadorSpan) {
+                            contadorSpan.innerText = parseInt(contadorSpan.innerText) + 1;
+                        }
+                    } else {
+                        alert('Erro ao enviar comentário.');
+                    }
+                })
+                .finally(() => { btn.disabled = false; });
+        }
+
+        // Permite enviar apertando a tecla Enter
+        document.getElementById('inputNovoComentario').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') enviarComentario();
+        });
+
         carregarFeed();
     </script>
     <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }</script>
