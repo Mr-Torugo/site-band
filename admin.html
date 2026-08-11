@@ -30,6 +30,30 @@
         .card-user:hover {
             border-left: 4px solid #0d6efd;
         }
+
+        .card-stat {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .card-stat:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 
@@ -37,16 +61,45 @@
 
     <nav class="navbar navbar-dark navbar-bando fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-arrow-left me-2"></i> Voltar</a>
-            <span class="navbar-text text-white fw-bold">⚙️ Painel do Administrador</span>
+            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-arrow-left me-2"></i> Voltar ao Mapa</a>
+            <span class="navbar-text text-white fw-bold">⚙️ Painel Admin</span>
         </div>
     </nav>
 
-    <div class="container mb-5">
-        <div class="text-center mb-4 mt-3">
-            <h3 class="fw-bold">Gerenciamento de Usuários</h3>
-            <p class="text-muted">Aqui você pode redefinir senhas esquecidas.</p>
+    <div class="container mb-5 mt-3">
+
+        <!-- RESUMO ESTATÍSTICO (DASHBOARD) -->
+        <h4 class="fw-bold mb-3">📊 Resumo do Jogo</h4>
+        <div class="row mb-5">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card card-stat bg-primary text-white text-center p-3 h-100 justify-content-center">
+                    <p class="stat-value" id="statUsuarios">-</p>
+                    <p class="stat-label mb-0"><i class="bi bi-people-fill"></i> Usuários</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card card-stat bg-success text-white text-center p-3 h-100 justify-content-center">
+                    <p class="stat-value" id="statAdesivos">-</p>
+                    <p class="stat-label mb-0"><i class="bi bi-pin-map-fill"></i> Adesivos Colados</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card card-stat bg-warning text-dark text-center p-3 h-100 justify-content-center">
+                    <p class="stat-value" id="statDescobertas">-</p>
+                    <p class="stat-label mb-0"><i class="bi bi-camera-fill"></i> Interações</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="card card-stat bg-info text-white text-center p-3 h-100 justify-content-center">
+                    <p class="stat-value" id="statMissoes">-</p>
+                    <p class="stat-label mb-0"><i class="bi bi-trophy-fill"></i> Missões Feitas</p>
+                </div>
+            </div>
         </div>
+
+        <!-- GERENCIAMENTO DE USUÁRIOS (ANTIGO) -->
+        <h4 class="fw-bold mb-3">👥 Gerenciamento de Usuários</h4>
+        <p class="text-muted small mb-3">Redefina senhas esquecidas de qualquer membro do Bando.</p>
 
         <div id="listaUsuarios" class="d-flex flex-column gap-3">
             <div class="text-center text-muted">Carregando usuários...</div>
@@ -84,6 +137,22 @@
         const meuId = localStorage.getItem('bando_id');
         if (!meuId) { window.location.href = 'login.html'; }
 
+        // --- NOVA FUNÇÃO: CARREGAR O DASHBOARD ---
+        function carregarResumo() {
+            fetch('api/admin_resumo.php?admin_id=' + meuId)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        document.getElementById('statUsuarios').innerText = data.dados.usuarios;
+                        document.getElementById('statAdesivos').innerText = data.dados.adesivos;
+                        document.getElementById('statDescobertas').innerText = data.dados.descobertas;
+                        document.getElementById('statMissoes').innerText = data.dados.missoes;
+                    }
+                })
+                .catch(e => console.error("Erro ao carregar resumo."));
+        }
+
+        // --- FUNÇÕES ANTIGAS MANTIDAS INTACTAS ---
         function carregarUsuarios() {
             fetch('api/admin_usuarios.php?admin_id=' + meuId)
                 .then(res => res.json())
@@ -144,6 +213,8 @@
                 .finally(() => { btn.innerHTML = 'Atualizar Senha'; btn.disabled = false; });
         }
 
+        // Inicia carregando o Resumo e a Lista ao mesmo tempo
+        carregarResumo();
         carregarUsuarios();
     </script>
 </body>
