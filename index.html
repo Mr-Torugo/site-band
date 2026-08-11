@@ -83,21 +83,99 @@
         .registro-opcao:hover {
             border-color: #0d6efd;
         }
+
+        @keyframes pulse-gold {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
+        }
+
+        .badge-tesouro {
+            background-color: #dc3545;
+            color: white;
+            animation: pulse-gold 2s infinite;
+            border: 2px solid #ffc107;
+            font-weight: bold;
+        }
+
+        /* =========================================
+           ANIMAÇÕES DO PINO DE EVENTO NO MAPA (TAMANHO TRAVADO)
+           ========================================= */
+        .pin-tesouro-container {
+            position: relative;
+            width: 55px;
+            height: 65px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .pin-tesouro-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 45px;
+            height: 45px;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 193, 7, 0.6);
+            border-radius: 50%;
+            animation: pin-pulse 1.5s infinite;
+            z-index: -1;
+        }
+
+        .pin-tesouro-img {
+            width: 55px !important;
+            height: 65px !important;
+            object-fit: contain;
+            animation: pin-bounce 0.8s infinite alternate;
+            filter: drop-shadow(0px 6px 5px rgba(0, 0, 0, 0.6));
+        }
+
+        @keyframes pin-pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.6);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pin-bounce {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .custom-div-icon {
+            background: transparent;
+            border: none;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Menu Superior Atualizado -->
     <div
         style="position: fixed; top: 15px; right: 15px; z-index: 1000; background: white; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
         <small class="fw-bold">👤 <span id="nomeLogado"></span> <span id="badgeAdmin"
                 class="badge bg-danger ms-1 d-none">ADMIN</span></small>
-
-        <!-- BOTÃO DO PAINEL ADMIN (Inicia escondido) -->
         <a href="admin.html" id="btnMenuAdmin" class="btn btn-sm btn-dark ms-2 fw-bold text-white d-none"
             style="padding: 2px 8px;">⚙️ Admin</a>
-
         <button onclick="abrirMissao()" class="btn btn-sm btn-success ms-2 fw-bold text-white"
             style="padding: 2px 8px;">🎯 Missão</button>
         <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white" style="padding: 2px 8px;">📡 Radar</a>
@@ -107,23 +185,18 @@
     </div>
 
     <div id="map"></div>
-
     <button class="btn btn-primary btn-flutuante" data-bs-toggle="modal" data-bs-target="#modalUpload"><i
             class="bi bi-plus-lg"></i></button>
-
     <button class="btn btn-dark btn-flutuante" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasFiltros" style="right: auto; left: 30px;">
-        <i class="bi bi-funnel-fill"></i>
-    </button>
+        data-bs-target="#offcanvasFiltros" style="right: auto; left: 30px;"><i class="bi bi-funnel-fill"></i></button>
 
-    <!-- Menu Lateral de Filtros (Offcanvas) -->
+    <!-- Menu Lateral de Filtros -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltros" style="width: 320px;">
         <div class="offcanvas-header bg-dark text-white">
-            <h5 class="offcanvas-title"><i class="bi bi-funnel-fill"></i> Filtros do Mapa</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            <h5 class="offcanvas-title"><i class="bi bi-funnel-fill"></i> Filtros do Mapa</h5><button type="button"
+                class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
-            <p class="text-muted small mb-4">Escolha o que você quer ver no mapa neste momento.</p>
             <div class="mb-4"><label class="form-label fw-bold">Status da Descoberta</label><select
                     class="form-select border-dark" id="filtroStatus" onchange="aplicarFiltros()">
                     <option value="todos">Mostrar Todos</option>
@@ -148,6 +221,7 @@
                     <option value="Comum">Comum</option>
                     <option value="Raro">Raro</option>
                     <option value="Lendário">Lendário</option>
+                    <option value="Tesouro">🌟 Apenas Eventos (Tesouro)</option>
                 </select></div>
             <button class="btn btn-outline-danger w-100 mt-2"
                 onclick="document.getElementById('filtroStatus').value='todos'; document.getElementById('filtroCategoria').value='todas'; document.getElementById('filtroRaridade').value='todas'; aplicarFiltros();"
@@ -190,7 +264,7 @@
         </div>
     </div>
 
-    <!-- MODAL 1: Upload -->
+    <!-- MODAL 1: Upload (COM CAIXA SECRETA DO ADMIN) -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -223,6 +297,16 @@
                                 <option value="Estados">Estados</option>
                                 <option value="Internacionais">Internacionais</option>
                             </select></div>
+
+                        <div id="boxEventoAdmin" class="mb-3 d-none p-2 border border-warning rounded"
+                            style="background-color: #fff3cd;">
+                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                    id="checkEvento"><label class="form-check-label fw-bold text-warning-emphasis"
+                                    for="checkEvento">🌟 Marcar como Evento (Tesouro - 500 XP)</label></div><small
+                                class="text-muted" style="font-size: 0.75rem;">Isso ignora o GPS e cria um adesivo
+                                dourado pulsante no mapa!</small>
+                        </div>
+
                         <div class="mb-3 mt-3 box-destaque"><label class="form-label fw-bold">Onde o adesivo foi
                                 colado?</label>
                             <div class="form-check mb-2"><input class="form-check-input" type="radio" name="modoLocal"
@@ -345,6 +429,7 @@
                                     <option value="Comum">Comum</option>
                                     <option value="Raro">Raro</option>
                                     <option value="Lendário">Lendário</option>
+                                    <option value="Tesouro">Tesouro (Evento)</option>
                                 </select></div>
                         </div>
                     </form>
@@ -366,11 +451,23 @@
         if (!meuId) { window.location.href = 'login.html'; } else { document.getElementById('nomeLogado').innerText = meuApelido; }
         function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
 
-        // --- SISTEMA DE MISSÕES ---
         function abrirMissao() { new bootstrap.Modal(document.getElementById('modalMissao')).show(); document.getElementById('missaoLoading').classList.remove('d-none'); document.getElementById('missaoConteudo').classList.add('d-none'); fetch('api/missao.php?usuario_id=' + meuId).then(r => r.json()).then(data => { if (data.sucesso) { document.getElementById('missaoLoading').classList.add('d-none'); document.getElementById('missaoConteudo').classList.remove('d-none'); document.getElementById('missaoTitulo').innerText = data.missao.titulo; document.getElementById('missaoDesc').innerText = data.missao.desc; document.getElementById('missaoXP').innerText = '+ ' + data.missao.xp + ' XP'; document.getElementById('missaoPrazo').innerText = data.prazo; const pct = (data.progresso / data.missao.meta) * 100; document.getElementById('missaoBarra').style.width = pct + '%'; document.getElementById('missaoStatus').innerText = data.progresso + '/' + data.missao.meta; const btnResgatar = document.getElementById('btnResgatarMissao'); const btnCompleta = document.getElementById('btnMissaoCompleta'); btnResgatar.classList.add('d-none'); btnCompleta.classList.add('d-none'); if (data.ja_resgatou) { btnCompleta.classList.remove('d-none'); } else if (data.concluida) { btnResgatar.classList.remove('d-none'); } } }); }
         function resgatarMissao() { const formData = new FormData(); formData.append('usuario_id', meuId); formData.append('acao', 'resgatar'); fetch('api/missao.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) { alert(data.mensagem); abrirMissao(); } else { alert('Erro: ' + data.erro); } }); }
 
+        // =========================================
+        // ÍCONES DO MAPA (NORMAL E TESOURO ATUALIZADO COM IMAGEM FIXA)
+        // =========================================
         const iconeBando = L.icon({ iconUrl: 'pin-bando.png', iconSize: [45, 55], iconAnchor: [22, 55], popupAnchor: [0, -55] });
+
+        // Ícone usando object-fit e tamanhos travados no CSS para não estourar a tela
+        const iconeTesouro = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="pin-tesouro-container"><div class="pin-tesouro-glow"></div><img src="pin-tesouro.png" class="pin-tesouro-img" alt="Tesouro!"></div>`,
+            iconSize: [55, 65], // Reduzido para ficar próximo ao pino normal
+            iconAnchor: [27, 65], // Âncora corrigida para a ponta ficar no lugar certo
+            popupAnchor: [0, -60]
+        });
+
         function toggleFotoReq() { const tipo = document.querySelector('input[name="tipoRegistro"]:checked').value; const boxFoto = document.getElementById('boxFotoDesc'); if (tipo === 'avistado') { boxFoto.style.display = 'none'; } else { boxFoto.style.display = 'block'; } }
 
         const map = L.map('map').setView([-23.5505, -46.6333], 2);
@@ -390,8 +487,30 @@
         let latManual = null; let lngManual = null;
         document.getElementById('btnBuscarEnd').addEventListener('click', function () { const endereco = document.getElementById('inputEndereco').value; const status = document.getElementById('statusBusca'); if (!endereco) return; fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}`).then(res => res.json()).then(data => { if (data.length > 0) { latManual = data[0].lat; lngManual = data[0].lon; status.innerHTML = `✅ Encontrado: ${data[0].display_name}`; status.style.color = "green"; } else { status.innerText = "❌ Local não encontrado."; } }); });
 
-        document.getElementById('btnSalvar').addEventListener('click', function () { const nomeLocal = document.getElementById('nomeLocal').value; const categoria = document.getElementById('categoriaAdesivo').value; if (!nomeLocal || !arquivoSelecionado) { alert("Preencha o nome e foto."); return; } const modoSelecionado = document.querySelector('input[name="modoLocal"]:checked').value; const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Salvando...'; btn.disabled = true; if (modoSelecionado === 'manual' && latManual) { enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); } else if (modoSelecionado === 'mapa' && latMapa) { enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); } else { navigator.geolocation.getCurrentPosition(pos => { enviarParaServidor(pos.coords.latitude, pos.coords.longitude, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); } });
-        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, categoria, btn, textoOriginal) { const formData = new FormData(); formData.append('foto', arquivoFoto); formData.append('nomeLocal', nomeLocal); formData.append('lat', lat); formData.append('lng', lng); formData.append('criador_id', meuId); formData.append('categoria', categoria); fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; }); }
+        document.getElementById('btnSalvar').addEventListener('click', function () {
+            const nomeLocal = document.getElementById('nomeLocal').value;
+            const categoria = document.getElementById('categoriaAdesivo').value;
+            if (!nomeLocal || !arquivoSelecionado) { alert("Preencha o nome e foto."); return; }
+
+            const modoSelecionado = document.querySelector('input[name="modoLocal"]:checked').value;
+            const btn = this; const textoOriginal = btn.innerHTML; btn.innerHTML = 'Salvando...'; btn.disabled = true;
+
+            if (modoSelecionado === 'manual' && latManual) { enviarParaServidor(latManual, lngManual, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }
+            else if (modoSelecionado === 'mapa' && latMapa) { enviarParaServidor(latMapa, lngMapa, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }
+            else { navigator.geolocation.getCurrentPosition(pos => { enviarParaServidor(pos.coords.latitude, pos.coords.longitude, arquivoSelecionado, nomeLocal, categoria, btn, textoOriginal); }, () => { alert('Erro no GPS.'); btn.innerHTML = textoOriginal; btn.disabled = false; }, { enableHighAccuracy: true }); }
+        });
+
+        function enviarParaServidor(lat, lng, arquivoFoto, nomeLocal, categoria, btn, textoOriginal) {
+            const formData = new FormData();
+            formData.append('foto', arquivoFoto); formData.append('nomeLocal', nomeLocal);
+            formData.append('lat', lat); formData.append('lng', lng);
+            formData.append('criador_id', meuId); formData.append('categoria', categoria);
+
+            const checkEvento = document.getElementById('checkEvento');
+            formData.append('is_evento', (checkEvento && checkEvento.checked) ? 'true' : 'false');
+
+            fetch('api/salvar.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) location.reload(); else alert('Erro: ' + data.erro); }).finally(() => { btn.innerHTML = textoOriginal; btn.disabled = false; });
+        }
 
         let todosAdesivos = []; let usuarioAdmin = false; const marcadoresCluster = L.markerClusterGroup(); map.addLayer(marcadoresCluster);
         function aplicarFiltros() { renderizarMapa(); }
@@ -399,10 +518,10 @@
         function carregarAdesivos() {
             fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
                 if (data.sucesso) {
-                    // SE FOR ADMIN, EXIBE O BOTÃO E A BADGE!
                     if (data.is_admin) {
                         document.getElementById('badgeAdmin').classList.remove('d-none');
                         document.getElementById('btnMenuAdmin').classList.remove('d-none');
+                        document.getElementById('boxEventoAdmin').classList.remove('d-none');
                         usuarioAdmin = true;
                     }
                     todosAdesivos = data.dados; renderizarMapa();
@@ -424,7 +543,10 @@
 
                 if (fStatus === 'nao_encontrado' && meuNivel > 0) return; if (fStatus === 'conquistado' && meuNivel !== 3) return; if (fCategoria !== 'todas' && adesivo.categoria !== fCategoria) return; if (fRaridade !== 'todas' && adesivo.raridade !== fRaridade) return;
 
-                const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeBando });
+                // TROCA O ÍCONE SE FOR TESOURO
+                let iconeAtual = (adesivo.raridade === 'Tesouro') ? iconeTesouro : iconeBando;
+                const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeAtual });
+
                 let botaoAcaoHtml = '';
                 if (adesivo.criador_id != meuId) {
                     if (meuNivel === 3) botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`; else if (meuNivel === 2) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`; else if (meuNivel === 1) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`; else botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
@@ -433,7 +555,8 @@
                 let boxAdminHtml = '';
                 if (adesivo.criador_id == meuId || usuarioAdmin) { boxAdminHtml = `<div class="d-flex gap-2 mt-2"><button onclick="abrirModalEditar(${adesivo.id}, '${adesivo.nome_local.replace(/'/g, "\\'")}', '${adesivo.categoria}', '${adesivo.raridade}')" class="btn btn-outline-info btn-sm flex-fill"><i class="bi bi-pencil"></i></button><button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm flex-fill"><i class="bi bi-trash"></i></button></div>`; }
 
-                let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
+                let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : (adesivo.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
+
                 const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">${adesivo.codigo}</span> <span class="badge bg-info text-dark mb-1">${adesivo.categoria || 'Urbano'}</span> <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
                 marker.bindPopup(popupContent); marcadoresCluster.addLayer(marker);
             });
