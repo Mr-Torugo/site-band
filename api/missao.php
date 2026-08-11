@@ -65,7 +65,7 @@ try {
     }
     // MISSÃO 4: Caçador de Lendas 
     elseif ($tipo_missao === 4) {
-        $missao = ['titulo' => 'Caçador de Lendas', 'desc' => 'Visite e registre (qualquer nível) 1 adesivo de raridade Lendário.', 'meta' => 1, 'xp' => 300];
+        $missao = ['titulo' => 'Caçador de Lendas', 'desc' => 'Visite e registre (qualquer nível) 1 adesivo de raridade Lendário.', 'meta' => 1, 'xp' => 2000];
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM descobertas d JOIN adesivos a ON d.adesivo_id = a.id WHERE d.descobridor_id = ? AND a.raridade = 'Lendário' AND d.data_descoberta >= ? AND d.data_descoberta <= ?");
         $stmt->execute([$usuario_id, $inicio_semana, $fim_semana]);
         $progresso_atual = (int)$stmt->fetchColumn();

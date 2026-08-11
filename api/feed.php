@@ -13,7 +13,8 @@ try {
             a.nome_local AS local,
             a.raridade AS raridade,
             '' AS dono_adesivo,
-            a.foto_original AS foto_adesivo,
+            a.foto_original AS foto_adesivo, -- Mantém para navegadores com cache antigo
+            a.foto_original AS foto_registro, -- A foto nova da ação
             'colou' AS tipo_registro
         FROM adesivos a
         JOIN usuarios u ON a.criador_id = u.id
@@ -27,7 +28,8 @@ try {
             a.nome_local AS local,
             a.raridade AS raridade,
             criador.apelido AS dono_adesivo,
-            a.foto_original AS foto_adesivo,
+            a.foto_original AS foto_adesivo, -- Mantém para navegadores com cache antigo
+            d.foto_selfie AS foto_registro, -- A MÁGICA: A foto exata do momento (selfie)
             d.tipo_registro AS tipo_registro
         FROM descobertas d
         JOIN usuarios u ON d.descobridor_id = u.id

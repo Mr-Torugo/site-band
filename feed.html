@@ -109,7 +109,9 @@
                         const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
                         let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : 'bg-secondary');
-                        const imagemHtml = item.foto_adesivo ? `<img src="${item.foto_adesivo}" class="feed-img" alt="Foto do local">` : '';
+
+                        // AGORA ELE LÊ A FOTO DO REGISTRO EXATO DA AÇÃO!
+                        const imagemHtml = item.foto_registro ? `<img src="${item.foto_registro}" class="feed-img" alt="Foto da ação">` : '';
 
                         if (item.tipo === 'colou') {
                             html += `
