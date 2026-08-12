@@ -1,34 +1,36 @@
 <?php
 header('Content-Type: application/json');
-
-require_once 'conexao.php';
+require_once '../api/conexao.php';
 
 try {
-
-    $dados = json_decode(file_get_contents('php://input'), true);
-    $apelido = trim($dados['apelido'] ?? '');
-    $senha = $dados['senha'] ?? '';
+    $apelido = trim($_POST['apelido'] ?? '');
+    $senha = $_POST['senha'] ?? '';
 
     if (empty($apelido) || empty($senha)) {
         throw new Exception("Preencha todos os campos.");
     }
 
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE apelido = ?");
-    $stmt->execute([$apelido]);
-    if ($stmt->fetch()) {
-        throw new Exception("Esse apelido já está em uso por outro membro do Bando!");
+    $stmtCheck = $pdo->prepare("SELECT id FROM usuarios WHERE apelido = ?");
+    $stmtCheck->execute([$apelido]);
+    if ($stmtCheck->fetch()) {
+        throw new Exception("Este apelido já está em uso. Escolha outro!");
     }
 
-    $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO usuarios (apelido, senha_hash) VALUES (?, ?)");
-    $stmt->execute([$apelido, $senha_hash]);
-    
-    $novo_id = $pdo->lastInsertId();
+    // Criptografa a senha
+    $senhaHash_criptografada = password_hash($senha, PASSWORD_DEFAULT);
 
-    echo json_encode(['sucesso' => true, 'id' => $novo_id, 'apelido' => $apelido]);
+    // MUDANÇA AQUI: Usando senha_hash em vez de senha
+    $stmt = $pdo->prepare("INSERT INTO usuarios (apelido, senha_hash, is_admin) VALUES (?, ?, 0)");
+    $stmt->execute([$apelido, $senhaHash_criptografada]);
+    
+    $novoId = $pdo->lastInsertId();
+
+    $_SESSION['usuario_id'] = $novoId;
+    $_SESSION['is_admin'] = 0;
+
+    echo json_encode(['sucesso' => true, 'id' => $novoId, 'apelido' => $apelido]);
 
 } catch (Exception $e) {
-    http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
 }
 ?>

@@ -213,6 +213,21 @@
                 .finally(() => { btn.innerHTML = 'Atualizar Senha'; btn.disabled = false; });
         }
 
+        function sairDoApp() {
+            // Chama o PHP para destruir a sessão no servidor
+            fetch('api/logout.php')
+                .then(res => res.json())
+                .then(() => {
+                    // Limpa o navegador e manda para a tela de login
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                })
+                .catch(() => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+        }
+
         // Inicia carregando o Resumo e a Lista ao mesmo tempo
         carregarResumo();
         carregarUsuarios();

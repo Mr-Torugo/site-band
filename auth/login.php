@@ -1,30 +1,36 @@
 <?php
 header('Content-Type: application/json');
-
-require_once 'conexao.php';
+require_once '../api/conexao.php';
 
 try {
-
-    $dados = json_decode(file_get_contents('php://input'), true);
-    $apelido = trim($dados['apelido'] ?? '');
-    $senha = $dados['senha'] ?? '';
+    $apelido = $_POST['apelido'] ?? '';
+    $senha = $_POST['senha'] ?? '';
 
     if (empty($apelido) || empty($senha)) {
         throw new Exception("Preencha todos os campos.");
     }
 
-    $stmt = $pdo->prepare("SELECT id, senha_hash FROM usuarios WHERE apelido = ?");
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE apelido = ?");
     $stmt->execute([$apelido]);
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($usuario && password_verify($senha, $usuario['senha_hash'])) {
-        echo json_encode(['sucesso' => true, 'id' => $usuario['id'], 'apelido' => $apelido]);
+    // MUDANÇA AQUI: Lendo $user['senha_hash'] do banco
+    if ($user && password_verify($senha, $user['senha_hash'])) {
+        
+        $_SESSION['usuario_id'] = $user['id'];
+        $_SESSION['is_admin'] = $user['is_admin'];
+        
+        echo json_encode([
+            'sucesso' => true, 
+            'id' => $user['id'], 
+            'apelido' => $user['apelido'],
+            'is_admin' => $user['is_admin']
+        ]);
     } else {
-        throw new Exception("Apelido ou senha incorretos.");
+        throw new Exception("Usuário ou senha incorretos.");
     }
 
 } catch (Exception $e) {
-    http_response_code(500);
     echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
 }
 ?>

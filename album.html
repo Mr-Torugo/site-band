@@ -145,6 +145,21 @@
             }
         }
 
+        function sairDoApp() {
+            // Chama o PHP para destruir a sessão no servidor
+            fetch('api/logout.php')
+                .then(res => res.json())
+                .then(() => {
+                    // Limpa o navegador e manda para a tela de login
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                })
+                .catch(() => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+        }
+
         function carregarAlbum() {
             // Agora apontando para a pasta api/
             fetch(`api/meu_album.php?usuario_id=${meuId}`)

@@ -529,6 +529,21 @@
             });
         }
 
+        function sairDoApp() {
+            // Chama o PHP para destruir a sessão no servidor
+            fetch('api/logout.php')
+                .then(res => res.json())
+                .then(() => {
+                    // Limpa o navegador e manda para a tela de login
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                })
+                .catch(() => {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+        }
+
         function renderizarMapa() {
             marcadoresCluster.clearLayers();
             const fStatus = document.getElementById('filtroStatus').value; const fCategoria = document.getElementById('filtroCategoria').value; const fRaridade = document.getElementById('filtroRaridade').value;
