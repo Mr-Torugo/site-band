@@ -1,1 +1,8 @@
 .vscode/settings.json
+# Ignora o banco de dados real
+database/banco.sqlite
+database/*.sqlite
+
+# Ignora as fotos reais enviadas pelos usuários
+uploads/*
+!uploads/.gitkeep
