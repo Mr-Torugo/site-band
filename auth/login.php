@@ -1,11 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
-$db_file = __DIR__ . '/../api/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $dados = json_decode(file_get_contents('php://input'), true);
     $apelido = trim($dados['apelido'] ?? '');
