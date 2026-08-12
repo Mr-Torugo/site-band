@@ -1,11 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
-$db_file = 'banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Seus dados de teste
     $apelido = 'Vitor';

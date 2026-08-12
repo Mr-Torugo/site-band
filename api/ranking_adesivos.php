@@ -1,11 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Busca os adesivos e conta quantas descobertas cada um tem
     $sql = "SELECT 

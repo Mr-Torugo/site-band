@@ -1,9 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     
     try { $pdo->exec("CREATE TABLE IF NOT EXISTS curtidas (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER, tipo_acao TEXT, acao_id INTEGER, data_curtida DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(usuario_id, tipo_acao, acao_id))"); } catch (Exception $e) {}
     try { $pdo->exec("CREATE TABLE IF NOT EXISTS feed_comentarios (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER, tipo_acao TEXT, acao_id INTEGER, comentario TEXT, data_comentario DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (Exception $e) {}

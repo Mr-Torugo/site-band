@@ -1,9 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN is_admin INTEGER DEFAULT 0"); } catch (Exception $e) {}
     
     $usuario_id = $_GET['usuario_id'] ?? 0;

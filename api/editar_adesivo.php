@@ -1,10 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    
     $id = $_POST['id'] ?? '';
     $usuario_id = $_POST['usuario_id'] ?? '';
     $nome_local = $_POST['nomeLocal'] ?? '';

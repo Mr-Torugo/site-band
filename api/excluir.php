@@ -1,10 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
-try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    
+try { 
     $data = json_decode(file_get_contents("php://input"), true);
     $id = $data['id'] ?? '';
     $usuario_id = $data['usuario_id'] ?? '';

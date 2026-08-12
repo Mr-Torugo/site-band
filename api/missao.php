@@ -2,9 +2,9 @@
 header('Content-Type: application/json');
 $db_file = __DIR__ . '/banco.sqlite';
 
+require_once 'conexao.php';
+
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Cria a tabela de histórico de missões caso não exista
     $pdo->exec("CREATE TABLE IF NOT EXISTS missoes_concluidas (

@@ -1,10 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
 

@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
+
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     try { $pdo->exec("ALTER TABLE descobertas ADD COLUMN tipo_registro TEXT DEFAULT 'conquistado'"); } catch (Exception $e) {}
     try { $pdo->exec("ALTER TABLE descobertas ADD COLUMN is_latest INTEGER DEFAULT 1"); } catch (Exception $e) {}
     try { $pdo->exec("CREATE TABLE IF NOT EXISTS missoes_concluidas (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER, ano_semana TEXT, xp_ganho INTEGER, data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (Exception $e) {}

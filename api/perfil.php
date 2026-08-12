@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
+
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     try { $pdo->exec("CREATE TABLE IF NOT EXISTS missoes_concluidas (id INTEGER PRIMARY KEY AUTOINCREMENT, usuario_id INTEGER, ano_semana TEXT, xp_ganho INTEGER, data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP)"); } catch (Exception $e) {}
     $alvo_id = $_GET['id'] ?? 0; if (!$alvo_id) throw new Exception("Usuário não informado.");
     $sqlUser = "SELECT u.apelido, COALESCE((SELECT SUM(CASE 

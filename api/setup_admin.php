@@ -1,7 +1,7 @@
 <?php
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
+
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     // Cria a coluna is_admin silenciosamente caso não exista
     try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN is_admin INTEGER DEFAULT 0"); } catch (Exception $e) {}
     

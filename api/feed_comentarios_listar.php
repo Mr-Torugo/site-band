@@ -1,9 +1,8 @@
 <?php
 header('Content-Type: application/json');
-$db_file = __DIR__ . '/banco.sqlite';
+require_once 'conexao.php';
 
 try {
-    $pdo = new PDO("sqlite:" . $db_file);
     
     $tipo_acao = $_GET['tipo_acao'] ?? '';
     $acao_id = $_GET['acao_id'] ?? 0;
