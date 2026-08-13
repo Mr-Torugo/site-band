@@ -3,11 +3,10 @@ header('Content-Type: application/json');
 require_once 'conexao.php';
 
 try {
-    // Busca os adesivos e conta quantas vezes cada um foi descoberto
     $sql = "
         SELECT 
             a.id, 
-            a.codigo, 
+            COALESCE(a.codigo, a.id) AS codigo, 
             a.nome_local, 
             a.foto_original,
             COALESCE(u.apelido, 'Caçador Anônimo') AS quem_colou,
