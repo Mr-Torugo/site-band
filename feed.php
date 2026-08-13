@@ -349,7 +349,7 @@
                             }
 
                             const fotoParaExibir = item.foto_registro || item.foto_adesivo || item.foto;
-                            // Blindagem: Previne o erro "missing )" caso a URL da imagem tenha aspas simples
+                            // Blindagem contra aspas no nome da foto
                             const fotoSafe = fotoParaExibir ? fotoParaExibir.replace(/'/g, "\\'") : '';
                             const imagemHtml = fotoSafe ? `<img src="${fotoSafe}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoSafe}')">` : '';
 
@@ -369,7 +369,7 @@
                                 </button>
                             </div>`;
 
-                            // Verifica se é novo adesivo (colou)
+                            // 1. Verifica se é novo adesivo (colou)
                             if (tipoAcaoTratado === 'colou' || tipoAcaoTratado === 'novo_adesivo') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeLocal = item.local || item.nome_local;
@@ -388,7 +388,7 @@
                                     </div>
                                 </div>`;
                             } 
-                            // Verifica se é descoberta (achou)
+                            // 2. Verifica se é descoberta (achou)
                             else if (tipoAcaoTratado === 'achou' || tipoAcaoTratado === 'descoberta') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeLocal = item.local || item.nome_local;
@@ -412,7 +412,7 @@
                                     </div>
                                 </div>`;
                             }
-                            // Verifica se é Conquista
+                            // 3. Verifica se é Conquista
                             else if (tipoAcaoTratado === 'conquista') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeMedalha = item.local || item.nome_local;
@@ -441,7 +441,32 @@
                                     </div>
                                 </div>`;
                             }
-                        });
+                            // 4. Verifica se é Missão Concluída
+                            else if (tipoAcaoTratado === 'missao') {
+                                let quemAgiu = item.quem_agiu || item.nome_usuario;
+                                let nomeMissao = item.local || item.nome_local || 'Missão da Semana';
+                                let textoRecompensa = item.comentario || 'Completou a missão e ganhou XP!';
+                                
+                                html += `
+                                <div class="feed-item">
+                                    <div class="feed-icone bg-success text-white"><i class="bi bi-bullseye"></i></div>
+                                    <div class="feed-card border border-success border-2" style="background-color: #f8fff9;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">${dataFormatada}</small>
+                                            <span class="badge bg-success text-white me-1">🎯 Missão Concluída</span>
+                                        </div>
+                                        <div class="text-center my-3">
+                                            <div style="font-size: 4rem; line-height: 1;">🎯</div>
+                                            <h4 class="fw-bold text-success mt-2">${nomeMissao}</h4>
+                                            <p class="badge bg-warning text-dark fs-6 mt-1 mb-0">${textoRecompensa}</p>
+                                        </div>
+                                        <p class="mb-0 text-center"><b>${quemAgiu}</b> cumpriu o dever e garantiu a recompensa!</p>
+                                        ${htmlAcoes}
+                                    </div>
+                                </div>`;
+                            }
+                        }); // Fim do forEach
+                        
                         lista.innerHTML = html;
                     }
                 })

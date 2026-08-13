@@ -62,16 +62,35 @@ try {
         FROM usuario_medalhas um
         JOIN usuarios u ON um.usuario_id = u.id
 
+        UNION ALL
+
+        SELECT 
+            mc.id AS id_acao,
+            'missao' AS tipo_acao,
+            u.apelido AS nome_usuario,
+            'Missão da Semana' AS nome_local, 
+            '🎯' AS foto, 
+            NULL AS tipo_registro,
+            mc.data_conclusao AS data_acao, 
+            'Ganhou +' || mc.xp_ganho || ' XP!' AS comentario, /* <-- A CORREÇÃO FOI FEITA AQUI */
+            'Missão' AS categoria,
+            'Lendário' AS raridade, 
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'missao' AND acao_id = mc.id) AS total_curtidas,
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'missao' AND acao_id = mc.id AND usuario_id = :uid4) AS curtido_por_mim,
+            (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'missao' AND acao_id = mc.id) AS total_comentarios
+        FROM missoes_concluidas mc
+        JOIN usuarios u ON mc.usuario_id = u.id
+
         ORDER BY data_acao DESC
         LIMIT 50
     ";
 
     $stmt = $pdo->prepare($sql);
-    // Solução do Bug: Enviamos a variável 3 vezes separadas (uid1, uid2 e uid3)
     $stmt->execute([
         'uid1' => $usuario_id,
         'uid2' => $usuario_id,
-        'uid3' => $usuario_id
+        'uid3' => $usuario_id,
+        'uid4' => $usuario_id
     ]);
     
     $feed = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -82,7 +101,6 @@ try {
     ]);
 
 } catch (PDOException $e) {
-    // Tirei o status 500 para o Javascript não se assustar e poder imprimir o erro na sua tela!
     echo json_encode(['sucesso' => false, 'erro' => 'Erro do Banco: ' . $e->getMessage()]);
 }
 ?>
