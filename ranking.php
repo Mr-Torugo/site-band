@@ -155,9 +155,6 @@
             transition: transform 0.2s ease;
         }
 
-        .img-adesivo:hover {
-            transform: scale(1.02);
-        }
 
         .badge-codigo {
             position: absolute;
@@ -339,13 +336,10 @@
                     let html = '';
                     data.dados.forEach((adesivo, index) => {
                         let corMedalha = index === 0 ? 'bg-warning text-dark' : (index === 1 ? 'bg-light text-dark' : (index === 2 ? 'bg-dark text-white' : 'bg-secondary text-white'));
-                        
-                        // 👇 O título agora é um link clicável que direciona para o Mapa 👇
                         html += `
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="card card-figurinha">
                                 <div class="position-relative">
-                                    <span class="badge bg-primary badge-codigo">#${adesivo.codigo}</span>
                                     <span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span>
                                     <img src="${adesivo.foto_original}" class="img-adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')">
                                 </div>

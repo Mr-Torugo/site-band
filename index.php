@@ -613,7 +613,7 @@
                     default: 
                         badgeCategoria = `<span class="badge bg-light text-dark border mb-1">${catTratada}</span>`;
                 }
-                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">#${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
+                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
                 
                 marker.bindPopup(popupContent); 
                 marcadoresCluster.addLayer(marker);
