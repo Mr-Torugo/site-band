@@ -152,7 +152,7 @@
                     if (data.sucesso) {
                         localStorage.setItem('bando_id', data.id);
                         localStorage.setItem('bando_apelido', data.apelido);
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.php';
                     } else {
                         alert("Atenção: " + data.erro);
                         btn.innerHTML = 'Entrar no Mapa';
@@ -185,7 +185,7 @@
                     if (data.sucesso) {
                         localStorage.setItem('bando_id', data.id);
                         localStorage.setItem('bando_apelido', data.apelido);
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.php';
                     } else {
                         alert("Atenção: " + data.erro);
                         btn.innerHTML = 'Criar Conta e Entrar';

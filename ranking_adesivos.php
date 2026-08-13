@@ -135,82 +135,13 @@
 
 <body>
 
-    <!-- =========================================
-         TOPO MOBILE
-         ========================================= -->
-    <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-white fs-5">🔥 Hot Spots</h1>
-    </div>
-
-    <!-- =========================================
-         MENU INFERIOR MOBILE
-         ========================================= -->
-    <div class="mobile-bottom-nav d-flex d-md-none">
-        <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
-        </a>
-        <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
-        </a>
-        <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
-        </a>
-        <a href="album.html" class="nav-item-mobile">
-            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
-        </a>
-        <!-- Ranking ativo no menu "Mais" -->
-        <div class="nav-item-mobile dropdown active">
-            <a href="#" data-bs-toggle="dropdown" class="text-decoration-none d-flex flex-column align-items-center"
-                style="color: #0d6efd;">
-                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
-                <li><a class="dropdown-item fw-bold text-warning bg-light" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
-                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- =========================================
-         MENU SUPERIOR PC (Escondido no celular)
-         ========================================= -->
-    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
-            <div class="d-flex gap-3">
-                <a href="index.html" class="btn btn-outline-light">Mapa</a>
-                <a href="feed.html" class="btn btn-outline-light">📡 Radar</a>
-                <a href="album.html" class="btn btn-outline-light fw-bold">Meu Álbum</a>
-                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
-                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- =========================================
-         CONTEÚDO DA PÁGINA
-         ========================================= -->
-    <div class="container ranking-container mb-5">
-        <div class="text-center mb-4 mt-3">
-            <h2 class="fw-bold d-none d-md-block">Adesivos Mais Populares</h2>
-            <p class="text-muted">Quais locais receberam mais visitas da galera?</p>
-
-            <!-- Botão para alternar entre os dois rankings -->
-            <div class="btn-group mt-2" role="group">
-                <a href="ranking.html" class="btn btn-outline-primary fw-bold">Caçadores</a>
-                <a href="ranking_adesivos.html" class="btn btn-primary fw-bold active">Adesivos</a>
-            </div>
-        </div>
-
-        <div class="row g-4" id="gridRankingAdesivos">
-            <div class="text-center text-muted mt-5">Carregando locais...</div>
-        </div>
-    </div>
+    <?php 
+    // 1. Avisa para o menu que estamos na tela do Ranking de Adesivos
+    $menuAtivo = 'mais'; 
+    
+    // 2. Importa todo o código do menu
+    require './includes/navbar.php'; 
+    ?>
 
     <!-- =========================================
          MODAL DE IMAGEM AMPLIADA
@@ -234,7 +165,7 @@
 
     <script>
         if (!localStorage.getItem('bando_id')) {
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
         }
 
         // ===================================
@@ -250,11 +181,11 @@
                 .then(res => res.json())
                 .then(() => {
                     localStorage.clear();
-                    window.location.href = 'login.html';
+                    window.location.href = 'login.php';
                 })
                 .catch(() => {
                     localStorage.clear();
-                    window.location.href = 'login.html';
+                    window.location.href = 'login.php';
                 });
         }
 

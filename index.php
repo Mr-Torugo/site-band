@@ -235,75 +235,13 @@
 
 <body>
 
-    <!-- =========================================
-         TOPO MOBILE
-         ========================================= -->
-    <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-primary fs-4">Bandesivos</h1>
-        <div class="d-flex align-items-center gap-2">
-            <span id="badgeAdminMobile" class="badge bg-danger d-none">ADMIN</span>
-            <small class="fw-bold text-dark">👤 <span id="nomeLogadoMobile"></span></small>
-        </div>
-    </div>
-
-    <!-- =========================================
-         MENU INFERIOR MOBILE 
-         ========================================= -->
-    <div class="mobile-bottom-nav d-flex d-md-none">
-        <a href="index.html" class="nav-item-mobile active">
-            <i class="bi bi-map-fill fs-4 mb-1"></i> <span>Mapa</span>
-        </a>
-        <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1"></i> <span>Radar</span>
-        </a>
-        <a href="#" onclick="abrirMissao()" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1"></i> <span>Missão</span>
-        </a>
-        <a href="album.html" class="nav-item-mobile">
-            <i class="bi bi-journal-album fs-4 mb-1"></i> <span>Álbum</span>
-        </a>
-        <div class="nav-item-mobile dropdown">
-            <a href="#" data-bs-toggle="dropdown"
-                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
-                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
-                <li><a class="dropdown-item fw-bold text-warning bg-light" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Hall da Fama</a></li>
-                <li><a class="dropdown-item fw-bold text-danger d-none" href="admin.html" id="btnMenuAdminMobile"><i
-                            class="bi bi-shield-lock-fill me-2"></i> Admin</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
-                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- =========================================
-         MENU SUPERIOR PC (Flutuante Modernizado)
-         ========================================= -->
-    <div class="d-none d-md-flex align-items-center"
-        style="position: fixed; top: 15px; right: 15px; z-index: 1050; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-
-        <small class="fw-bold text-dark me-2 border-end pe-3">
-            👤 <span id="nomeLogado"></span> <span id="badgeAdmin" class="badge bg-danger ms-1 d-none">ADMIN</span>
-        </small>
-
-        <a href="admin.html" id="btnMenuAdmin"
-            class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
-        <button onclick="abrirMissao()" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i
-                class="bi bi-bullseye me-1"></i> Missão</button>
-        <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i
-                class="bi bi-broadcast me-1"></i> Radar</a>
-        <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i
-                class="bi bi-journal-album me-1"></i> Álbum</a>
-        <a href="ranking.html" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i
-                class="bi bi-trophy-fill me-1"></i> Ranking</a>
-        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i
-                class="bi bi-box-arrow-right fs-5"></i></button>
-    </div>
+    <?php 
+    // 1. Avisa para o menu que estamos na tela do Mapa
+    $menuAtivo = 'mapa'; 
+    
+    // 2. Importa todo o código do menu
+    require './includes/navbar.php'; 
+    ?>
 
     <div id="map"></div>
 
@@ -354,40 +292,6 @@
         </div>
     </div>
 
-    <!-- MODAL 6: Missão da Semana -->
-    <div class="modal fade" id="modalMissao" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-success" style="border-width: 3px;">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">🎯 Missão da Semana</h5><button type="button"
-                        class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body text-center py-4">
-                    <div id="missaoLoading" class="text-muted">Carregando missão...</div>
-                    <div id="missaoConteudo" class="d-none">
-                        <h4 id="missaoTitulo" class="fw-bold text-success mb-2"></h4>
-                        <p id="missaoDesc" class="text-muted mb-4"></p>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1"><small
-                                    class="fw-bold">Progresso</small><small id="missaoStatus"
-                                    class="fw-bold text-success">0/0</small></div>
-                            <div class="progress" style="height: 25px;">
-                                <div id="missaoBarra"
-                                    class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                                    role="progressbar" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                        <div class="bg-light p-3 rounded-3 mb-3 border"><span class="fw-bold">Recompensa:</span> <span
-                                class="badge bg-warning text-dark fs-6" id="missaoXP"></span></div><small
-                            class="text-muted d-block mb-3">Encerra no domingo: <b id="missaoPrazo"></b></small><button
-                            id="btnResgatarMissao" class="btn btn-success fw-bold w-100 py-2 d-none"
-                            onclick="resgatarMissao()">🎁 Resgatar Recompensa</button><button id="btnMissaoCompleta"
-                            class="btn btn-secondary fw-bold w-100 py-2 d-none" disabled>✅ Já Resgatada</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- MODAL 1: Upload (COM CAIXA SECRETA DO ADMIN) -->
     <div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
@@ -575,15 +479,12 @@
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
         if (!meuId) {
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
         } else {
             document.getElementById('nomeLogado').innerText = meuApelido;
             if (document.getElementById('nomeLogadoMobile')) document.getElementById('nomeLogadoMobile').innerText = meuApelido;
         }
-        function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
-
-        function abrirMissao() { new bootstrap.Modal(document.getElementById('modalMissao')).show(); document.getElementById('missaoLoading').classList.remove('d-none'); document.getElementById('missaoConteudo').classList.add('d-none'); fetch('api/missao.php?usuario_id=' + meuId).then(r => r.json()).then(data => { if (data.sucesso) { document.getElementById('missaoLoading').classList.add('d-none'); document.getElementById('missaoConteudo').classList.remove('d-none'); document.getElementById('missaoTitulo').innerText = data.missao.titulo; document.getElementById('missaoDesc').innerText = data.missao.desc; document.getElementById('missaoXP').innerText = '+ ' + data.missao.xp + ' XP'; document.getElementById('missaoPrazo').innerText = data.prazo; const pct = (data.progresso / data.missao.meta) * 100; document.getElementById('missaoBarra').style.width = pct + '%'; document.getElementById('missaoStatus').innerText = data.progresso + '/' + data.missao.meta; const btnResgatar = document.getElementById('btnResgatarMissao'); const btnCompleta = document.getElementById('btnMissaoCompleta'); btnResgatar.classList.add('d-none'); btnCompleta.classList.add('d-none'); if (data.ja_resgatou) { btnCompleta.classList.remove('d-none'); } else if (data.concluida) { btnResgatar.classList.remove('d-none'); } } }); }
-        function resgatarMissao() { const formData = new FormData(); formData.append('usuario_id', meuId); formData.append('acao', 'resgatar'); fetch('api/missao.php', { method: 'POST', body: formData }).then(r => r.json()).then(data => { if (data.sucesso) { alert(data.mensagem); abrirMissao(); } else { alert('Erro: ' + data.erro); } }); }
+        function sairDoApp() { localStorage.clear(); window.location.href = 'login.php'; }
 
         const iconeBando = L.icon({ iconUrl: 'pin-bando.png', iconSize: [45, 55], iconAnchor: [22, 55], popupAnchor: [0, -55] });
         const iconeTesouro = L.divIcon({

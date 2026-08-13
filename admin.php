@@ -103,66 +103,13 @@
 </head>
 
 <body>
-    <!-- TOPO MOBILE -->
-    <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-primary fs-4">Bandesivos</h1>
-        <div class="d-flex align-items-center gap-2">
-            <span id="badgeAdminMobile" class="badge bg-danger d-none">ADMIN</span>
-            <small class="fw-bold text-dark">👤 <span id="nomeLogadoMobile"></span></small>
-        </div>
-    </div>
-
-    <!-- MENU INFERIOR MOBILE -->
-    <div class="mobile-bottom-nav d-flex d-md-none">
-        <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-map-fill fs-4 mb-1"></i> <span>Mapa</span>
-        </a>
-        <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1"></i> <span>Radar</span>
-        </a>
-        <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1"></i> <span>Missão</span>
-        </a>
-        <a href="album.html" class="nav-item-mobile">
-            <i class="bi bi-journal-album fs-4 mb-1"></i> <span>Álbum</span>
-        </a>
-        <div class="nav-item-mobile dropdown active">
-            <a href="#" data-bs-toggle="dropdown"
-                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
-                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
-                <li><a class="dropdown-item fw-bold text-warning" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Hall da Fama</a></li>
-                <li><a class="dropdown-item fw-bold text-danger bg-light" href="admin.html" id="btnMenuAdminMobile"><i
-                            class="bi bi-shield-lock-fill me-2"></i> Admin</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
-                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- MENU SUPERIOR PC -->
-    <div class="d-none d-md-flex align-items-center"
-        style="position: fixed; top: 15px; right: 15px; z-index: 1050; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-        <small class="fw-bold text-dark me-2 border-end pe-3">👤 <span id="nomeLogado"></span> <span id="badgeAdmin"
-                class="badge bg-danger ms-1 d-none">ADMIN</span></small>
-        <a href="admin.html" id="btnMenuAdmin"
-            class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
-        <a href="index.html" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i
-                class="bi bi-bullseye me-1"></i> Missão</a>
-        <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i
-                class="bi bi-broadcast me-1"></i> Radar</a>
-        <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i
-                class="bi bi-journal-album me-1"></i> Álbum</a>
-        <a href="ranking.html" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i
-                class="bi bi-trophy-fill me-1"></i> Ranking</a>
-        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i
-                class="bi bi-box-arrow-right fs-5"></i></button>
-    </div>
+    <?php 
+    // 1. Avisa para o menu que estamos na tela do Radar
+    $menuAtivo = 'mais'; 
+    
+    // 2. Importa todo o código do menu
+    require './includes/navbar.php'; 
+    ?>
 
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="container admin-container mb-5">
