@@ -1,89 +1,79 @@
-<h1 align="center">🗺️ Mapa dos Bandesivos </h1>
+# 🗺️ Mapa dos Bandesivos (Bando Map)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
-  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
-  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap">
-  <img src="https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA">
-</p>
+![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap_5-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
+![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet?style=for-the-badge)
 
-## 📌 Sobre o Projeto
-O **Mapa dos Bandesivos** é um Progressive Web App (PWA) interativo de caça ao tesouro focado em exploração urbana e gamificação. Os usuários podem espalhar adesivos pelo mapa global e registrar descobertas ao encontrar os adesivos deixados por outros caçadores. 
-
-O sistema utiliza geolocalização e cálculos matemáticos (Fórmula de Haversine) para gerar raridades dinâmicas e distribuir pontos de experiência (XP), criando uma competição real entre os usuários.
+O **Mapa dos Bandesivos** é uma aplicação web gamificada (PWA) desenvolvida para uma comunidade de caçadores de adesivos (Sticker Art). O sistema permite que os usuários registrem novos adesivos colados pelas ruas, encontrem adesivos de outros membros, ganhem experiência (XP), desbloqueiem conquistas e subam no ranking geral do "Bando".
 
 ## 🚀 Funcionalidades Principais
 
-*   **Geolocalização Interativa (Leaflet):** Mapa dinâmico com suporte a GPS em tempo real, seleção manual via clique ou busca por endereço (API Nominatim).
-*   **Agrupamento Inteligente (Clustering):** Otimização de performance visual utilizando `Leaflet.markercluster` para agrupar marcadores em regiões com alta densidade de adesivos.
-*   **Gacha e Geofencing (Raridades Dinâmicas):** O backend calcula a distância do local do adesivo até um ponto central. Adesivos colados a mais de 100km tornam-se "Raros", e a distâncias extremas tornam-se "Lendários", rendendo mais XP aos descobridores.
-*   **Sistema de Gamificação e Conquistas:** Ranking automático baseado em XP, listando os jogadores com base no peso de suas descobertas e concedendo emblemas automáticos (Badges) por metas alcançadas.
-*   **Mural de Comentários e Selfies:** Cada ponto no mapa atua como um micro-fórum geolocalizado, onde os usuários podem enviar selfies e deixar mensagens ao registrar uma descoberta.
-*   **Álbum de Colecionador:** Galeria pessoal segmentada por "Adesivos Encontrados" e "Adesivos Colados", refletindo o histórico e o impacto do jogador no mapa.
-*   **Progressive Web App (PWA):** Instalação nativa em dispositivos móveis Android/iOS com suporte a cache local via Service Workers, oferecendo navegação fluida em tela cheia.
+- **📍 Mapa Interativo:** Visualização de adesivos geolocalizados usando Leaflet.js com sistema de clusterização inteligente. Filtros por categoria, raridade e status de descoberta.
+- **🎮 Gamificação e Patentes:** Sistema de XP dinâmico onde os usuários sobem de nível (de _Novato_ até _Entidade Suprema_) conforme interagem com o mapa.
+- **🏆 Motor de Conquistas e Missões:** Avaliação automática do progresso do usuário para destravar medalhas e missões semanais.
+- **📡 Radar (Feed Social):** Um feed em tempo real com as atividades da comunidade (quem colou, quem achou, conquistas alcançadas). Permite curtidas, comentários e _Deep Linking_ (clique no adesivo do feed e o mapa "viaja" até ele).
+- **📸 Álbum de Coleção:** Uma galeria pessoal onde o usuário visualiza os adesivos que colou e os que conquistou (com fotos e selfies).
+- **🏅 Hall da Fama (Ranking):** Listagem dos melhores caçadores da comunidade e dos adesivos mais visitados do mapa.
+- **👑 Painel Administrativo:** Criação de adesivos de "Evento/Tesouro", gerenciamento de usuários e moderação de conteúdo.
+- **📱 PWA Ready:** Pode ser instalado direto na tela inicial do celular como um aplicativo nativo.
 
 ## 🛠️ Tecnologias Utilizadas
 
-**Front-end:**
-*   HTML5 / CSS3 / JavaScript (Vanilla)
-*   [Bootstrap 5](https://getbootstrap.com/) (UI, Grid e Modais)
-*   [Leaflet.js](https://leafletjs.com/) (Renderização de Mapas)
-*   Service Workers & Web App Manifest (PWA)
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript, Bootstrap 5, Bootstrap Icons.
+- **Mapas:** Leaflet.js & Leaflet.markercluster.
+- **Backend:** PHP (API RESTful e processamento de lógica).
+- **Banco de Dados:** SQLite (leve, sem necessidade de configuração complexa de servidor).
 
-**Back-end & Banco de Dados:**
-*   PHP 8.x (API Restful para comunicação com o front-end)
-*   SQLite3 (Banco de dados relacional leve e integrado)
-*   Upload e manipulação de imagens nativo
+## ⚙️ Como rodar o projeto localmente
 
-## 📁 Estrutura de Pastas
+### Pré-requisitos
 
-```text
-site-bando/
-├── api/
-│   ├── banco.sqlite         # Banco de dados gerado automaticamente
-│   ├── descobrir.php        # Lógica de encontrar um adesivo
-│   ├── excluir.php          # Lógica de remoção com trava de segurança
-│   ├── listar.php           # Busca de adesivos para o mapa
-│   ├── meu_album.php        # Consulta de histórico do usuário
-│   ├── mural.php            # Feed de comentários por adesivo
-│   ├── ranking_adesivos.php # Classificação de "Hot Spots"
-│   ├── ranking.php          # Classificação de jogadores e XP
-│   └── salvar.php           # Upload de imagem, cálculo Haversine e Insert
-├── auth/
-│   ├── login.php            # Validação de credenciais
-│   └── registrar.php        # Criação de contas
-├── uploads/                 # Diretório de armazenamento local das imagens
-├── index.html               # Mapa principal (Core do App)
-├── login.html               # Tela de Autenticação
-├── album.html               # Coleção do usuário (Tabs dinâmicas)
-├── ranking.html             # Tabela de Líderes
-├── ranking_adesivos.html    # Locais mais populares
-├── manifest.json            # Configurações do App (PWA)
-└── sw.js                    # Service Worker (Cache management)
+Você precisará de um servidor web com suporte a PHP instalado na sua máquina (recomendamos o [XAMPP](https://www.apachefriends.org/pt_br/index.html) ou [Laragon](https://laragon.org/)).
 
-```
+### Passo a passo
 
-## ⚙️ Como Executar o Projeto Localmente
+1. **Clone o repositório:**
 
-1. Certifique-se de ter um servidor local PHP configurado (como [XAMPP](https://www.apachefriends.org/pt_br/index.html) ou Laragon).
+   ```bash
+   git clone [https://github.com/Mr-Torugo/site-band.git](https://github.com/Mr-Torugo/site-band)
+   ```
 
-2. Clone este repositório para a pasta pública do seu servidor (ex: `htdocs` no XAMPP):
+2. **Mova para o servidor local:**
 
-```bash
-   git clone [https://github.com/Mr-Torugo/site-bando.git](https://github.com/Mr-Torugo/site-bando.git)
-```
+Coloque a pasta do projeto dentro do diretório do seu servidor local (ex: htdocs no XAMPP ou www no WAMP/Laragon).
 
-3. Acesse a pasta do projeto e crie o diretório uploads/ na raiz, caso não exista, e garanta que ele tem permissões de leitura/escrita.
+Crie o Banco de Dados Automaticamente:
+O projeto conta com um script de setup que gera o banco SQLite sozinho. Abra o navegador e acesse:
 
-4. O banco de dados SQLite será gerado e estruturado automaticamente pelo script auth/registrar.php no primeiro cadastro de usuário.
+http://localhost/site-band/api/setup.php
 
-5. Acesse no navegador: http://localhost/site-bando/
+Se a tela exibir "Setup Concluído com Sucesso", o banco de dados foi criado dentro da pasta database/.
 
-## 👨‍💻 Autor
+3. **Acesse a Aplicação:**
 
-Vitor Hugo
+Agora basta acessar a raiz do projeto no seu navegador:
+
+http://localhost/site-band/
+
+4. **(Opcional) Torne-se Administrador:**
+   Crie uma conta na tela de registro. Depois, descubra o seu ID (geralmente 1 se for o primeiro usuário) e acesse:
+
+http://localhost/site-band/api/setup_admin.php?id=1
+
+📂 **Estrutura de Pastas (Ignoradas no Git)**
+
+⚠️ Atenção: As seguintes pastas e arquivos não estão versionados por motivos de segurança e armazenamento (configurados no .gitignore):
+
+- database/banco.sqlite: O banco de dados de produção.
+
+- uploads/: O diretório onde as fotos e selfies dos usuários são salvas.
+
+👨‍💻 Autor
+
+Desenvolvido por Vitor Hugo (e o Bando!).
 
 [Linkedin](https://www.linkedin.com/in/vitor-hugo-05b2b91a7/)
 
-Estudante de Sistemas para Internet no Senac e Analista Junior.
+Que a caçada comece! 🎯
