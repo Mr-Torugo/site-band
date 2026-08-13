@@ -18,6 +18,7 @@ try {
             nome_local, 
             foto_original, 
             raridade, 
+            categoria, /* 👈 CATEGORIA ADICIONADA AQUI */
             data_criacao 
         FROM adesivos 
         WHERE criador_id = :uid
@@ -35,6 +36,7 @@ try {
             a.nome_local, 
             a.foto_original, 
             a.raridade, 
+            a.categoria, /* 👈 CATEGORIA ADICIONADA AQUI */
             d.data_descoberta, 
             d.foto_selfie, 
             d.comentario

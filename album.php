@@ -100,11 +100,7 @@
             object-fit: cover;
             cursor: pointer;
             transition: transform 0.2s ease;
-        }
-
-        .img-adesivo:hover {
-            transform: scale(1.02);
-        }
+        }    
 
         .img-selfie {
             width: 60px;
@@ -125,61 +121,57 @@
             left: 10px;
             font-size: 1rem;
         }
+
+        /* Efeito no link do nome do local */
+        .link-mapa {
+            text-decoration: none;
+            color: #212529;
+            transition: color 0.2s;
+        }
+        .link-mapa:hover {
+            color: #0d6efd;
+        }
     </style>
 </head>
 
 <body>
 
     <?php 
-    // 1. Avisa para o menu que estamos na tela do Álbum
     $menuAtivo = 'album'; 
-    
-    // 2. Importa todo o código do menu
     require './includes/navbar.php'; 
     ?>
 
-    <!-- =========================================
-         CONTEÚDO DO ÁLBUM (INTACTO)
-         ========================================= -->
     <div class="container mb-5">
         <div class="text-center mb-4 mt-3">
             <h2 class="fw-bold d-none d-md-block">Coleção de Adesivos</h2>
             <p class="text-muted" id="contadorAdesivos">Carregando...</p>
 
-            <!-- Botões para alternar as abas -->
             <div class="btn-group mt-1 w-100" style="max-width: 400px;" role="group">
                 <button type="button" class="btn btn-primary fw-bold" id="btnAchados" onclick="mostrarAba('achados')">
                     🔍 Encontrados
                 </button>
-                <button type="button" class="btn btn-outline-primary fw-bold" id="btnColados"
-                    onclick="mostrarAba('colados')">
+                <button type="button" class="btn btn-outline-primary fw-bold" id="btnColados" onclick="mostrarAba('colados')">
                     📍 Colados
                 </button>
             </div>
         </div>
 
-        <!-- Grade 1: Adesivos que o usuário ENCONTROU -->
         <div class="row g-4" id="gridAchados">
             <div class="text-center text-muted w-100">Carregando seus achados...</div>
         </div>
 
-        <!-- Grade 2: Adesivos que o usuário COLOU (escondida por padrão) -->
         <div class="row g-4" id="gridColados" style="display: none;"></div>
     </div>
 
-    <!-- =========================================
-         MODAL DE IMAGEM AMPLIADA
-         ========================================= -->
+    <!-- MODAL DE IMAGEM AMPLIADA -->
     <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content bg-transparent border-0">
                 <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Fechar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body text-center pt-0">
-                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
-                        style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                 </div>
             </div>
         </div>
@@ -198,7 +190,6 @@
             if (document.getElementById('nomeLogadoMobile')) document.getElementById('nomeLogadoMobile').innerText = meuApelido;
         }
 
-        // Verifica admin para mostrar botões secretos do menu
         fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
             if (data.sucesso && data.is_admin) {
                 if (document.getElementById('badgeAdmin')) document.getElementById('badgeAdmin').classList.remove('d-none');
@@ -218,7 +209,21 @@
             return 'bg-secondary';
         }
 
-        // Função que controla a troca de visualização
+        function getBadgeCategoria(categoria) {
+            let catTratada = categoria || 'Urbano';
+            switch(catTratada) {
+                case 'Natureza': return `<span class="badge bg-success me-1">${catTratada}</span>`;
+                case 'Urbano': return `<span class="badge bg-secondary me-1">${catTratada}</span>`;
+                case 'Praia': return `<span class="badge bg-info text-dark me-1">${catTratada}</span>`;
+                case 'Turísticos': return `<span class="badge bg-warning text-dark me-1">${catTratada}</span>`;
+                case 'Estrada': return `<span class="badge bg-dark me-1">${catTratada}</span>`;
+                case 'Móveis': return `<span class="badge bg-primary me-1">${catTratada}</span>`;
+                case 'Estados': return `<span class="badge bg-danger me-1">${catTratada}</span>`;
+                case 'Internacionais': return `<span class="badge me-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`;
+                default: return `<span class="badge bg-light text-dark border me-1">${catTratada}</span>`;
+            }
+        }
+
         function mostrarAba(aba) {
             const btnAchados = document.getElementById('btnAchados');
             const btnColados = document.getElementById('btnColados');
@@ -240,9 +245,6 @@
             }
         }
 
-        // ===================================
-        // FUNÇÃO DE AMPLIAR IMAGEM
-        // ===================================
         function abrirImagemMaior(caminho) {
             document.getElementById('imagemMaiorSrc').src = caminho;
             new bootstrap.Modal(document.getElementById('modalImagemMaior')).show();
@@ -280,11 +282,13 @@
                             listaAchados.forEach(item => {
                                 const dataObj = new Date(item.data_descoberta);
                                 const dataFormatada = dataObj.toLocaleDateString('pt-BR');
-                                // Adicionado evento onclick na selfie também
                                 const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie" onclick="abrirImagemMaior('${item.foto_selfie}')">` : '';
                                 const comentarioHtml = item.comentario ? `<p class="card-text text-muted small mt-2"><i>"${item.comentario}"</i></p>` : '';
+                                
                                 const corBadge = determinarCorRaridade(item.raridade);
+                                const badgeCategoriaHtml = getBadgeCategoria(item.categoria);
 
+                                // 👇 ADICIONADO AQUI: O Título agora é um Link com o Ícone do Mapa 👇
                                 htmlAchados += `
                                     <div class="col-12 col-md-6 col-lg-4">
                                         <div class="card card-figurinha">
@@ -294,10 +298,15 @@
                                                 <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${item.foto_original}')">
                                             </div>
                                             <div class="card-body">
-                                                <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
-                                                <div class="mt-1">
+                                                <h5 class="card-title fw-bold mb-0">
+                                                    <a href="index.php?adesivo=${item.id}" class="link-mapa">
+                                                        <i class="bi bi-geo-alt-fill text-primary"></i> ${item.nome_local}
+                                                    </a>
+                                                </h5>
+                                                <div class="mt-2">
+                                                    ${badgeCategoriaHtml}
                                                     <span class="badge ${corBadge}">${item.raridade}</span>
-                                                    <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> Achado em: ${dataFormatada}</small>
+                                                    <small class="text-muted ms-2 d-block mt-1"><i class="bi bi-calendar3"></i> Achado em: ${dataFormatada}</small>
                                                 </div>
                                                 ${comentarioHtml}
                                             </div>
@@ -316,8 +325,11 @@
                             listaColados.forEach(item => {
                                 const dataObj = new Date(item.data_criacao);
                                 const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+                                
                                 const corBadge = determinarCorRaridade(item.raridade);
+                                const badgeCategoriaHtml = getBadgeCategoria(item.categoria);
 
+                                // 👇 ADICIONADO AQUI: O Título agora é um Link com o Ícone do Mapa 👇
                                 htmlColados += `
                                     <div class="col-12 col-md-6 col-lg-4">
                                         <div class="card card-figurinha border border-2 border-primary">
@@ -326,10 +338,15 @@
                                                 <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${item.foto_original}')">
                                             </div>
                                             <div class="card-body">
-                                                <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
-                                                <div class="mt-1 mb-2">
+                                                <h5 class="card-title fw-bold mb-0">
+                                                    <a href="index.php?adesivo=${item.id}" class="link-mapa">
+                                                        <i class="bi bi-geo-alt-fill text-primary"></i> ${item.nome_local}
+                                                    </a>
+                                                </h5>
+                                                <div class="mt-2 mb-3">
+                                                    ${badgeCategoriaHtml}
                                                     <span class="badge ${corBadge}">${item.raridade}</span>
-                                                    <small class="text-muted ms-2"><i class="bi bi-calendar3"></i> Colado em: ${dataFormatada}</small>
+                                                    <small class="text-muted ms-2 d-block mt-1"><i class="bi bi-calendar3"></i> Colado em: ${dataFormatada}</small>
                                                 </div>
                                                 <span class="badge bg-success w-100"><i class="bi bi-check-circle"></i> Criado por você</span>
                                             </div>
@@ -340,7 +357,6 @@
                             gridColados.innerHTML = htmlColados;
                         }
 
-                        // Inicializa a tela mostrando os achados primeiro
                         mostrarAba('achados');
 
                     } else {
@@ -355,7 +371,6 @@
         carregarAlbum();
     </script>
 
-    <!-- REGISTRO DO SERVICE WORKER (PWA) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
