@@ -200,9 +200,9 @@
             <h2 class="fw-bold text-dark d-none d-md-block">Estatísticas do Bando</h2>
             <div class="btn-group mt-2 w-100" style="max-width: 400px;" role="group">
                 <button type="button" class="btn btn-primary fw-bold" id="btnAbaCacadores"
-                    onclick="mostrarAba('cacadores')">Caçadores</button>
+                    onclick="mostrarAba('cacadores')">Melhores caçadores</button>
                 <button type="button" class="btn btn-outline-primary fw-bold" id="btnAbaAdesivos"
-                    onclick="mostrarAba('adesivos')">Hot Spots</button>
+                    onclick="mostrarAba('adesivos')">Melhores adesivos</button>
             </div>
         </div>
 
