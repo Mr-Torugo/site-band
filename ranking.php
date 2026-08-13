@@ -250,6 +250,9 @@
                         <h4 class="text-success fw-bold mb-4"><span id="perfilXP"></span> XP</h4>
                         <h6 class="fw-bold text-start border-bottom pb-2 mb-3">🏅 Quadro de Medalhas</h6>
                         <div class="row g-2" id="perfilMedalhas"></div>
+                        <a href="#" id="btnVerAlbumCompleto" class="btn btn-outline-primary fw-bold mt-4 w-100">
+                            <i class="bi bi-journal-album"></i> Ver Álbum Completo
+                        </a>
                     </div>
                 </div>
             </div>
@@ -364,6 +367,7 @@
         }
 
         function abrirPerfil(id) {
+            document.getElementById('btnVerAlbumCompleto').href = 'perfil_cacador.php?id=' + id;
             new bootstrap.Modal(document.getElementById('modalPerfil')).show(); document.getElementById('perfilLoading').classList.remove('d-none'); document.getElementById('perfilConteudo').classList.add('d-none');
             fetch('api/perfil.php?id=' + id).then(r => r.json()).then(data => {
                 if (data.sucesso) {

@@ -1,14 +1,17 @@
 <?php
 header('Content-Type: application/json');
 require_once 'conexao.php';
-require_once 'regras_negocio.php'; // Importamos nossas regras de jogo!
+require_once 'regras_negocio.php'; 
 
 try {
+    // 👇 Cria a coluna de foto silenciosamente no banco caso ela não exista
+    try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN foto_perfil TEXT DEFAULT NULL"); } catch (Exception $e) {}
+
     $alvo_id = $_GET['id'] ?? 0; 
     if (!$alvo_id) throw new Exception("Usuário não informado.");
 
-    // 👇 Busca o apelido e calcula o XP em TEMPO REAL (idêntico ao Ranking) 👇
-    $sql = "SELECT u.apelido,
+    // 👇 Adicionado "u.foto_perfil" na busca
+    $sql = "SELECT u.apelido, u.foto_perfil,
             COALESCE((SELECT SUM(CASE 
                     WHEN a.raridade = 'Comum' AND d.tipo_registro = 'conquistado' THEN 10
                     WHEN a.raridade = 'Comum' AND d.tipo_registro = 'encontrado' THEN 5
@@ -28,7 +31,6 @@ try {
     
     if (!$user) throw new Exception("Usuário não encontrado.");
 
-    // Alimentamos as variáveis com o valor calculado
     $xp = $user['xp_real'];
     $titulo = definirTitulo($xp);
     $medalhas = processarMedalhas($pdo, $alvo_id);
@@ -37,6 +39,7 @@ try {
         'sucesso' => true, 
         'perfil' => [
             'apelido' => $user['apelido'], 
+            'foto_perfil' => $user['foto_perfil'], // 👈 Adicionado aqui!
             'titulo' => $titulo, 
             'xp' => $xp, 
             'medalhas' => $medalhas
