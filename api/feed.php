@@ -8,6 +8,7 @@ try {
     $sql = "
         SELECT 
             a.id AS id_acao,
+            a.id AS adesivo_id, /* 👈 ID do Adesivo */
             'novo_adesivo' AS tipo_acao,
             u.apelido AS nome_usuario,
             a.nome_local,
@@ -27,6 +28,7 @@ try {
 
         SELECT 
             d.id AS id_acao,
+            d.adesivo_id AS adesivo_id, /* 👈 ID do Adesivo */
             'descoberta' AS tipo_acao,
             u.apelido AS nome_usuario,
             a.nome_local,
@@ -47,6 +49,7 @@ try {
 
         SELECT 
             um.id AS id_acao,
+            NULL AS adesivo_id, /* Medalha não tem mapa */
             'conquista' AS tipo_acao,
             u.apelido AS nome_usuario,
             um.nome AS nome_local, 
@@ -66,13 +69,14 @@ try {
 
         SELECT 
             mc.id AS id_acao,
+            NULL AS adesivo_id, /* Missão não tem mapa */
             'missao' AS tipo_acao,
             u.apelido AS nome_usuario,
             'Missão da Semana' AS nome_local, 
             '🎯' AS foto, 
             NULL AS tipo_registro,
             mc.data_conclusao AS data_acao, 
-            'Ganhou +' || mc.xp_ganho || ' XP!' AS comentario, /* <-- A CORREÇÃO FOI FEITA AQUI */
+            'Ganhou +' || mc.xp_ganho || ' XP!' AS comentario,
             'Missão' AS categoria,
             'Lendário' AS raridade, 
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'missao' AND acao_id = mc.id) AS total_curtidas,

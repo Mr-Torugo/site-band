@@ -470,7 +470,7 @@
         </div>
     </div>
 
-    <!-- JS Scripts e Lógica (Mantidos Intactos) -->
+    <!-- JS Scripts e Lógica -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
@@ -564,6 +564,9 @@
             marcadoresCluster.clearLayers();
             const fStatus = document.getElementById('filtroStatus').value; const fCategoria = document.getElementById('filtroCategoria').value; const fRaridade = document.getElementById('filtroRaridade').value;
 
+            // 👇 ADICIONADO: Memória para guardar os pinos pelo ID 👇
+            let marcadoresSalvos = {}; 
+
             todosAdesivos.forEach(adesivo => {
                 let historicoHtml = ''; let botaoMuralHtml = ''; let meuNivel = 0;
                 if (adesivo.descobertas && adesivo.descobertas.length > 0) {
@@ -587,7 +590,6 @@
 
                 let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : (adesivo.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
-                // 👇 NOVA LÓGICA DE CORES DAS CATEGORIAS (MAPA) 👇
                 let catTratada = adesivo.categoria || 'Urbano';
                 let badgeCategoria = '';
                 
@@ -611,12 +613,28 @@
                     default: 
                         badgeCategoria = `<span class="badge bg-light text-dark border mb-1">${catTratada}</span>`;
                 }
-                // 👆 FIM DA NOVA LÓGICA 👆
                 const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">#${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
                 
                 marker.bindPopup(popupContent); 
                 marcadoresCluster.addLayer(marker);
+
+                // 👇 ADICIONADO: Salva o pino na memória usando o ID dele 👇
+                marcadoresSalvos[adesivo.id] = marker; 
             });
+
+            // 👇 ADICIONADO: A MÁGICA DO VOO 👇
+            // Verifica se veio algum "?adesivo=123" no link lá do Feed
+            const urlParams = new URLSearchParams(window.location.search);
+            const adesivoFocoId = urlParams.get('adesivo');
+            
+            if (adesivoFocoId && marcadoresSalvos[adesivoFocoId]) {
+                let marcadorFoco = marcadoresSalvos[adesivoFocoId];
+                
+                // Dá zoom sozinho até a rua do adesivo e abre a janelinha (popup)
+                marcadoresCluster.zoomToShowLayer(marcadorFoco, function() {
+                    marcadorFoco.openPopup();
+                });
+            }
         }
 
         function abrirModalEditar(id, nomeLocal, categoria, raridade) { 

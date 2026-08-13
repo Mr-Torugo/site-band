@@ -347,7 +347,6 @@
                             }
 
                             const fotoParaExibir = item.foto_registro || item.foto_adesivo || item.foto;
-                            // Blindagem contra aspas no nome da foto
                             const fotoSafe = fotoParaExibir ? fotoParaExibir.replace(/'/g, "\\'") : '';
                             const imagemHtml = fotoSafe ? `<img src="${fotoSafe}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoSafe}')">` : '';
 
@@ -380,7 +379,7 @@
                                             <small class="text-muted">${dataFormatada}</small>
                                             <div>${badgeCategoria} <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span></div>
                                         </div>
-                                        <p class="mb-0"><b>${quemAgiu}</b> colou um novo adesivo em <strong class="text-primary">${nomeLocal}</strong>.</p>
+                                        <p class="mb-0"><b>${quemAgiu}</b> colou um novo adesivo em <a href="index.php?adesivo=${item.adesivo_id}" class="text-decoration-none fw-bold" style="color: #0d6efd;"><i class="bi bi-geo-alt-fill"></i> ${nomeLocal}</a>.</p>
                                         ${imagemHtml}
                                         ${htmlAcoes}
                                     </div>
@@ -404,7 +403,7 @@
                                             <small class="text-muted">${dataFormatada}</small>
                                             <div>${badgeCategoria} <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span></div>
                                         </div>
-                                        <p class="mb-0">${iconeAcao} <b>${quemAgiu}</b> ${textoAcao} <b>${donoAdesivo}</b> em <strong class="text-success">${nomeLocal}</strong>!</p>
+                                        <p class="mb-0">${iconeAcao} <b>${quemAgiu}</b> ${textoAcao} <b>${donoAdesivo}</b> em <a href="index.php?adesivo=${item.adesivo_id}" class="text-decoration-none fw-bold text-success"><i class="bi bi-geo-alt-fill"></i> ${nomeLocal}</a>!</p>
                                         ${imagemHtml}
                                         ${htmlAcoes}
                                     </div>
