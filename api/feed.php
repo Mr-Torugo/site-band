@@ -18,7 +18,7 @@ try {
             a.categoria,
             a.raridade,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_curtidas,
-            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id AND usuario_id = :uid) AS curtido_por_mim,
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id AND usuario_id = :uid1) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_comentarios
         FROM adesivos a
         JOIN usuarios u ON a.criador_id = u.id
@@ -37,18 +37,43 @@ try {
             a.categoria,
             a.raridade,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_curtidas,
-            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id AND usuario_id = :uid) AS curtido_por_mim,
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id AND usuario_id = :uid2) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_comentarios
         FROM descobertas d
         JOIN usuarios u ON d.descobridor_id = u.id
         JOIN adesivos a ON d.adesivo_id = a.id
+
+        UNION ALL
+
+        SELECT 
+            um.id AS id_acao,
+            'conquista' AS tipo_acao,
+            u.apelido AS nome_usuario,
+            um.nome AS nome_local, 
+            um.icone AS foto, 
+            NULL AS tipo_registro,
+            um.data_conquista AS data_acao,
+            um.descricao AS comentario,
+            'Conquista' AS categoria,
+            'Tesouro' AS raridade, 
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'conquista' AND acao_id = um.id) AS total_curtidas,
+            (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'conquista' AND acao_id = um.id AND usuario_id = :uid3) AS curtido_por_mim,
+            (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'conquista' AND acao_id = um.id) AS total_comentarios
+        FROM usuario_medalhas um
+        JOIN usuarios u ON um.usuario_id = u.id
 
         ORDER BY data_acao DESC
         LIMIT 50
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(['uid' => $usuario_id]);
+    // Solução do Bug: Enviamos a variável 3 vezes separadas (uid1, uid2 e uid3)
+    $stmt->execute([
+        'uid1' => $usuario_id,
+        'uid2' => $usuario_id,
+        'uid3' => $usuario_id
+    ]);
+    
     $feed = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
@@ -57,10 +82,7 @@ try {
     ]);
 
 } catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode([
-        'sucesso' => false, 
-        'erro' => 'Erro ao carregar o feed: ' . $e->getMessage()
-    ]);
+    // Tirei o status 500 para o Javascript não se assustar e poder imprimir o erro na sua tela!
+    echo json_encode(['sucesso' => false, 'erro' => 'Erro do Banco: ' . $e->getMessage()]);
 }
 ?>

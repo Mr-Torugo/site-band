@@ -72,6 +72,11 @@ try {
         if ($tipo_registro === 'conquistado') $msg = "👑 Conquistado! XP Total recebido e adesivo no Álbum!";
         elseif ($tipo_registro === 'encontrado') $msg = "📸 Encontrado! Você recebeu 50% do XP!";
         else $msg = "👁️ Avistado! O radar marcou que você passou por aqui.";
+
+        // --- VERIFICA MEDALHAS AUTOMATICAMENTE ---
+        require_once 'motor_conquistas.php';
+        checarEAtualizarMedalhas($pdo, $descobridor_id); // Chama o árbitro!
+        // -----------------------------------------
             
         echo json_encode(['sucesso' => true, 'mensagem' => $msg]);
     }

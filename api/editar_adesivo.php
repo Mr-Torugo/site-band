@@ -35,7 +35,7 @@ try {
         // Se for admin, aceita a raridade nova que ele escolheu
         $raridade_final = $raridade_enviada;
     } else {
-        // Se NÃO for admin (é apenas o criador), força a manter a raridade que já estava no banco
+        // Se não for admin, mantém a raridade atual
         $raridade_final = $adesivo['raridade'];
     }
 

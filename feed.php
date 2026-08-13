@@ -333,38 +333,29 @@
 
                             let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : (item.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
-                            // 👇 NOVA LÓGICA DE CORES DAS CATEGORIAS AQUI 👇
+                            // Lógica de Cores da Categoria
                             let catTratada = item.categoria || 'Urbano';
                             let badgeCategoria = '';
-                            
                             switch(catTratada) {
-                                case 'Natureza': 
-                                    badgeCategoria = `<span class="badge bg-success me-1">${catTratada}</span>`; break; // Verde
-                                case 'Urbano': 
-                                    badgeCategoria = `<span class="badge bg-secondary me-1">${catTratada}</span>`; break; // Cinza
-                                case 'Praia': 
-                                    badgeCategoria = `<span class="badge bg-info text-dark me-1">${catTratada}</span>`; break; // Azul Claro
-                                case 'Turísticos': 
-                                    badgeCategoria = `<span class="badge bg-warning text-dark me-1">${catTratada}</span>`; break; // Amarelo
-                                case 'Estrada': 
-                                    badgeCategoria = `<span class="badge bg-dark me-1">${catTratada}</span>`; break; // Preto
-                                case 'Móveis': 
-                                    badgeCategoria = `<span class="badge bg-primary me-1">${catTratada}</span>`; break; // Azul Escuro
-                                case 'Estados': 
-                                    badgeCategoria = `<span class="badge bg-danger me-1">${catTratada}</span>`; break; // Vermelho
-                                case 'Internacionais': 
-                                    badgeCategoria = `<span class="badge me-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break; // Roxo
-                                default: 
-                                    badgeCategoria = `<span class="badge bg-light text-dark border me-1">${catTratada}</span>`; // Padrão
+                                case 'Natureza': badgeCategoria = `<span class="badge bg-success me-1">${catTratada}</span>`; break;
+                                case 'Urbano': badgeCategoria = `<span class="badge bg-secondary me-1">${catTratada}</span>`; break;
+                                case 'Praia': badgeCategoria = `<span class="badge bg-info text-dark me-1">${catTratada}</span>`; break;
+                                case 'Turísticos': badgeCategoria = `<span class="badge bg-warning text-dark me-1">${catTratada}</span>`; break;
+                                case 'Estrada': badgeCategoria = `<span class="badge bg-dark me-1">${catTratada}</span>`; break;
+                                case 'Móveis': badgeCategoria = `<span class="badge bg-primary me-1">${catTratada}</span>`; break;
+                                case 'Estados': badgeCategoria = `<span class="badge bg-danger me-1">${catTratada}</span>`; break;
+                                case 'Internacionais': badgeCategoria = `<span class="badge me-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break;
+                                default: badgeCategoria = `<span class="badge bg-light text-dark border me-1">${catTratada}</span>`;
                             }
-                            // 👆 FIM DA NOVA LÓGICA 👆
 
-                            const fotoParaExibir = item.foto_registro || item.foto_adesivo || item.foto; // Blindagem do nome da variável
-                            const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoParaExibir}')">` : '';
+                            const fotoParaExibir = item.foto_registro || item.foto_adesivo || item.foto;
+                            // Blindagem: Previne o erro "missing )" caso a URL da imagem tenha aspas simples
+                            const fotoSafe = fotoParaExibir ? fotoParaExibir.replace(/'/g, "\\'") : '';
+                            const imagemHtml = fotoSafe ? `<img src="${fotoSafe}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoSafe}')">` : '';
 
                             let iconeCoracao = item.curtido_por_mim || item.curtiu_mim ? 'bi-heart-fill' : 'bi-heart';
                             let classeCurtido = item.curtido_por_mim || item.curtiu_mim ? 'curtido' : '';
-
+                            
                             let idAcaoTratado = item.acao_id || item.id_acao;
                             let tipoAcaoTratado = item.tipo || item.tipo_acao;
 
@@ -376,8 +367,7 @@
                                 <button class="btn-curtir ms-4 text-dark" onclick="abrirModalComentarios('${tipoAcaoTratado}', ${idAcaoTratado})">
                                     <i class="bi bi-chat-text"></i> <span class="contador" id="contador-coment-${tipoAcaoTratado}-${idAcaoTratado}">${item.total_comentarios}</span>
                                 </button>
-                            </div>
-                        `;
+                            </div>`;
 
                             // Verifica se é novo adesivo (colou)
                             if (tipoAcaoTratado === 'colou' || tipoAcaoTratado === 'novo_adesivo') {
@@ -390,10 +380,7 @@
                                     <div class="feed-card">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <small class="text-muted">${dataFormatada}</small>
-                                            <div>
-                                                ${badgeCategoria}
-                                                <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span>
-                                            </div>
+                                            <div>${badgeCategoria} <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span></div>
                                         </div>
                                         <p class="mb-0"><b>${quemAgiu}</b> colou um novo adesivo em <strong class="text-primary">${nomeLocal}</strong>.</p>
                                         ${imagemHtml}
@@ -417,10 +404,7 @@
                                     <div class="feed-card">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <small class="text-muted">${dataFormatada}</small>
-                                            <div>
-                                                ${badgeCategoria}
-                                                <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span>
-                                            </div>
+                                            <div>${badgeCategoria} <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span></div>
                                         </div>
                                         <p class="mb-0">${iconeAcao} <b>${quemAgiu}</b> ${textoAcao} <b>${donoAdesivo}</b> em <strong class="text-success">${nomeLocal}</strong>!</p>
                                         ${imagemHtml}
@@ -428,10 +412,40 @@
                                     </div>
                                 </div>`;
                             }
+                            // Verifica se é Conquista
+                            else if (tipoAcaoTratado === 'conquista') {
+                                let quemAgiu = item.quem_agiu || item.nome_usuario;
+                                let nomeMedalha = item.local || item.nome_local;
+                                let descMedalha = item.comentario || 'Alcançou um novo marco!';
+                                let iconeMedalha = item.foto || item.foto_registro || '🏆';
+                                
+                                let displayIcone = iconeMedalha.includes('.') || iconeMedalha.includes('http') 
+                                    ? `<img src="${iconeMedalha}" style="width: 80px; height: 80px; object-fit: contain;">` 
+                                    : `<div style="font-size: 4rem; line-height: 1;">${iconeMedalha}</div>`;
+
+                                html += `
+                                <div class="feed-item">
+                                    <div class="feed-icone bg-warning text-dark"><i class="bi bi-trophy-fill"></i></div>
+                                    <div class="feed-card border border-warning border-2" style="background-color: #fffdf5;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">${dataFormatada}</small>
+                                            <span class="badge bg-warning text-dark me-1">🏆 Conquista Desbloqueada</span>
+                                        </div>
+                                        <div class="text-center my-3">
+                                            ${displayIcone}
+                                            <h4 class="fw-bold text-dark mt-2">${nomeMedalha}</h4>
+                                            <p class="text-muted small mb-0">"${descMedalha}"</p>
+                                        </div>
+                                        <p class="mb-0 text-center">Parabéns <b>${quemAgiu}</b>, você entrou para a história!</p>
+                                        ${htmlAcoes}
+                                    </div>
+                                </div>`;
+                            }
                         });
                         lista.innerHTML = html;
                     }
-                });
+                })
+                .catch(err => console.error("Erro no Feed:", err));
         }
 
         // ===================================

@@ -59,6 +59,10 @@ try {
 
     $stmt = $pdo->prepare("INSERT INTO adesivos (nome_local, lat, lng, foto_original, criador_id, raridade, categoria) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$nome_local, $lat, $lng, $foto_caminho, $criador_id, $raridade, $categoria]);
+    // --- VERIFICA MEDALHAS AUTOMATICAMENTE ---
+    require_once 'motor_conquistas.php';
+    checarEAtualizarMedalhas($pdo, $criador_id); // Chama o árbitro!
+    // -----------------------------------------
 
     echo json_encode(['sucesso' => true, 'mensagem' => 'Adesivo salvo com sucesso! Raridade calculada: ' . $raridade]);
 
