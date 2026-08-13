@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meu Álbum - O Bando</title>
 
     <!-- CONEXÕES DO PWA (APLICATIVO) -->
@@ -15,16 +15,68 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
+        /* =========================================
+           ESTILOS BASE E RESPONSIVIDADE
+           ========================================= */
         body {
             background-color: #f0f2f5;
             padding-top: 70px;
+            padding-bottom: 90px;
+            /* Espaço para o menu inferior no celular */
         }
 
-        .navbar-bando {
-            background-color: #0d6efd;
+        /* Topo Celular */
+        .mobile-top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #0d6efd;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 15px 20px;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* Menu Inferior Celular */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1050;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+
+        .nav-item-mobile {
+            text-align: center;
+            color: #adb5bd;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+        }
+
+        .nav-item-mobile.active {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 30px;
+                padding-top: 80px;
+            }
+        }
+
+        /* =========================================
+           ESTILOS DO ÁLBUM E CARTÕES
+           ========================================= */
         .card-figurinha {
             border: none;
             border-radius: 12px;
@@ -42,6 +94,12 @@
             width: 100%;
             height: 200px;
             object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .img-adesivo:hover {
+            transform: scale(1.02);
         }
 
         .img-selfie {
@@ -54,6 +112,7 @@
             top: 10px;
             right: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
         }
 
         .badge-codigo {
@@ -67,20 +126,68 @@
 
 <body>
 
-    <nav class="navbar navbar-dark navbar-bando fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">
-                <i class="bi bi-arrow-left me-2"></i> Voltar ao Mapa
+    <!-- =========================================
+         TOPO MOBILE
+         ========================================= -->
+    <div class="mobile-top-bar d-flex d-md-none">
+        <h1 class="m-0 fw-bold text-white fs-5">📖 Meu Álbum</h1>
+    </div>
+
+    <!-- =========================================
+         MENU INFERIOR MOBILE
+         ========================================= -->
+    <div class="mobile-bottom-nav d-flex d-md-none">
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+        </a>
+        <a href="feed.html" class="nav-item-mobile">
+            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+        </a>
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+        </a>
+        <a href="album.html" class="nav-item-mobile active">
+            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+        </a>
+        <div class="nav-item-mobile dropdown">
+            <a href="#" data-bs-toggle="dropdown"
+                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
+                <i class="bi bi-grid-fill fs-4 mb-1 text-primary"></i> <span>Mais</span>
             </a>
-            <span class="navbar-text text-white fw-bold">
-                📖 Álbum de <span id="nomeLogado"></span>
-            </span>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
+                <li><a class="dropdown-item fw-bold text-primary" href="ranking.html"><i
+                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
+                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MENU SUPERIOR PC (Escondido no celular)
+         ========================================= -->
+    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
+            <div class="d-flex gap-3">
+                <a href="index.html" class="btn btn-outline-light">Mapa</a>
+                <a href="feed.html" class="btn btn-outline-light">📡 Radar</a>
+                <a href="album.html" class="btn btn-primary fw-bold">Meu Álbum</a>
+                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
+                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
+            </div>
         </div>
     </nav>
 
+    <!-- =========================================
+         CONTEÚDO DO ÁLBUM
+         ========================================= -->
     <div class="container mb-5">
         <div class="text-center mb-4 mt-3">
-            <h2 class="fw-bold">Sua Coleção</h2>
+            <h2 class="fw-bold">Coleção de <span id="nomeLogado"></span></h2>
             <p class="text-muted" id="contadorAdesivos">Carregando...</p>
 
             <!-- Botões para alternar as abas -->
@@ -104,6 +211,26 @@
         <div class="row g-4" id="gridColados" style="display: none;"></div>
     </div>
 
+    <!-- =========================================
+         MODAL DE IMAGEM AMPLIADA
+         ========================================= -->
+    <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
+                        style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         const meuId = localStorage.getItem('bando_id');
         const meuApelido = localStorage.getItem('bando_apelido');
@@ -120,6 +247,7 @@
         function determinarCorRaridade(raridade) {
             if (raridade === 'Raro') return 'bg-primary';
             if (raridade === 'Lendário') return 'bg-warning text-dark';
+            if (raridade === 'Tesouro') return 'bg-danger text-white border border-warning border-2';
             return 'bg-secondary';
         }
 
@@ -145,12 +273,18 @@
             }
         }
 
+        // ===================================
+        // FUNÇÃO DE AMPLIAR IMAGEM
+        // ===================================
+        function abrirImagemMaior(caminho) {
+            document.getElementById('imagemMaiorSrc').src = caminho;
+            new bootstrap.Modal(document.getElementById('modalImagemMaior')).show();
+        }
+
         function sairDoApp() {
-            // Chama o PHP para destruir a sessão no servidor
             fetch('api/logout.php')
                 .then(res => res.json())
                 .then(() => {
-                    // Limpa o navegador e manda para a tela de login
                     localStorage.clear();
                     window.location.href = 'login.html';
                 })
@@ -161,7 +295,6 @@
         }
 
         function carregarAlbum() {
-            // Agora apontando para a pasta api/
             fetch(`api/meu_album.php?usuario_id=${meuId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -180,7 +313,8 @@
                             listaAchados.forEach(item => {
                                 const dataObj = new Date(item.data_descoberta);
                                 const dataFormatada = dataObj.toLocaleDateString('pt-BR');
-                                const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie">` : '';
+                                // Adicionado evento onclick na selfie também
+                                const selfieHtml = item.foto_selfie ? `<img src="${item.foto_selfie}" class="img-selfie" alt="Sua Selfie" onclick="abrirImagemMaior('${item.foto_selfie}')">` : '';
                                 const comentarioHtml = item.comentario ? `<p class="card-text text-muted small mt-2"><i>"${item.comentario}"</i></p>` : '';
                                 const corBadge = determinarCorRaridade(item.raridade);
 
@@ -190,7 +324,7 @@
                                             <div class="position-relative">
                                                 <span class="badge bg-dark badge-codigo">${item.codigo}</span>
                                                 ${selfieHtml}
-                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
+                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${item.foto_original}')">
                                             </div>
                                             <div class="card-body">
                                                 <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>
@@ -222,7 +356,7 @@
                                         <div class="card card-figurinha border border-2 border-primary">
                                             <div class="position-relative">
                                                 <span class="badge bg-dark badge-codigo">${item.codigo}</span>
-                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo">
+                                                <img src="${item.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${item.foto_original}')">
                                             </div>
                                             <div class="card-body">
                                                 <h5 class="card-title fw-bold mb-0">${item.nome_local}</h5>

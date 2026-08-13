@@ -6,73 +6,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel Admin - Bando Map</title>
 
-    <!-- Bootstrap para deixar o visual incrível -->
+    <!-- CONEXÕES DO PWA (APLICATIVO) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#dc3545">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
+        /* =========================================
+           ESTILOS BASE E RESPONSIVIDADE
+           ========================================= */
         body {
             background-color: #f8f9fa;
+            padding-top: 70px;
+            padding-bottom: 90px;
+            /* Espaço para o menu inferior no celular */
         }
 
-        .navbar-brand {
-            font-weight: 900;
-            color: #dc3545 !important;
+        /* Topo Celular (Vermelho Admin) */
+        .mobile-top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #dc3545;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 15px 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Menu Inferior Celular */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1050;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+            display: flex;
+        }
+
+        .nav-item-mobile {
+            text-align: center;
+            color: #adb5bd;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+        }
+
+        .nav-item-mobile.active {
+            color: #dc3545;
+            font-weight: bold;
         }
 
         .admin-container {
             max-width: 900px;
-            margin: 40px auto;
+            margin: 0 auto;
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
 
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 30px;
+                padding-top: 80px;
+            }
+
+            .admin-container {
+                padding: 30px;
+                margin-top: 20px;
+            }
+        }
+
+        /* =========================================
+           AJUSTES DA TABELA PARA CELULAR
+           ========================================= */
         .table-responsive {
             margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        /* Flexbox para os botões quebrarem de linha suavemente em telas pequenas */
+        .botoes-acao {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Menu Superior -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- =========================================
+         TOPO MOBILE
+         ========================================= -->
+    <div class="mobile-top-bar d-flex d-md-none">
+        <h1 class="m-0 fw-bold text-white fs-5">🛡️ Painel Admin</h1>
+    </div>
+
+    <!-- =========================================
+         MENU INFERIOR MOBILE
+         ========================================= -->
+    <div class="mobile-bottom-nav d-flex d-md-none">
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+        </a>
+        <a href="feed.html" class="nav-item-mobile">
+            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+        </a>
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+        </a>
+        <a href="album.html" class="nav-item-mobile">
+            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+        </a>
+        <!-- Destacado em vermelho por estarmos na área Admin -->
+        <div class="nav-item-mobile dropdown active">
+            <a href="#" data-bs-toggle="dropdown" class="text-decoration-none d-flex flex-column align-items-center"
+                style="color: #dc3545;">
+                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
+                <li><a class="dropdown-item fw-bold text-warning" href="ranking.html"><i
+                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                <li><a class="dropdown-item fw-bold text-danger bg-light" href="admin.html"><i
+                            class="bi bi-gear-fill me-2"></i> Admin</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
+                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MENU SUPERIOR PC (Escondido no celular)
+         ========================================= -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">🛡️ Painel Admin do Bando</a>
-            <div class="d-flex">
-                <a href="index.html" class="btn btn-outline-light me-2">Voltar ao Mapa</a>
-                <button onclick="sairDoApp()" class="btn btn-danger">Sair</button>
+            <a class="navbar-brand fw-bold text-danger" href="#">🛡️ Painel Admin do Bando</a>
+            <div class="d-flex gap-3">
+                <a href="index.html" class="btn btn-outline-light">Voltar ao Mapa</a>
+                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
             </div>
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
-    <div class="container admin-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">Gerenciamento de Caçadores</h3>
-            <button class="btn btn-primary" onclick="carregarUsuarios()">Atualizar Lista</button>
+    <!-- =========================================
+         CONTEÚDO PRINCIPAL
+         ========================================= -->
+    <div class="container admin-container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h3 class="fw-bold mb-0 text-dark">Gerenciamento de Caçadores</h3>
+            <button class="btn btn-primary fw-bold shadow-sm" onclick="carregarUsuarios()"><i
+                    class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista</button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
+        <div class="table-responsive shadow-sm">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col" class="ps-3">ID</th>
                         <th scope="col">Apelido</th>
                         <th scope="col">Cargo</th>
-                        <th scope="col" class="text-end">Ações</th>
+                        <th scope="col" class="text-end pe-3">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaUsuarios">
-                    <!-- Os usuários vão aparecer aqui gerados pelo JS -->
                     <tr>
-                        <td colspan="4" class="text-center">Carregando usuários...</td>
+                        <td colspan="4" class="text-center py-4 text-muted">Carregando usuários...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         // Quando a página abre, ele já tenta carregar a lista
@@ -96,7 +218,7 @@
                 })
                 .catch(erro => {
                     console.error("Erro ao puxar lista:", erro);
-                    document.getElementById('tabelaUsuarios').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
+                    document.getElementById('tabelaUsuarios').innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4 fw-bold">Erro ao carregar dados.</td></tr>';
                 });
         }
 
@@ -115,30 +237,29 @@
 
                 // Design do cargo
                 const badge = u.is_admin == 1
-                    ? '<span class="badge bg-danger">Admin</span>'
+                    ? '<span class="badge bg-danger"><i class="bi bi-shield-lock-fill me-1"></i>Admin</span>'
                     : '<span class="badge bg-secondary">Caçador</span>';
 
-                // Botões (Promover/Rebaixar e Excluir)
-                let botoes = '';
+                // Botões agrupados em uma div flex para responsividade
+                let botoes = '<div class="botoes-acao">';
 
-                botoes += `<button class="btn btn-sm btn-info me-1 fw-bold text-white" onclick="resetarSenha(${u.id}, '${u.apelido}')">Resetar Senha</button>`;
+                botoes += `<button class="btn btn-sm btn-info fw-bold text-white" onclick="resetarSenha(${u.id}, '${u.apelido}')"><i class="bi bi-key-fill"></i> <span class="d-none d-md-inline">Senha</span></button>`;
 
                 if (u.is_admin == 1) {
-                    botoes += `<button class="btn btn-sm btn-warning me-1 fw-bold" onclick="executarAcao('rebaixar', ${u.id})" ${isMe ? 'disabled' : ''}>Rebaixar</button>`;
+                    botoes += `<button class="btn btn-sm btn-warning fw-bold" onclick="executarAcao('rebaixar', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-arrow-down-circle"></i> <span class="d-none d-md-inline">Rebaixar</span></button>`;
                 } else {
-                    botoes += `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="executarAcao('promover', ${u.id})">Dar Admin</button>`;
+                    botoes += `<button class="btn btn-sm btn-success fw-bold" onclick="executarAcao('promover', ${u.id})"><i class="bi bi-arrow-up-circle"></i> <span class="d-none d-md-inline">Promover</span></button>`;
                 }
 
-
-
-                botoes += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="executarAcao('excluir', ${u.id})" ${isMe ? 'disabled' : ''}>Excluir</button>`;
+                botoes += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="executarAcao('excluir', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-trash-fill"></i></button>`;
+                botoes += '</div>';
 
                 tbody.innerHTML += `
                     <tr>
-                        <td class="text-muted fw-bold">#${u.id}</td>
-                        <td class="fw-bold fs-5">${u.apelido} ${isMe ? '<span class="text-success fs-6">(Você)</span>' : ''}</td>
+                        <td class="text-muted fw-bold ps-3">#${u.id}</td>
+                        <td class="fw-bold text-dark fs-6">${u.apelido} ${isMe ? '<br><span class="badge bg-success" style="font-size:0.65rem;">VOCÊ</span>' : ''}</td>
                         <td>${badge}</td>
-                        <td class="text-end">${botoes}</td>
+                        <td class="pe-3">${botoes}</td>
                     </tr>
                 `;
             });
@@ -170,12 +291,10 @@
                     }
                 })
                 .catch(erro => console.error(erro));
-
-
         }
 
         // ==========================================
-        // 5. RESETAR SENHA DO USUÁRIO
+        // 4. RESETAR SENHA DO USUÁRIO
         // ==========================================
         function resetarSenha(id, apelido) {
             // Abre uma caixinha perguntando qual será a nova senha temporária
@@ -205,7 +324,7 @@
         }
 
         // ==========================================
-        // 4. SAIR DO APP (BLINDADO)
+        // 5. SAIR DO APP (BLINDADO)
         // ==========================================
         function sairDoApp() {
             // Mostra pro usuário que está saindo
@@ -217,7 +336,15 @@
                     window.location.href = 'login.html';
                 });
         }
+    </script>
 
+    <!-- REGISTRO DO SERVICE WORKER (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
     </script>
 </body>
 

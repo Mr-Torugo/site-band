@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Feed de Atividades - O Bando</title>
 
     <link rel="manifest" href="manifest.json">
@@ -14,16 +14,78 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
+        /* =========================================
+           ESTILOS BASE E RESPONSIVIDADE
+           ========================================= */
         body {
             background-color: #f0f2f5;
             padding-top: 70px;
+            padding-bottom: 90px;
+            /* Espaço para o menu inferior no celular */
         }
 
-        .navbar-bando {
-            background-color: #0d6efd;
+        /* Topo Celular */
+        .mobile-top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #0d6efd;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 15px 20px;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* Menu Inferior Celular */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1050;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+
+        .nav-item-mobile {
+            text-align: center;
+            color: #adb5bd;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+        }
+
+        .nav-item-mobile.active {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        /* Limitar a largura do Feed no PC */
+        .feed-container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 30px;
+                padding-top: 80px;
+            }
+
+            .navbar-bando {
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* =========================================
+           ESTILOS DO FEED
+           ========================================= */
         .feed-item {
             border-left: 4px solid #dee2e6;
             margin-left: 15px;
@@ -71,6 +133,14 @@
             margin-top: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             background-color: #212529;
+            cursor: pointer;
+            /* Mostra que é clicável */
+            transition: transform 0.2s ease;
+        }
+
+        .feed-img:hover {
+            transform: scale(1.02);
+            /* Efeitinho ao passar o mouse no PC */
         }
 
         .curtidas-box {
@@ -135,7 +205,6 @@
             text-align: right;
         }
 
-        /* ANIMAÇÃO DA ETIQUETA DO TESOURO NO FEED */
         @keyframes pulse-gold {
             0% {
                 box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.8);
@@ -162,25 +231,98 @@
 
 <body>
 
-    <nav class="navbar navbar-dark navbar-bando fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-arrow-left me-2"></i> Voltar</a>
-            <span class="navbar-text text-white fw-bold">📡 Atividades</span>
+    <!-- =========================================
+         TOPO MOBILE
+         ========================================= -->
+    <div class="mobile-top-bar d-flex d-md-none">
+        <h1 class="m-0 fw-bold text-white fs-5">📡 Radar do Bando</h1>
+    </div>
+
+    <!-- =========================================
+         MENU INFERIOR MOBILE
+         ========================================= -->
+    <div class="mobile-bottom-nav d-flex d-md-none">
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+        </a>
+        <a href="feed.html" class="nav-item-mobile active">
+            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+        </a>
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+        </a>
+        <a href="album.html" class="nav-item-mobile">
+            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+        </a>
+        <div class="nav-item-mobile dropdown">
+            <a href="#" data-bs-toggle="dropdown"
+                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
+                <i class="bi bi-grid-fill fs-4 mb-1 text-primary"></i> <span>Mais</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
+                <li><a class="dropdown-item fw-bold text-primary" href="ranking.html"><i
+                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
+                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MENU SUPERIOR PC (Escondido no celular)
+         ========================================= -->
+    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
+            <div class="d-flex gap-3">
+                <a href="index.html" class="btn btn-outline-light">Mapa</a>
+                <a href="feed.html" class="btn btn-info fw-bold text-white">📡 Radar</a>
+                <a href="album.html" class="btn btn-primary fw-bold">Meu Álbum</a>
+                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
+                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
+            </div>
         </div>
     </nav>
 
-    <div class="container mb-5">
-        <div class="text-center mb-4 mt-3">
+    <!-- =========================================
+         CONTEÚDO DO FEED
+         ========================================= -->
+    <div class="container feed-container mb-2">
+        <div class="text-center mb-4 mt-3 d-none d-md-block">
             <h2 class="fw-bold">Radar do Bando</h2>
             <p class="text-muted">A linha do tempo do mapa!</p>
         </div>
+
         <div id="listaFeed" class="mt-4">
             <div class="text-center text-muted">Carregando atividades...</div>
         </div>
     </div>
 
-    <!-- MODAL DE COMENTÁRIOS -->
-    <div class="modal fade" id="modalComentarios" tabindex="-1" aria-hidden="true">
+    <!-- =========================================
+         MODAL DE IMAGEM AMPLIADA
+         ========================================= -->
+    <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
+                        style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL DE COMENTÁRIOS
+         ========================================= -->
+    <div class="modal fade" id="modalComentarios" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content" style="height: 80vh;">
                 <div class="modal-header bg-dark text-white">
@@ -226,11 +368,11 @@
                             const dataObj = new Date(item.data_acao);
                             const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-                            // LÓGICA DE CORES ATUALIZADA (INCLUINDO TESOURO)
                             let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : (item.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
                             const fotoParaExibir = item.foto_registro || item.foto_adesivo;
-                            const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação">` : '';
+                            // ADICIONADA A FUNÇÃO DE CLIQUE (onclick) AQUI
+                            const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoParaExibir}')">` : '';
 
                             let iconeCoracao = item.curtiu_mim ? 'bi-heart-fill' : 'bi-heart';
                             let classeCurtido = item.curtiu_mim ? 'curtido' : '';
@@ -277,6 +419,14 @@
                         lista.innerHTML = html;
                     }
                 });
+        }
+
+        // ===================================
+        // FUNÇÃO DE AMPLIAR IMAGEM
+        // ===================================
+        function abrirImagemMaior(caminho) {
+            document.getElementById('imagemMaiorSrc').src = caminho;
+            new bootstrap.Modal(document.getElementById('modalImagemMaior')).show();
         }
 
         // ===================================
@@ -342,11 +492,9 @@
         }
 
         function sairDoApp() {
-            // Chama o PHP para destruir a sessão no servidor
             fetch('api/logout.php')
                 .then(res => res.json())
                 .then(() => {
-                    // Limpa o navegador e manda para a tela de login
                     localStorage.clear();
                     window.location.href = 'login.html';
                 })

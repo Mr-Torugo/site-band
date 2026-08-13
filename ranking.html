@@ -3,27 +3,81 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ranking - O Bando</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#ffc107">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
+        /* =========================================
+           ESTILOS BASE E RESPONSIVIDADE
+           ========================================= */
         body {
             background-color: #f0f2f5;
             padding-top: 70px;
+            padding-bottom: 90px;
         }
 
-        .navbar-bando {
-            background-color: #ffc107;
+        .mobile-top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #ffc107;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
+            padding: 15px 20px;
+            align-items: center;
+            justify-content: center;
         }
 
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1050;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+
+        .nav-item-mobile {
+            text-align: center;
+            color: #adb5bd;
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+        }
+
+        .nav-item-mobile.active {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        .ranking-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 30px;
+                padding-top: 80px;
+            }
+        }
+
+        /* =========================================
+           ESTILOS DOS CAÇADORES (Lista)
+           ========================================= */
         .ranking-item {
             background: white;
             border-radius: 12px;
@@ -78,31 +132,155 @@
             font-size: 2.5rem;
             margin-bottom: 5px;
         }
+
+        /* =========================================
+           ESTILOS DOS ADESIVOS (Cards)
+           ========================================= */
+        .card-figurinha {
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+            height: 100%;
+        }
+
+        .card-figurinha:hover {
+            transform: translateY(-5px);
+        }
+
+        .img-adesivo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .img-adesivo:hover {
+            transform: scale(1.02);
+        }
+
+        .badge-codigo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1rem;
+        }
+
+        .badge-ranking-adesivo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+            background-color: #FFD700;
+            color: #000;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-achados {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #198754;
+        }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-light navbar-bando fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-dark" href="index.html"><i class="bi bi-arrow-left me-2"></i> Voltar</a>
-            <span class="navbar-text text-dark fw-bold">🏆 Hall da Fama</span>
-        </div>
-    </nav>
+    <!-- =========================================
+         TOPO E MENU MOBILE
+         ========================================= -->
+    <div class="mobile-top-bar d-flex d-md-none">
+        <h1 class="m-0 fw-bold text-dark fs-5">🏆 Hall da Fama</h1>
+    </div>
 
-    <div class="container mb-5">
-        <div class="text-center mb-4 mt-3">
-            <h2 class="fw-bold text-dark">Melhores Caçadores</h2>
-            <p class="text-muted">Clique em um jogador para ver as medalhas!</p>
-        </div>
-
-        <div id="listaRanking" class="d-flex flex-column gap-3">
-            <div class="text-center text-muted">Aguardando dados...</div>
+    <div class="mobile-bottom-nav d-flex d-md-none">
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+        </a>
+        <a href="feed.html" class="nav-item-mobile">
+            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+        </a>
+        <a href="index.html" class="nav-item-mobile">
+            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+        </a>
+        <a href="album.html" class="nav-item-mobile">
+            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+        </a>
+        <div class="nav-item-mobile dropdown active">
+            <a href="#" data-bs-toggle="dropdown" class="text-decoration-none d-flex flex-column align-items-center"
+                style="color: #0d6efd;">
+                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
+                <li><a class="dropdown-item fw-bold text-warning bg-light" href="ranking.html"><i
+                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item fw-bold text-danger" href="#" onclick="sairDoApp()"><i
+                            class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
+            </ul>
         </div>
     </div>
 
-    <!-- MODAL: PERFIL PÚBLICO -->
-    <div class="modal fade" id="modalPerfil" tabindex="-1" aria-hidden="true">
+    <!-- =========================================
+         MENU SUPERIOR PC
+         ========================================= -->
+    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
+            <div class="d-flex gap-3">
+                <a href="index.html" class="btn btn-outline-light">Mapa</a>
+                <a href="feed.html" class="btn btn-outline-light">📡 Radar</a>
+                <a href="album.html" class="btn btn-outline-light fw-bold">Meu Álbum</a>
+                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
+                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- =========================================
+         CONTEÚDO PRINCIPAL (TABS)
+         ========================================= -->
+    <div class="container ranking-container mb-5">
+        <div class="text-center mb-4 mt-3">
+            <h2 class="fw-bold text-dark d-none d-md-block">Estatísticas do Bando</h2>
+            <p class="text-muted d-none d-md-block">Veja quem são os melhores caçadores e os locais mais populares!</p>
+
+            <!-- Botões que funcionam como Abas -->
+            <div class="btn-group mt-2 w-100" style="max-width: 400px;" role="group">
+                <button type="button" class="btn btn-primary fw-bold" id="btnAbaCacadores"
+                    onclick="mostrarAba('cacadores')">Caçadores</button>
+                <button type="button" class="btn btn-outline-primary fw-bold" id="btnAbaAdesivos"
+                    onclick="mostrarAba('adesivos')">Hot Spots</button>
+            </div>
+        </div>
+
+        <!-- ABA 1: RANKING DE CAÇADORES -->
+        <div id="abaCacadores" style="display: block; max-width: 650px; margin: 0 auto;">
+            <div class="text-center mb-3 d-block d-md-none">
+                <small class="text-muted">Clique em um jogador para ver as medalhas!</small>
+            </div>
+            <div id="listaRanking" class="d-flex flex-column gap-3">
+                <div class="text-center text-muted">Aguardando dados...</div>
+            </div>
+        </div>
+
+        <!-- ABA 2: RANKING DE ADESIVOS (Escondida por padrão) -->
+        <div id="abaAdesivos" style="display: none;">
+            <div class="row g-4" id="gridRankingAdesivos">
+                <div class="text-center text-muted mt-5 w-100">Carregando locais...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL 1: PERFIL DO CAÇADOR
+         ========================================= -->
+    <div class="modal fade" id="modalPerfil" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-warning" style="border-width: 3px;">
                 <div class="modal-header bg-warning text-dark">
@@ -111,18 +289,30 @@
                 </div>
                 <div class="modal-body text-center py-4">
                     <div id="perfilLoading" class="text-muted">Procurando informações...</div>
-
                     <div id="perfilConteudo" class="d-none">
                         <h2 id="perfilNome" class="fw-bold mb-0"></h2>
                         <span id="perfilTitulo" class="badge bg-dark mb-3 fs-6"></span>
-
                         <h4 class="text-success fw-bold mb-4"><span id="perfilXP"></span> XP</h4>
-
                         <h6 class="fw-bold text-start border-bottom pb-2 mb-3">🏅 Quadro de Medalhas</h6>
-                        <div class="row g-2" id="perfilMedalhas">
-                            <!-- As medalhas entram aqui via JS -->
-                        </div>
+                        <div class="row g-2" id="perfilMedalhas"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         MODAL 2: AMPLIAR IMAGEM DO ADESIVO
+         ========================================= -->
+    <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center pt-0">
+                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
+                        style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                 </div>
             </div>
         </div>
@@ -133,7 +323,32 @@
     <script>
         if (!localStorage.getItem('bando_id')) { window.location.href = 'login.html'; }
 
-        function carregarRanking() {
+        // ===================================
+        // CONTROLE DAS ABAS
+        // ===================================
+        function mostrarAba(aba) {
+            const btnCacadores = document.getElementById('btnAbaCacadores');
+            const btnAdesivos = document.getElementById('btnAbaAdesivos');
+            const abaCacadores = document.getElementById('abaCacadores');
+            const abaAdesivos = document.getElementById('abaAdesivos');
+
+            if (aba === 'cacadores') {
+                btnCacadores.className = 'btn btn-primary fw-bold';
+                btnAdesivos.className = 'btn btn-outline-primary fw-bold';
+                abaCacadores.style.display = 'block';
+                abaAdesivos.style.display = 'none';
+            } else {
+                btnCacadores.className = 'btn btn-outline-primary fw-bold';
+                btnAdesivos.className = 'btn btn-primary fw-bold';
+                abaCacadores.style.display = 'none';
+                abaAdesivos.style.display = 'block';
+            }
+        }
+
+        // ===================================
+        // DADOS DOS CAÇADORES
+        // ===================================
+        function carregarRankingCacadores() {
             fetch('api/ranking.php')
                 .then(res => res.json())
                 .then(data => {
@@ -167,7 +382,6 @@
             document.getElementById('perfilLoading').innerText = "Procurando informações...";
             document.getElementById('perfilConteudo').classList.add('d-none');
 
-            // Adicionado nocache para evitar bug no celular
             fetch('api/perfil.php?id=' + idUsuario + '&nocache=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
@@ -196,17 +410,79 @@
                         });
                         document.getElementById('perfilMedalhas').innerHTML = medalhasHtml;
                     } else {
-                        // TRAVA DE SEGURANÇA: Se der erro, mostra vermelho.
                         document.getElementById('perfilLoading').innerHTML = `<span class="text-danger fw-bold">Erro: ${data.erro}</span>`;
                     }
                 })
                 .catch(e => {
-                    // TRAVA DE SEGURANÇA 2: Se a internet cair ou o PHP bugar, não fica carregando infinito.
-                    document.getElementById('perfilLoading').innerHTML = `<span class="text-danger fw-bold">Erro ao se conectar ao servidor.</span>`;
+                    document.getElementById('perfilLoading').innerHTML = `<span class="text-danger fw-bold">Erro de conexão.</span>`;
                 });
         }
 
-        carregarRanking();
+        // ===================================
+        // DADOS DOS ADESIVOS (HOT SPOTS)
+        // ===================================
+        function carregarRankingAdesivos() {
+            fetch('api/ranking_adesivos.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        const grid = document.getElementById('gridRankingAdesivos');
+                        if (data.dados.length === 0) {
+                            grid.innerHTML = `<div class="col-12 text-center text-muted mt-5"><h4>Nenhum adesivo no mapa ainda!</h4></div>`;
+                            return;
+                        }
+
+                        let html = '';
+                        data.dados.forEach((adesivo, index) => {
+                            let corMedalha = 'bg-secondary text-white';
+                            if (index === 0) corMedalha = 'bg-warning text-dark'; // Ouro
+                            else if (index === 1) corMedalha = 'bg-light text-dark'; // Prata
+                            else if (index === 2) corMedalha = 'bg-dark text-white'; // Bronze 
+
+                            html += `
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card card-figurinha">
+                                        <div class="position-relative">
+                                            <span class="badge bg-primary badge-codigo">${adesivo.codigo}</span>
+                                            <span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span>
+                                            <img src="${adesivo.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')">
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title fw-bold mb-1">${adesivo.nome_local}</h5>
+                                            <small class="text-muted d-block mb-3">Colado por: <b>${adesivo.quem_colou}</b></small>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+                                                <span class="text-muted fw-bold">Descobertas:</span>
+                                                <span class="info-achados">${adesivo.total_achados}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        grid.innerHTML = html;
+                    }
+                });
+        }
+
+        function abrirImagemMaior(caminho) {
+            document.getElementById('imagemMaiorSrc').src = caminho;
+            new bootstrap.Modal(document.getElementById('modalImagemMaior')).show();
+        }
+
+        // ===================================
+        // UTILIDADES
+        // ===================================
+        function sairDoApp() {
+            fetch('api/logout.php').finally(() => {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            });
+        }
+
+        // Inicia carregando os dois dados simultaneamente!
+        carregarRankingCacadores();
+        carregarRankingAdesivos();
     </script>
 </body>
 
