@@ -562,31 +562,57 @@
 
         function renderizarMapa() {
             marcadoresCluster.clearLayers();
-            const fStatus = document.getElementById('filtroStatus').value; const fCategoria = document.getElementById('filtroCategoria').value; const fRaridade = document.getElementById('filtroRaridade').value;
+            const fStatus = document.getElementById('filtroStatus').value; 
+            const fCategoria = document.getElementById('filtroCategoria').value; 
+            const fRaridade = document.getElementById('filtroRaridade').value;
 
-            // 👇 ADICIONADO: Memória para guardar os pinos pelo ID 👇
+            // Memória para guardar os pinos pelo ID
             let marcadoresSalvos = {}; 
 
             todosAdesivos.forEach(adesivo => {
                 let historicoHtml = ''; let botaoMuralHtml = ''; let meuNivel = 0;
+                
                 if (adesivo.descobertas && adesivo.descobertas.length > 0) {
                     historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; text-align: left;"><small style="color: #666; display: block; margin-bottom: 5px;"><b>Já registraram:</b></small><div style="max-height: 60px; overflow-y: auto; font-size: 0.8rem;">';
-                    adesivo.descobertas.forEach(d => { let icone = d.tipo_registro === 'conquistado' ? '👑' : (d.tipo_registro === 'encontrado' ? '📸' : '👁️'); historicoHtml += `<div style="margin-bottom: 3px;">${icone} <b>${d.apelido}</b></div>`; if (d.apelido === meuApelido) { if (d.tipo_registro === 'conquistado') meuNivel = 3; else if (d.tipo_registro === 'encontrado') meuNivel = 2; else meuNivel = 1; } });
-                    historicoHtml += '</div></div>'; botaoMuralHtml = `<button onclick="abrirMural(${adesivo.id}, '${adesivo.nome_local}')" class="btn btn-outline-primary btn-sm mt-2 fw-bold w-100"><i class="bi bi-chat-quote"></i> Ver Mural</button>`;
-                } else { historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>'; }
+                    adesivo.descobertas.forEach(d => { 
+                        let icone = d.tipo_registro === 'conquistado' ? '👑' : (d.tipo_registro === 'encontrado' ? '📸' : '👁️'); 
+                        historicoHtml += `<div style="margin-bottom: 3px;">${icone} <b>${d.apelido}</b></div>`; 
+                        if (d.apelido === meuApelido) { 
+                            if (d.tipo_registro === 'conquistado') meuNivel = 3; 
+                            else if (d.tipo_registro === 'encontrado') meuNivel = 2; 
+                            else meuNivel = 1; 
+                        } 
+                    });
+                    historicoHtml += '</div></div>'; 
+                    botaoMuralHtml = `<button onclick="abrirMural(${adesivo.id}, '${adesivo.nome_local}')" class="btn btn-outline-primary btn-sm mt-2 fw-bold w-100"><i class="bi bi-chat-quote"></i> Ver Mural</button>`;
+                } else { 
+                    historicoHtml = '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #888;">Seja o primeiro a encontrar! 🏆</div>'; 
+                }
 
-                if (fStatus === 'nao_encontrado' && meuNivel > 0) return; if (fStatus === 'conquistado' && meuNivel !== 3) return; if (fCategoria !== 'todas' && adesivo.categoria !== fCategoria) return; if (fRaridade !== 'todas' && adesivo.raridade !== fRaridade) return;
+                // 👇 A CORREÇÃO DE LOGICA DO FILTRO ENTRA AQUI 👇
+                // Se o filtro for "Não encontrei", pula se eu já achei (meuNivel > 0) OU se o adesivo for meu (criador_id == meuId)
+                if (fStatus === 'nao_encontrado' && (meuNivel > 0 || adesivo.criador_id == meuId)) return; 
+                // 👆 ----------------------------------------- 👆
+                
+                if (fStatus === 'conquistado' && meuNivel !== 3) return; 
+                if (fCategoria !== 'todas' && adesivo.categoria !== fCategoria) return; 
+                if (fRaridade !== 'todas' && adesivo.raridade !== fRaridade) return;
 
                 let iconeAtual = (adesivo.raridade === 'Tesouro') ? iconeTesouro : iconeBando;
                 const marker = L.marker([adesivo.lat, adesivo.lng], { icon: iconeAtual });
 
                 let botaoAcaoHtml = '';
                 if (adesivo.criador_id != meuId) {
-                    if (meuNivel === 3) botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`; else if (meuNivel === 2) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`; else if (meuNivel === 1) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`; else botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
+                    if (meuNivel === 3) botaoAcaoHtml = `<button class="btn btn-secondary btn-sm mt-2 fw-bold w-100" disabled>👑 Conquistado (Álbum + 100% XP)</button>`; 
+                    else if (meuNivel === 2) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 2)" class="btn btn-warning text-dark btn-sm mt-2 fw-bold w-100">⬆️ Evoluir para Conquistado</button>`; 
+                    else if (meuNivel === 1) botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 1)" class="btn btn-info text-white btn-sm mt-2 fw-bold w-100">⬆️ Evoluir Registro</button>`; 
+                    else botaoAcaoHtml = `<button onclick="abrirModalDescoberta(${adesivo.id}, '${adesivo.nome_local}', 0)" class="btn btn-success btn-sm mt-2 fw-bold w-100">🎉 Fazer Registro!</button>`;
                 }
 
                 let boxAdminHtml = '';
-                if (adesivo.criador_id == meuId || usuarioAdmin) { boxAdminHtml = `<div class="d-flex gap-2 mt-2"><button onclick="abrirModalEditar(${adesivo.id}, '${adesivo.nome_local.replace(/'/g, "\\'")}', '${adesivo.categoria}', '${adesivo.raridade}')" class="btn btn-outline-info btn-sm flex-fill"><i class="bi bi-pencil"></i></button><button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm flex-fill"><i class="bi bi-trash"></i></button></div>`; }
+                if (adesivo.criador_id == meuId || usuarioAdmin) { 
+                    boxAdminHtml = `<div class="d-flex gap-2 mt-2"><button onclick="abrirModalEditar(${adesivo.id}, '${adesivo.nome_local.replace(/'/g, "\\'")}', '${adesivo.categoria}', '${adesivo.raridade}')" class="btn btn-outline-info btn-sm flex-fill"><i class="bi bi-pencil"></i></button><button onclick="deletarAdesivo(${adesivo.id})" class="btn btn-outline-danger btn-sm flex-fill"><i class="bi bi-trash"></i></button></div>`; 
+                }
 
                 let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : (adesivo.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
@@ -594,35 +620,27 @@
                 let badgeCategoria = '';
                 
                 switch(catTratada) {
-                    case 'Natureza': 
-                        badgeCategoria = `<span class="badge bg-success mb-1">${catTratada}</span>`; break;
-                    case 'Urbano': 
-                        badgeCategoria = `<span class="badge bg-secondary mb-1">${catTratada}</span>`; break;
-                    case 'Praia': 
-                        badgeCategoria = `<span class="badge bg-info text-dark mb-1">${catTratada}</span>`; break;
-                    case 'Turísticos': 
-                        badgeCategoria = `<span class="badge bg-warning text-dark mb-1">${catTratada}</span>`; break;
-                    case 'Estrada': 
-                        badgeCategoria = `<span class="badge bg-dark mb-1">${catTratada}</span>`; break;
-                    case 'Móveis': 
-                        badgeCategoria = `<span class="badge bg-primary mb-1">${catTratada}</span>`; break;
-                    case 'Estados': 
-                        badgeCategoria = `<span class="badge bg-danger mb-1">${catTratada}</span>`; break;
-                    case 'Internacionais': 
-                        badgeCategoria = `<span class="badge mb-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break;
-                    default: 
-                        badgeCategoria = `<span class="badge bg-light text-dark border mb-1">${catTratada}</span>`;
+                    case 'Natureza': badgeCategoria = `<span class="badge bg-success mb-1">${catTratada}</span>`; break;
+                    case 'Urbano': badgeCategoria = `<span class="badge bg-secondary mb-1">${catTratada}</span>`; break;
+                    case 'Praia': badgeCategoria = `<span class="badge bg-info text-dark mb-1">${catTratada}</span>`; break;
+                    case 'Turísticos': badgeCategoria = `<span class="badge bg-warning text-dark mb-1">${catTratada}</span>`; break;
+                    case 'Estrada': badgeCategoria = `<span class="badge bg-dark mb-1">${catTratada}</span>`; break;
+                    case 'Móveis': badgeCategoria = `<span class="badge bg-primary mb-1">${catTratada}</span>`; break;
+                    case 'Estados': badgeCategoria = `<span class="badge bg-danger mb-1">${catTratada}</span>`; break;
+                    case 'Internacionais': badgeCategoria = `<span class="badge mb-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break;
+                    default: badgeCategoria = `<span class="badge bg-light text-dark border mb-1">${catTratada}</span>`;
                 }
-                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
+                
+                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">#${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
                 
                 marker.bindPopup(popupContent); 
                 marcadoresCluster.addLayer(marker);
 
-                // 👇 ADICIONADO: Salva o pino na memória usando o ID dele 👇
+                // Salva o pino na memória usando o ID dele 
                 marcadoresSalvos[adesivo.id] = marker; 
             });
 
-            // 👇 ADICIONADO: A MÁGICA DO VOO 👇
+            // A MÁGICA DO VOO 
             // Verifica se veio algum "?adesivo=123" no link lá do Feed
             const urlParams = new URLSearchParams(window.location.search);
             const adesivoFocoId = urlParams.get('adesivo');

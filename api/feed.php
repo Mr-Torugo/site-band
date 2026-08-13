@@ -8,7 +8,7 @@ try {
     $sql = "
         SELECT 
             a.id AS id_acao,
-            a.id AS adesivo_id, /* 👈 ID do Adesivo */
+            a.id AS adesivo_id,
             'novo_adesivo' AS tipo_acao,
             u.apelido AS nome_usuario,
             a.nome_local,
@@ -18,6 +18,7 @@ try {
             NULL AS comentario,
             a.categoria,
             a.raridade,
+            u.apelido AS criador_adesivo, /* 👈 O criador do adesivo é ele mesmo */
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id AND usuario_id = :uid1) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_comentarios
@@ -28,9 +29,9 @@ try {
 
         SELECT 
             d.id AS id_acao,
-            d.adesivo_id AS adesivo_id, /* 👈 ID do Adesivo */
+            d.adesivo_id AS adesivo_id,
             'descoberta' AS tipo_acao,
-            u.apelido AS nome_usuario,
+            u.apelido AS nome_usuario, /* O caçador que descobriu */
             a.nome_local,
             d.foto_selfie AS foto,
             d.tipo_registro,
@@ -38,18 +39,20 @@ try {
             d.comentario,
             a.categoria,
             a.raridade,
+            uc.apelido AS criador_adesivo, /* 👈 O SEGUNDO JOIN ACHA O CRIADOR AQUI! */
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id AND usuario_id = :uid2) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_comentarios
         FROM descobertas d
         JOIN usuarios u ON d.descobridor_id = u.id
         JOIN adesivos a ON d.adesivo_id = a.id
+        LEFT JOIN usuarios uc ON a.criador_id = uc.id /* 👈 Ligação adicionada */
 
         UNION ALL
 
         SELECT 
             um.id AS id_acao,
-            NULL AS adesivo_id, /* Medalha não tem mapa */
+            NULL AS adesivo_id,
             'conquista' AS tipo_acao,
             u.apelido AS nome_usuario,
             um.nome AS nome_local, 
@@ -59,6 +62,7 @@ try {
             um.descricao AS comentario,
             'Conquista' AS categoria,
             'Tesouro' AS raridade, 
+            NULL AS criador_adesivo, /* Medalha não tem criador */
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'conquista' AND acao_id = um.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'conquista' AND acao_id = um.id AND usuario_id = :uid3) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'conquista' AND acao_id = um.id) AS total_comentarios
@@ -69,7 +73,7 @@ try {
 
         SELECT 
             mc.id AS id_acao,
-            NULL AS adesivo_id, /* Missão não tem mapa */
+            NULL AS adesivo_id,
             'missao' AS tipo_acao,
             u.apelido AS nome_usuario,
             'Missão da Semana' AS nome_local, 
@@ -79,6 +83,7 @@ try {
             'Ganhou +' || mc.xp_ganho || ' XP!' AS comentario,
             'Missão' AS categoria,
             'Lendário' AS raridade, 
+            NULL AS criador_adesivo, /* Missão não tem criador */
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'missao' AND acao_id = mc.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'missao' AND acao_id = mc.id AND usuario_id = :uid4) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'missao' AND acao_id = mc.id) AS total_comentarios

@@ -31,7 +31,7 @@ try {
         data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
     )");
 
-    // 3. Tabela de Descobertas
+    // 3. Tabela de Descobertas (Atualizada com is_latest)
     $pdo->exec("CREATE TABLE IF NOT EXISTS descobertas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         adesivo_id INTEGER,
@@ -39,6 +39,7 @@ try {
         tipo_registro TEXT,
         foto_selfie TEXT,
         comentario TEXT,
+        is_latest INTEGER DEFAULT 1, 
         data_descoberta DATETIME DEFAULT CURRENT_TIMESTAMP
     )");
 
@@ -61,14 +62,33 @@ try {
         data_comentario DATETIME DEFAULT CURRENT_TIMESTAMP
     )");
 
-    echo "<h1>Setup Concluído com Sucesso! 🚀</h1>";
+    // 6. 👇 Tabela de Conquistas / Medalhas (NOVA) 👇
+    $pdo->exec("CREATE TABLE IF NOT EXISTS usuario_medalhas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER,
+        nome TEXT,
+        descricao TEXT,
+        icone TEXT,
+        data_conquista DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // 7. 👇 Tabela de Missões Concluídas (NOVA) 👇
+    $pdo->exec("CREATE TABLE IF NOT EXISTS missoes_concluidas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER,
+        ano_semana TEXT,
+        xp_ganho INTEGER,
+        data_conclusao DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    echo "<h1>Setup Concluído com Sucesso! </h1>";
     echo "<p>Todas as tabelas foram criadas de forma segura no arquivo <b>database/banco.sqlite</b>.</p>";
     echo "<h3>O que fazer agora?</h3>";
     echo "<ul>";
     echo "<li>Como o banco está limpo, você precisa <b>criar uma conta nova</b>.</li>";
     echo "<li>Vá até a tela de registro (ou clique no link de 'Criar Conta' na tela de Login).</li>";
     echo "</ul>";
-    echo "<p><a href='../login.html'>Ir para a tela de Login</a></p>";
+    echo "<p><a href='../login.php'>Ir para a tela de Login</a></p>";
 
 } catch (PDOException $e) {
     echo "<h1 style='color:red;'>Erro crítico ao criar tabelas:</h1>";

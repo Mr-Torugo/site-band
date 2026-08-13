@@ -389,7 +389,8 @@
                             else if (tipoAcaoTratado === 'achou' || tipoAcaoTratado === 'descoberta') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeLocal = item.local || item.nome_local;
-                                let donoAdesivo = item.dono_adesivo || 'um caçador';
+                                // 👇 AQUI ESTÁ A CORREÇÃO: Puxando o criador_adesivo do banco 👇
+                                let donoAdesivo = item.criador_adesivo || 'um caçador';
                                 
                                 let iconeAcao = '👁️'; let textoAcao = 'avistou o adesivo de';
                                 if (item.tipo_registro === 'conquistado') { iconeAcao = '👑'; textoAcao = 'conquistou o adesivo de'; }

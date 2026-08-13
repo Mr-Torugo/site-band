@@ -196,7 +196,7 @@
             });
         }
 
-        function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
+        function sairDoApp() { localStorage.clear(); window.location.href = 'login.php'; }
     </script>
 </body>
 

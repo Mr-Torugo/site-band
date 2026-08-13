@@ -6,6 +6,7 @@ database/*.sqlite
 # Ignora as fotos reais enviadas pelos usuários
 uploads/*
 !uploads/.gitkeep
+uploads/
 
 
 api/tornar_admin.php
