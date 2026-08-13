@@ -2,51 +2,41 @@
 header('Content-Type: application/json');
 require_once 'conexao.php';
 
+$usuario_id = $_POST['usuario_id'] ?? 0;
+$tipo_acao = $_POST['tipo_acao'] ?? '';
+$acao_id = $_POST['acao_id'] ?? 0;
+
+if (!$usuario_id || !$tipo_acao || !$acao_id) {
+    echo json_encode(['sucesso' => false, 'erro' => 'Dados incompletos para curtir.']);
+    exit;
+}
+
 try {
-    // 1. TRAVA DE SEGURANÇA: Se não tem sessão ativa, bloqueia a requisição!
-    if (!isset($_SESSION['usuario_id'])) {
-        http_response_code(401);
-        throw new Exception("Acesso Negado. Você não está logado.");
-    }
-
-    // 2. PEGA O ID BLINDADO DO SERVIDOR (Hacker não consegue falsificar isso)
-    $usuario_id = $_SESSION['usuario_id'];
-    
-    $tipo_acao = $_POST['tipo_acao'] ?? '';
-    $acao_id = $_POST['acao_id'] ?? 0;
-
-    if (!$tipo_acao || !$acao_id) {
-        throw new Exception("Dados inválidos para curtir.");
-    }
-
-    // Cria a tabela de curtidas silenciosamente caso não exista
-    $pdo->exec("CREATE TABLE IF NOT EXISTS curtidas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        usuario_id INTEGER,
-        tipo_acao TEXT, 
-        acao_id INTEGER,
-        data_curtida DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(usuario_id, tipo_acao, acao_id)
-    )");
-
-    // Verifica se já curtiu
+    // Verifica se o usuário já curtiu este post
     $stmt = $pdo->prepare("SELECT id FROM curtidas WHERE usuario_id = ? AND tipo_acao = ? AND acao_id = ?");
     $stmt->execute([$usuario_id, $tipo_acao, $acao_id]);
     $curtida = $stmt->fetch();
 
     if ($curtida) {
-        // Remover curtida
-        $del = $pdo->prepare("DELETE FROM curtidas WHERE id = ?");
-        $del->execute([$curtida['id']]);
-        echo json_encode(['sucesso' => true, 'acao' => 'descurtiu']);
+        // Se já curtiu, o clique vai REMOVER a curtida
+        $stmt = $pdo->prepare("DELETE FROM curtidas WHERE id = ?");
+        $stmt->execute([$curtida['id']]);
+        $acao = 'descurtiu';
     } else {
-        // Inserir curtida
-        $ins = $pdo->prepare("INSERT INTO curtidas (usuario_id, tipo_acao, acao_id) VALUES (?, ?, ?)");
-        $ins->execute([$usuario_id, $tipo_acao, $acao_id]);
-        echo json_encode(['sucesso' => true, 'acao' => 'curtiu']);
+        // Se não curtiu, o clique vai ADICIONAR a curtida
+        $stmt = $pdo->prepare("INSERT INTO curtidas (usuario_id, tipo_acao, acao_id) VALUES (?, ?, ?)");
+        $stmt->execute([$usuario_id, $tipo_acao, $acao_id]);
+        $acao = 'curtiu';
     }
 
-} catch (Exception $e) {
-    echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+    // Pega o novo total de curtidas para atualizar a tela em tempo real
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM curtidas WHERE tipo_acao = ? AND acao_id = ?");
+    $stmt->execute([$tipo_acao, $acao_id]);
+    $total = $stmt->fetchColumn();
+
+    echo json_encode(['sucesso' => true, 'acao' => $acao, 'total_curtidas' => $total]);
+
+} catch (PDOException $e) {
+    echo json_encode(['sucesso' => false, 'erro' => 'Erro no banco: ' . $e->getMessage()]);
 }
 ?>

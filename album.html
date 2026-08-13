@@ -16,35 +16,34 @@
 
     <style>
         /* =========================================
-           ESTILOS BASE E RESPONSIVIDADE
+           MENUS RESPONSIVOS (PADRÃO DO APP)
            ========================================= */
         body {
             background-color: #f0f2f5;
             padding-top: 70px;
             padding-bottom: 90px;
-            /* Espaço para o menu inferior no celular */
         }
 
-        /* Topo Celular */
         .mobile-top-bar {
             position: fixed;
             top: 0;
             width: 100%;
-            background: #0d6efd;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             z-index: 1050;
-            padding: 15px 20px;
+            padding: 10px 15px;
+            display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
 
-        /* Menu Inferior Celular */
         .mobile-bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
             background: white;
             box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
             justify-content: space-around;
             padding: 10px 0;
             z-index: 1050;
@@ -60,11 +59,16 @@
             flex-direction: column;
             align-items: center;
             width: 20%;
+            transition: color 0.2s;
         }
 
         .nav-item-mobile.active {
             color: #0d6efd;
             font-weight: bold;
+        }
+
+        .nav-item-mobile.active i {
+            color: #0d6efd !important;
         }
 
         @media (min-width: 768px) {
@@ -127,36 +131,42 @@
 <body>
 
     <!-- =========================================
-         TOPO MOBILE
+         TOPO MOBILE (Novo Padrão)
          ========================================= -->
     <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-white fs-5">📖 Meu Álbum</h1>
+        <h1 class="m-0 fw-bold text-primary fs-4">Bandesivos</h1>
+        <div class="d-flex align-items-center gap-2">
+            <span id="badgeAdminMobile" class="badge bg-danger d-none">ADMIN</span>
+            <small class="fw-bold text-dark">👤 <span id="nomeLogadoMobile"></span></small>
+        </div>
     </div>
 
     <!-- =========================================
-         MENU INFERIOR MOBILE
+         MENU INFERIOR MOBILE (Novo Padrão)
          ========================================= -->
     <div class="mobile-bottom-nav d-flex d-md-none">
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+            <i class="bi bi-map-fill fs-4 mb-1"></i> <span>Mapa</span>
         </a>
         <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+            <i class="bi bi-broadcast fs-4 mb-1"></i> <span>Radar</span>
         </a>
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+            <i class="bi bi-bullseye fs-4 mb-1"></i> <span>Missão</span>
         </a>
         <a href="album.html" class="nav-item-mobile active">
-            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+            <i class="bi bi-journal-album fs-4 mb-1"></i> <span>Álbum</span>
         </a>
         <div class="nav-item-mobile dropdown">
             <a href="#" data-bs-toggle="dropdown"
                 class="text-decoration-none text-secondary d-flex flex-column align-items-center">
-                <i class="bi bi-grid-fill fs-4 mb-1 text-primary"></i> <span>Mais</span>
+                <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
-                <li><a class="dropdown-item fw-bold text-primary" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                <li><a class="dropdown-item fw-bold text-warning bg-light" href="ranking.html"><i
+                            class="bi bi-trophy-fill me-2"></i> Hall da Fama</a></li>
+                <li><a class="dropdown-item fw-bold text-danger d-none" href="admin.html" id="btnMenuAdminMobile"><i
+                            class="bi bi-shield-lock-fill me-2"></i> Admin</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -167,27 +177,35 @@
     </div>
 
     <!-- =========================================
-         MENU SUPERIOR PC (Escondido no celular)
+         MENU SUPERIOR PC (Novo Menu Flutuante)
          ========================================= -->
-    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
-            <div class="d-flex gap-3">
-                <a href="index.html" class="btn btn-outline-light">Mapa</a>
-                <a href="feed.html" class="btn btn-outline-light">📡 Radar</a>
-                <a href="album.html" class="btn btn-primary fw-bold">Meu Álbum</a>
-                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
-                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
-            </div>
-        </div>
-    </nav>
+    <div class="d-none d-md-flex align-items-center"
+        style="position: fixed; top: 15px; right: 15px; z-index: 1050; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+
+        <small class="fw-bold text-dark me-2 border-end pe-3">
+            👤 <span id="nomeLogado"></span> <span id="badgeAdmin" class="badge bg-danger ms-1 d-none">ADMIN</span>
+        </small>
+
+        <a href="admin.html" id="btnMenuAdmin"
+            class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
+        <a href="index.html" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-bullseye me-1"></i> Missão</a>
+        <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-broadcast me-1"></i> Radar</a>
+        <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-journal-album me-1"></i> Álbum</a>
+        <a href="ranking.html" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-trophy-fill me-1"></i> Ranking</a>
+        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i
+                class="bi bi-box-arrow-right fs-5"></i></button>
+    </div>
 
     <!-- =========================================
-         CONTEÚDO DO ÁLBUM
+         CONTEÚDO DO ÁLBUM (INTACTO)
          ========================================= -->
     <div class="container mb-5">
         <div class="text-center mb-4 mt-3">
-            <h2 class="fw-bold">Coleção de <span id="nomeLogado"></span></h2>
+            <h2 class="fw-bold d-none d-md-block">Coleção de Adesivos</h2>
             <p class="text-muted" id="contadorAdesivos">Carregando...</p>
 
             <!-- Botões para alternar as abas -->
@@ -238,8 +256,19 @@
         if (!meuId) {
             window.location.href = 'login.html';
         } else {
-            document.getElementById('nomeLogado').innerText = meuApelido;
+            if (document.getElementById('nomeLogado')) document.getElementById('nomeLogado').innerText = meuApelido;
+            if (document.getElementById('nomeLogadoMobile')) document.getElementById('nomeLogadoMobile').innerText = meuApelido;
         }
+
+        // Verifica admin para mostrar botões secretos do menu
+        fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
+            if (data.sucesso && data.is_admin) {
+                if (document.getElementById('badgeAdmin')) document.getElementById('badgeAdmin').classList.remove('d-none');
+                if (document.getElementById('badgeAdminMobile')) document.getElementById('badgeAdminMobile').classList.remove('d-none');
+                if (document.getElementById('btnMenuAdmin')) document.getElementById('btnMenuAdmin').classList.remove('d-none');
+                if (document.getElementById('btnMenuAdminMobile')) document.getElementById('btnMenuAdminMobile').classList.remove('d-none');
+            }
+        });
 
         let listaAchados = [];
         let listaColados = [];

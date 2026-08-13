@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel Admin - Bando Map</title>
 
-    <!-- CONEXÕES DO PWA (APLICATIVO) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#dc3545">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,41 +14,36 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
-        /* =========================================
-           ESTILOS BASE E RESPONSIVIDADE
-           ========================================= */
         body {
             background-color: #f8f9fa;
             padding-top: 70px;
             padding-bottom: 90px;
-            /* Espaço para o menu inferior no celular */
         }
 
-        /* Topo Celular (Vermelho Admin) */
         .mobile-top-bar {
             position: fixed;
             top: 0;
             width: 100%;
-            background: #dc3545;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             z-index: 1050;
-            padding: 15px 20px;
+            padding: 10px 15px;
+            display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
 
-        /* Menu Inferior Celular */
         .mobile-bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
             background: white;
             box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
             justify-content: space-around;
             padding: 10px 0;
             z-index: 1050;
             padding-bottom: env(safe-area-inset-bottom, 10px);
-            display: flex;
         }
 
         .nav-item-mobile {
@@ -61,11 +55,16 @@
             flex-direction: column;
             align-items: center;
             width: 20%;
+            transition: color 0.2s;
         }
 
         .nav-item-mobile.active {
-            color: #dc3545;
+            color: #0d6efd;
             font-weight: bold;
+        }
+
+        .nav-item-mobile.active i {
+            color: #0d6efd !important;
         }
 
         .admin-container {
@@ -89,15 +88,11 @@
             }
         }
 
-        /* =========================================
-           AJUSTES DA TABELA PARA CELULAR
-           ========================================= */
         .table-responsive {
             margin-top: 20px;
             border-radius: 8px;
         }
 
-        /* Flexbox para os botões quebrarem de linha suavemente em telas pequenas */
         .botoes-acao {
             display: flex;
             gap: 6px;
@@ -108,41 +103,39 @@
 </head>
 
 <body>
-
-    <!-- =========================================
-         TOPO MOBILE
-         ========================================= -->
+    <!-- TOPO MOBILE -->
     <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-white fs-5">🛡️ Painel Admin</h1>
+        <h1 class="m-0 fw-bold text-primary fs-4">Bandesivos</h1>
+        <div class="d-flex align-items-center gap-2">
+            <span id="badgeAdminMobile" class="badge bg-danger d-none">ADMIN</span>
+            <small class="fw-bold text-dark">👤 <span id="nomeLogadoMobile"></span></small>
+        </div>
     </div>
 
-    <!-- =========================================
-         MENU INFERIOR MOBILE
-         ========================================= -->
+    <!-- MENU INFERIOR MOBILE -->
     <div class="mobile-bottom-nav d-flex d-md-none">
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+            <i class="bi bi-map-fill fs-4 mb-1"></i> <span>Mapa</span>
         </a>
         <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+            <i class="bi bi-broadcast fs-4 mb-1"></i> <span>Radar</span>
         </a>
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+            <i class="bi bi-bullseye fs-4 mb-1"></i> <span>Missão</span>
         </a>
         <a href="album.html" class="nav-item-mobile">
-            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+            <i class="bi bi-journal-album fs-4 mb-1"></i> <span>Álbum</span>
         </a>
-        <!-- Destacado em vermelho por estarmos na área Admin -->
         <div class="nav-item-mobile dropdown active">
-            <a href="#" data-bs-toggle="dropdown" class="text-decoration-none d-flex flex-column align-items-center"
-                style="color: #dc3545;">
+            <a href="#" data-bs-toggle="dropdown"
+                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
                 <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
                 <li><a class="dropdown-item fw-bold text-warning" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
-                <li><a class="dropdown-item fw-bold text-danger bg-light" href="admin.html"><i
-                            class="bi bi-gear-fill me-2"></i> Admin</a></li>
+                            class="bi bi-trophy-fill me-2"></i> Hall da Fama</a></li>
+                <li><a class="dropdown-item fw-bold text-danger bg-light" href="admin.html" id="btnMenuAdminMobile"><i
+                            class="bi bi-shield-lock-fill me-2"></i> Admin</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -152,29 +145,32 @@
         </div>
     </div>
 
-    <!-- =========================================
-         MENU SUPERIOR PC (Escondido no celular)
-         ========================================= -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-danger" href="#">🛡️ Painel Admin do Bando</a>
-            <div class="d-flex gap-3">
-                <a href="index.html" class="btn btn-outline-light">Voltar ao Mapa</a>
-                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
-            </div>
-        </div>
-    </nav>
+    <!-- MENU SUPERIOR PC -->
+    <div class="d-none d-md-flex align-items-center"
+        style="position: fixed; top: 15px; right: 15px; z-index: 1050; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <small class="fw-bold text-dark me-2 border-end pe-3">👤 <span id="nomeLogado"></span> <span id="badgeAdmin"
+                class="badge bg-danger ms-1 d-none">ADMIN</span></small>
+        <a href="admin.html" id="btnMenuAdmin"
+            class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
+        <a href="index.html" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-bullseye me-1"></i> Missão</a>
+        <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-broadcast me-1"></i> Radar</a>
+        <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-journal-album me-1"></i> Álbum</a>
+        <a href="ranking.html" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-trophy-fill me-1"></i> Ranking</a>
+        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i
+                class="bi bi-box-arrow-right fs-5"></i></button>
+    </div>
 
-    <!-- =========================================
-         CONTEÚDO PRINCIPAL
-         ========================================= -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <div class="container admin-container mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <h3 class="fw-bold mb-0 text-dark">Gerenciamento de Caçadores</h3>
             <button class="btn btn-primary fw-bold shadow-sm" onclick="carregarUsuarios()"><i
                     class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista</button>
         </div>
-
         <div class="table-responsive shadow-sm">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
@@ -195,156 +191,65 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // Quando a página abre, ele já tenta carregar a lista
+        const meuId = localStorage.getItem('bando_id');
+        const meuApelido = localStorage.getItem('bando_apelido');
+        if (!meuId) window.location.href = 'login.html';
+        if (document.getElementById('nomeLogado')) document.getElementById('nomeLogado').innerText = meuApelido;
+        if (document.getElementById('nomeLogadoMobile')) document.getElementById('nomeLogadoMobile').innerText = meuApelido;
+
+        // Verifica admin
+        fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
+            if (data.sucesso && data.is_admin) {
+                document.getElementById('badgeAdmin').classList.remove('d-none');
+                document.getElementById('badgeAdminMobile').classList.remove('d-none');
+                document.getElementById('btnMenuAdmin').classList.remove('d-none');
+                document.getElementById('btnMenuAdminMobile').classList.remove('d-none');
+            }
+        });
+
         document.addEventListener("DOMContentLoaded", carregarUsuarios);
 
-        // ==========================================
-        // 1. CARREGAR USUÁRIOS
-        // ==========================================
         function carregarUsuarios() {
-            // Como não mandamos FormData, o PHP assume a ação 'listar'
-            fetch('api/admin_usuarios.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        renderizarTabela(data.dados);
-                    } else {
-                        alert("Bloqueado: " + data.erro);
-                        // Se não for admin, chuta ele de volta pro mapa
-                        if (data.erro.includes("negado")) window.location.href = 'index.html';
-                    }
-                })
-                .catch(erro => {
-                    console.error("Erro ao puxar lista:", erro);
-                    document.getElementById('tabelaUsuarios').innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4 fw-bold">Erro ao carregar dados.</td></tr>';
-                });
+            fetch('api/admin_usuarios.php').then(res => res.json()).then(data => {
+                if (data.sucesso) renderizarTabela(data.dados);
+                else { alert("Bloqueado: " + data.erro); if (data.erro.includes("negado")) window.location.href = 'index.html'; }
+            }).catch(e => document.getElementById('tabelaUsuarios').innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4 fw-bold">Erro ao carregar dados.</td></tr>');
         }
 
-        // ==========================================
-        // 2. DESENHAR TABELA
-        // ==========================================
         function renderizarTabela(usuarios) {
-            const tbody = document.getElementById('tabelaUsuarios');
-            tbody.innerHTML = '';
-
-            // Pega o ID da pessoa logada para não deixar ela se excluir
-            const meuId = localStorage.getItem('bando_id');
-
+            const tbody = document.getElementById('tabelaUsuarios'); tbody.innerHTML = '';
             usuarios.forEach(u => {
                 const isMe = (u.id == meuId);
-
-                // Design do cargo
-                const badge = u.is_admin == 1
-                    ? '<span class="badge bg-danger"><i class="bi bi-shield-lock-fill me-1"></i>Admin</span>'
-                    : '<span class="badge bg-secondary">Caçador</span>';
-
-                // Botões agrupados em uma div flex para responsividade
+                const badge = u.is_admin == 1 ? '<span class="badge bg-danger"><i class="bi bi-shield-lock-fill me-1"></i>Admin</span>' : '<span class="badge bg-secondary">Caçador</span>';
                 let botoes = '<div class="botoes-acao">';
-
                 botoes += `<button class="btn btn-sm btn-info fw-bold text-white" onclick="resetarSenha(${u.id}, '${u.apelido}')"><i class="bi bi-key-fill"></i> <span class="d-none d-md-inline">Senha</span></button>`;
-
-                if (u.is_admin == 1) {
-                    botoes += `<button class="btn btn-sm btn-warning fw-bold" onclick="executarAcao('rebaixar', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-arrow-down-circle"></i> <span class="d-none d-md-inline">Rebaixar</span></button>`;
-                } else {
-                    botoes += `<button class="btn btn-sm btn-success fw-bold" onclick="executarAcao('promover', ${u.id})"><i class="bi bi-arrow-up-circle"></i> <span class="d-none d-md-inline">Promover</span></button>`;
-                }
-
-                botoes += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="executarAcao('excluir', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-trash-fill"></i></button>`;
-                botoes += '</div>';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="text-muted fw-bold ps-3">#${u.id}</td>
-                        <td class="fw-bold text-dark fs-6">${u.apelido} ${isMe ? '<br><span class="badge bg-success" style="font-size:0.65rem;">VOCÊ</span>' : ''}</td>
-                        <td>${badge}</td>
-                        <td class="pe-3">${botoes}</td>
-                    </tr>
-                `;
+                if (u.is_admin == 1) botoes += `<button class="btn btn-sm btn-warning fw-bold" onclick="executarAcao('rebaixar', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-arrow-down-circle"></i> <span class="d-none d-md-inline">Rebaixar</span></button>`;
+                else botoes += `<button class="btn btn-sm btn-success fw-bold" onclick="executarAcao('promover', ${u.id})"><i class="bi bi-arrow-up-circle"></i> <span class="d-none d-md-inline">Promover</span></button>`;
+                botoes += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="executarAcao('excluir', ${u.id})" ${isMe ? 'disabled' : ''}><i class="bi bi-trash-fill"></i></button></div>`;
+                tbody.innerHTML += `<tr><td class="text-muted fw-bold ps-3">#${u.id}</td><td class="fw-bold text-dark fs-6">${u.apelido} ${isMe ? '<br><span class="badge bg-success" style="font-size:0.65rem;">VOCÊ</span>' : ''}</td><td>${badge}</td><td class="pe-3">${botoes}</td></tr>`;
             });
         }
 
-        // ==========================================
-        // 3. EXECUTAR AÇÕES (Promover, Rebaixar, Excluir)
-        // ==========================================
         function executarAcao(acao, alvo_id) {
-            // Travas de confirmação do Javascript
             if (acao === 'excluir' && !confirm("CUIDADO: Isso vai excluir o caçador permanentemente! Tem certeza?")) return;
-            if (acao === 'rebaixar' && !confirm("Deseja remover os poderes de administrador deste usuário?")) return;
-
-            const formData = new FormData();
-            formData.append('acao', acao);
-            formData.append('alvo_id', alvo_id);
-
-            fetch('api/admin_usuarios.php', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        // Se deu certo, recarrega a tabela para ver a mudança
-                        carregarUsuarios();
-                    } else {
-                        alert("Erro: " + data.erro);
-                    }
-                })
-                .catch(erro => console.error(erro));
-        }
-
-        // ==========================================
-        // 4. RESETAR SENHA DO USUÁRIO
-        // ==========================================
-        function resetarSenha(id, apelido) {
-            // Abre uma caixinha perguntando qual será a nova senha temporária
-            const novaSenha = prompt(`Digite a nova senha temporária para o caçador(a) ${apelido}:`);
-
-            // Se você clicar em cancelar ou deixar vazio, ele aborta
-            if (!novaSenha || novaSenha.trim() === '') return;
-
-            const formData = new FormData();
-            formData.append('acao', 'resetar_senha');
-            formData.append('alvo_id', id);
-            formData.append('nova_senha', novaSenha);
-
-            fetch('api/admin_usuarios.php', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        alert(`Feito! A senha de ${apelido} agora é: ${novaSenha}`);
-                    } else {
-                        alert("Erro: " + data.erro);
-                    }
-                })
-                .catch(erro => console.error(erro));
-        }
-
-        // ==========================================
-        // 5. SAIR DO APP (BLINDADO)
-        // ==========================================
-        function sairDoApp() {
-            // Mostra pro usuário que está saindo
-            document.body.style.opacity = '0.5';
-
-            fetch('api/logout.php')
-                .finally(() => {
-                    localStorage.clear();
-                    window.location.href = 'login.html';
-                });
-        }
-    </script>
-
-    <!-- REGISTRO DO SERVICE WORKER (PWA) -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
+            if (acao === 'rebaixar' && !confirm("Deseja remover os poderes de administrador?")) return;
+            const formData = new FormData(); formData.append('acao', acao); formData.append('alvo_id', alvo_id);
+            fetch('api/admin_usuarios.php', { method: 'POST', body: formData }).then(res => res.json()).then(data => {
+                if (data.sucesso) carregarUsuarios(); else alert("Erro: " + data.erro);
             });
         }
+
+        function resetarSenha(id, apelido) {
+            const novaSenha = prompt(`Digite a nova senha temporária para ${apelido}:`);
+            if (!novaSenha || novaSenha.trim() === '') return;
+            const formData = new FormData(); formData.append('acao', 'resetar_senha'); formData.append('alvo_id', id); formData.append('nova_senha', novaSenha);
+            fetch('api/admin_usuarios.php', { method: 'POST', body: formData }).then(res => res.json()).then(data => {
+                if (data.sucesso) alert(`Feito! Senha de ${apelido}: ${novaSenha}`); else alert("Erro: " + data.erro);
+            });
+        }
+
+        function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
     </script>
 </body>
 

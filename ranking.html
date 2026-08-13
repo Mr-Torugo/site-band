@@ -4,19 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ranking - O Bando</title>
+    <title>Ranking - Bando Map</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffc107">
+    <meta name="theme-color" content="#0d6efd">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
-        /* =========================================
-           ESTILOS BASE E RESPONSIVIDADE
-           ========================================= */
         body {
             background-color: #f0f2f5;
             padding-top: 70px;
@@ -27,12 +24,13 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: #ffc107;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             z-index: 1050;
-            padding: 15px 20px;
+            padding: 10px 15px;
+            display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
 
         .mobile-bottom-nav {
@@ -41,6 +39,7 @@
             width: 100%;
             background: white;
             box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
             justify-content: space-around;
             padding: 10px 0;
             z-index: 1050;
@@ -56,11 +55,16 @@
             flex-direction: column;
             align-items: center;
             width: 20%;
+            transition: color 0.2s;
         }
 
         .nav-item-mobile.active {
             color: #0d6efd;
             font-weight: bold;
+        }
+
+        .nav-item-mobile.active i {
+            color: #0d6efd !important;
         }
 
         .ranking-container {
@@ -75,9 +79,6 @@
             }
         }
 
-        /* =========================================
-           ESTILOS DOS CAÇADORES (Lista)
-           ========================================= */
         .ranking-item {
             background: white;
             border-radius: 12px;
@@ -133,9 +134,6 @@
             margin-bottom: 5px;
         }
 
-        /* =========================================
-           ESTILOS DOS ADESIVOS (Cards)
-           ========================================= */
         .card-figurinha {
             border: none;
             border-radius: 12px;
@@ -188,35 +186,39 @@
 </head>
 
 <body>
-
-    <!-- =========================================
-         TOPO E MENU MOBILE
-         ========================================= -->
+    <!-- TOPO MOBILE -->
     <div class="mobile-top-bar d-flex d-md-none">
-        <h1 class="m-0 fw-bold text-dark fs-5">🏆 Hall da Fama</h1>
+        <h1 class="m-0 fw-bold text-primary fs-4">Bandesivos</h1>
+        <div class="d-flex align-items-center gap-2">
+            <span id="badgeAdminMobile" class="badge bg-danger d-none">ADMIN</span>
+            <small class="fw-bold text-dark">👤 <span id="nomeLogadoMobile"></span></small>
+        </div>
     </div>
 
+    <!-- MENU INFERIOR MOBILE -->
     <div class="mobile-bottom-nav d-flex d-md-none">
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-map-fill fs-4 mb-1 text-primary"></i> <span>Mapa</span>
+            <i class="bi bi-map-fill fs-4 mb-1"></i> <span>Mapa</span>
         </a>
         <a href="feed.html" class="nav-item-mobile">
-            <i class="bi bi-broadcast fs-4 mb-1 text-primary"></i> <span>Radar</span>
+            <i class="bi bi-broadcast fs-4 mb-1"></i> <span>Radar</span>
         </a>
         <a href="index.html" class="nav-item-mobile">
-            <i class="bi bi-bullseye fs-4 mb-1 text-primary"></i> <span>Missão</span>
+            <i class="bi bi-bullseye fs-4 mb-1"></i> <span>Missão</span>
         </a>
         <a href="album.html" class="nav-item-mobile">
-            <i class="bi bi-journal-album fs-4 mb-1 text-primary"></i> <span>Álbum</span>
+            <i class="bi bi-journal-album fs-4 mb-1"></i> <span>Álbum</span>
         </a>
         <div class="nav-item-mobile dropdown active">
-            <a href="#" data-bs-toggle="dropdown" class="text-decoration-none d-flex flex-column align-items-center"
-                style="color: #0d6efd;">
+            <a href="#" data-bs-toggle="dropdown"
+                class="text-decoration-none text-secondary d-flex flex-column align-items-center">
                 <i class="bi bi-grid-fill fs-4 mb-1"></i> <span>Mais</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="margin-bottom: 15px;">
                 <li><a class="dropdown-item fw-bold text-warning bg-light" href="ranking.html"><i
-                            class="bi bi-trophy-fill me-2"></i> Ranking</a></li>
+                            class="bi bi-trophy-fill me-2"></i> Hall da Fama</a></li>
+                <li><a class="dropdown-item fw-bold text-danger d-none" href="admin.html" id="btnMenuAdminMobile"><i
+                            class="bi bi-shield-lock-fill me-2"></i> Admin</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -226,31 +228,29 @@
         </div>
     </div>
 
-    <!-- =========================================
-         MENU SUPERIOR PC
-         ========================================= -->
-    <nav class="navbar navbar-dark bg-dark fixed-top d-none d-md-flex desktop-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-white" href="index.html">📍 Bando Map</a>
-            <div class="d-flex gap-3">
-                <a href="index.html" class="btn btn-outline-light">Mapa</a>
-                <a href="feed.html" class="btn btn-outline-light">📡 Radar</a>
-                <a href="album.html" class="btn btn-outline-light fw-bold">Meu Álbum</a>
-                <a href="ranking.html" class="btn btn-warning fw-bold text-dark">🏆 Ranking</a>
-                <button onclick="sairDoApp()" class="btn btn-danger fw-bold">Sair</button>
-            </div>
-        </div>
-    </nav>
+    <!-- MENU SUPERIOR PC -->
+    <div class="d-none d-md-flex align-items-center"
+        style="position: fixed; top: 15px; right: 15px; z-index: 1050; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <small class="fw-bold text-dark me-2 border-end pe-3">👤 <span id="nomeLogado"></span> <span id="badgeAdmin"
+                class="badge bg-danger ms-1 d-none">ADMIN</span></small>
+        <a href="admin.html" id="btnMenuAdmin"
+            class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
+        <a href="index.html" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-bullseye me-1"></i> Missão</a>
+        <a href="feed.html" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i
+                class="bi bi-broadcast me-1"></i> Radar</a>
+        <a href="album.html" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-journal-album me-1"></i> Álbum</a>
+        <a href="ranking.html" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i
+                class="bi bi-trophy-fill me-1"></i> Ranking</a>
+        <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i
+                class="bi bi-box-arrow-right fs-5"></i></button>
+    </div>
 
-    <!-- =========================================
-         CONTEÚDO PRINCIPAL (TABS)
-         ========================================= -->
+    <!-- CONTEÚDO PRINCIPAL (TABS) -->
     <div class="container ranking-container mb-5">
         <div class="text-center mb-4 mt-3">
             <h2 class="fw-bold text-dark d-none d-md-block">Estatísticas do Bando</h2>
-            <p class="text-muted d-none d-md-block">Veja quem são os melhores caçadores e os locais mais populares!</p>
-
-            <!-- Botões que funcionam como Abas -->
             <div class="btn-group mt-2 w-100" style="max-width: 400px;" role="group">
                 <button type="button" class="btn btn-primary fw-bold" id="btnAbaCacadores"
                     onclick="mostrarAba('cacadores')">Caçadores</button>
@@ -259,17 +259,11 @@
             </div>
         </div>
 
-        <!-- ABA 1: RANKING DE CAÇADORES -->
         <div id="abaCacadores" style="display: block; max-width: 650px; margin: 0 auto;">
-            <div class="text-center mb-3 d-block d-md-none">
-                <small class="text-muted">Clique em um jogador para ver as medalhas!</small>
-            </div>
             <div id="listaRanking" class="d-flex flex-column gap-3">
                 <div class="text-center text-muted">Aguardando dados...</div>
             </div>
         </div>
-
-        <!-- ABA 2: RANKING DE ADESIVOS (Escondida por padrão) -->
         <div id="abaAdesivos" style="display: none;">
             <div class="row g-4" id="gridRankingAdesivos">
                 <div class="text-center text-muted mt-5 w-100">Carregando locais...</div>
@@ -277,9 +271,7 @@
         </div>
     </div>
 
-    <!-- =========================================
-         MODAL 1: PERFIL DO CAÇADOR
-         ========================================= -->
+    <!-- MODAIS (Perfil e Imagem) -->
     <div class="modal fade" id="modalPerfil" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-warning" style="border-width: 3px;">
@@ -301,187 +293,87 @@
         </div>
     </div>
 
-    <!-- =========================================
-         MODAL 2: AMPLIAR IMAGEM DO ADESIVO
-         ========================================= -->
     <div class="modal fade" id="modalImagemMaior" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content bg-transparent border-0">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center pt-0">
-                    <img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
-                        style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                </div>
+                <div class="modal-header border-0 pb-0"><button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button></div>
+                <div class="modal-body text-center pt-0"><img id="imagemMaiorSrc" src="" alt="Foto Ampliada"
+                        style="max-width: 100%; max-height: 80vh; border-radius: 8px;"></div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        if (!localStorage.getItem('bando_id')) { window.location.href = 'login.html'; }
+        const meuId = localStorage.getItem('bando_id');
+        const meuApelido = localStorage.getItem('bando_apelido');
+        if (!meuId) window.location.href = 'login.html';
+        if (document.getElementById('nomeLogado')) document.getElementById('nomeLogado').innerText = meuApelido;
+        if (document.getElementById('nomeLogadoMobile')) document.getElementById('nomeLogadoMobile').innerText = meuApelido;
 
-        // ===================================
-        // CONTROLE DAS ABAS
-        // ===================================
-        function mostrarAba(aba) {
-            const btnCacadores = document.getElementById('btnAbaCacadores');
-            const btnAdesivos = document.getElementById('btnAbaAdesivos');
-            const abaCacadores = document.getElementById('abaCacadores');
-            const abaAdesivos = document.getElementById('abaAdesivos');
-
-            if (aba === 'cacadores') {
-                btnCacadores.className = 'btn btn-primary fw-bold';
-                btnAdesivos.className = 'btn btn-outline-primary fw-bold';
-                abaCacadores.style.display = 'block';
-                abaAdesivos.style.display = 'none';
-            } else {
-                btnCacadores.className = 'btn btn-outline-primary fw-bold';
-                btnAdesivos.className = 'btn btn-primary fw-bold';
-                abaCacadores.style.display = 'none';
-                abaAdesivos.style.display = 'block';
+        // Verifica se é admin para mostrar os botões
+        fetch('api/listar.php?usuario_id=' + meuId).then(r => r.json()).then(data => {
+            if (data.sucesso && data.is_admin) {
+                document.getElementById('badgeAdmin').classList.remove('d-none');
+                document.getElementById('badgeAdminMobile').classList.remove('d-none');
+                document.getElementById('btnMenuAdmin').classList.remove('d-none');
+                document.getElementById('btnMenuAdminMobile').classList.remove('d-none');
             }
+        });
+
+        function sairDoApp() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        function mostrarAba(aba) {
+            document.getElementById('btnAbaCacadores').className = aba === 'cacadores' ? 'btn btn-primary fw-bold' : 'btn btn-outline-primary fw-bold';
+            document.getElementById('btnAbaAdesivos').className = aba === 'adesivos' ? 'btn btn-primary fw-bold' : 'btn btn-outline-primary fw-bold';
+            document.getElementById('abaCacadores').style.display = aba === 'cacadores' ? 'block' : 'none';
+            document.getElementById('abaAdesivos').style.display = aba === 'adesivos' ? 'block' : 'none';
         }
 
-        // ===================================
-        // DADOS DOS CAÇADORES
-        // ===================================
         function carregarRankingCacadores() {
-            fetch('api/ranking.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        let html = '';
-                        data.dados.forEach((user, index) => {
-                            let posClass = index === 0 ? 'pos-1' : (index === 1 ? 'pos-2' : (index === 2 ? 'pos-3' : ''));
-                            let posText = index < 3 ? '🏆' : (index + 1) + 'º';
-
-                            html += `
-                            <div class="ranking-item d-flex align-items-center" onclick="abrirPerfil(${user.id})">
-                                <div class="ranking-pos ${posClass} me-3">${posText}</div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-0 fw-bold text-dark">${user.apelido}</h5>
-                                    <small class="badge bg-secondary">${user.titulo}</small>
-                                </div>
-                                <div class="text-end">
-                                    <h5 class="mb-0 fw-bold text-success">${user.xp_total} XP</h5>
-                                </div>
-                            </div>
-                        `;
-                        });
-                        document.getElementById('listaRanking').innerHTML = html;
-                    }
-                });
-        }
-
-        function abrirPerfil(idUsuario) {
-            new bootstrap.Modal(document.getElementById('modalPerfil')).show();
-            document.getElementById('perfilLoading').classList.remove('d-none');
-            document.getElementById('perfilLoading').innerText = "Procurando informações...";
-            document.getElementById('perfilConteudo').classList.add('d-none');
-
-            fetch('api/perfil.php?id=' + idUsuario + '&nocache=' + new Date().getTime())
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        document.getElementById('perfilLoading').classList.add('d-none');
-                        document.getElementById('perfilConteudo').classList.remove('d-none');
-
-                        document.getElementById('perfilNome').innerText = data.perfil.apelido;
-                        document.getElementById('perfilTitulo').innerText = data.perfil.titulo;
-                        document.getElementById('perfilXP').innerText = data.perfil.xp;
-
-                        let medalhasHtml = '';
-                        data.perfil.medalhas.forEach(m => {
-                            let classeBloq = m.desbloqueada ? '' : 'medalha-bloqueada bg-light';
-                            let corTexto = m.desbloqueada ? 'text-dark' : 'text-muted';
-
-                            medalhasHtml += `
-                            <div class="col-6">
-                                <div class="medalha-box h-100 ${classeBloq}">
-                                    <div class="medalha-icone">${m.icone}</div>
-                                    <h6 class="fw-bold ${corTexto} mb-1" style="font-size: 0.9rem;">${m.nome}</h6>
-                                    <small class="text-muted" style="font-size: 0.75rem;">${m.desc}</small>
-                                </div>
-                            </div>
-                        `;
-                        });
-                        document.getElementById('perfilMedalhas').innerHTML = medalhasHtml;
-                    } else {
-                        document.getElementById('perfilLoading').innerHTML = `<span class="text-danger fw-bold">Erro: ${data.erro}</span>`;
-                    }
-                })
-                .catch(e => {
-                    document.getElementById('perfilLoading').innerHTML = `<span class="text-danger fw-bold">Erro de conexão.</span>`;
-                });
-        }
-
-        // ===================================
-        // DADOS DOS ADESIVOS (HOT SPOTS)
-        // ===================================
-        function carregarRankingAdesivos() {
-            fetch('api/ranking_adesivos.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        const grid = document.getElementById('gridRankingAdesivos');
-                        if (data.dados.length === 0) {
-                            grid.innerHTML = `<div class="col-12 text-center text-muted mt-5"><h4>Nenhum adesivo no mapa ainda!</h4></div>`;
-                            return;
-                        }
-
-                        let html = '';
-                        data.dados.forEach((adesivo, index) => {
-                            let corMedalha = 'bg-secondary text-white';
-                            if (index === 0) corMedalha = 'bg-warning text-dark'; // Ouro
-                            else if (index === 1) corMedalha = 'bg-light text-dark'; // Prata
-                            else if (index === 2) corMedalha = 'bg-dark text-white'; // Bronze 
-
-                            html += `
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card card-figurinha">
-                                        <div class="position-relative">
-                                            <!--  ADICIONADO O # BEM AQUI NA FRENTE DO ADESIVO.CODIGO -->
-                                            <span class="badge bg-primary badge-codigo">#${adesivo.codigo}</span>
-                                            <span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span>
-                                            <img src="${adesivo.foto_original}" class="img-adesivo" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')">
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold mb-1">${adesivo.nome_local}</h5>
-                                            <small class="text-muted d-block mb-3">Colado por: <b>${adesivo.quem_colou}</b></small>
-                                            
-                                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
-                                                <span class="text-muted fw-bold">Descobertas:</span>
-                                                <span class="info-achados">${adesivo.total_achados}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        grid.innerHTML = html;
-                    }
-                });
-        }
-
-        function abrirImagemMaior(caminho) {
-            document.getElementById('imagemMaiorSrc').src = caminho;
-            new bootstrap.Modal(document.getElementById('modalImagemMaior')).show();
-        }
-
-        // ===================================
-        // UTILIDADES
-        // ===================================
-        function sairDoApp() {
-            fetch('api/logout.php').finally(() => {
-                localStorage.clear();
-                window.location.href = 'login.html';
+            fetch('api/ranking.php').then(res => res.json()).then(data => {
+                if (data.sucesso) {
+                    let html = '';
+                    data.dados.forEach((user, index) => {
+                        let posClass = index === 0 ? 'pos-1' : (index === 1 ? 'pos-2' : (index === 2 ? 'pos-3' : ''));
+                        let posText = index < 3 ? '🏆' : (index + 1) + 'º';
+                        html += `<div class="ranking-item d-flex align-items-center" onclick="abrirPerfil(${user.id})"><div class="ranking-pos ${posClass} me-3">${posText}</div><div class="flex-grow-1"><h5 class="mb-0 fw-bold text-dark">${user.apelido}</h5><small class="badge bg-secondary">${user.titulo}</small></div><div class="text-end"><h5 class="mb-0 fw-bold text-success">${user.xp_total} XP</h5></div></div>`;
+                    });
+                    document.getElementById('listaRanking').innerHTML = html;
+                }
             });
         }
 
-        // Inicia carregando os dois dados simultaneamente!
+        function carregarRankingAdesivos() {
+            fetch('api/ranking_adesivos.php').then(res => res.json()).then(data => {
+                if (data.sucesso) {
+                    const grid = document.getElementById('gridRankingAdesivos');
+                    if (data.dados.length === 0) { grid.innerHTML = `<div class="col-12 text-center text-muted mt-5"><h4>Nenhum adesivo no mapa ainda!</h4></div>`; return; }
+                    let html = '';
+                    data.dados.forEach((adesivo, index) => {
+                        let corMedalha = index === 0 ? 'bg-warning text-dark' : (index === 1 ? 'bg-light text-dark' : (index === 2 ? 'bg-dark text-white' : 'bg-secondary text-white'));
+                        html += `<div class="col-12 col-md-6 col-lg-4"><div class="card card-figurinha"><div class="position-relative"><span class="badge bg-primary badge-codigo">#${adesivo.codigo}</span><span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span><img src="${adesivo.foto_original}" class="img-adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')"></div><div class="card-body"><h5 class="card-title fw-bold mb-1">${adesivo.nome_local}</h5><small class="text-muted d-block mb-3">Colado por: <b>${adesivo.quem_colou}</b></small><div class="d-flex justify-content-between align-items-center bg-light p-2 rounded"><span class="text-muted fw-bold">Descobertas:</span><span class="info-achados">${adesivo.total_achados}</span></div></div></div></div>`;
+                    });
+                    grid.innerHTML = html;
+                }
+            });
+        }
+
+        function abrirPerfil(id) {
+            new bootstrap.Modal(document.getElementById('modalPerfil')).show(); document.getElementById('perfilLoading').classList.remove('d-none'); document.getElementById('perfilConteudo').classList.add('d-none');
+            fetch('api/perfil.php?id=' + id).then(r => r.json()).then(data => {
+                if (data.sucesso) {
+                    document.getElementById('perfilLoading').classList.add('d-none'); document.getElementById('perfilConteudo').classList.remove('d-none');
+                    document.getElementById('perfilNome').innerText = data.perfil.apelido; document.getElementById('perfilTitulo').innerText = data.perfil.titulo; document.getElementById('perfilXP').innerText = data.perfil.xp;
+                    let mHtml = ''; data.perfil.medalhas.forEach(m => { mHtml += `<div class="col-6"><div class="medalha-box h-100 ${m.desbloqueada ? '' : 'medalha-bloqueada bg-light'}"><div class="medalha-icone">${m.icone}</div><h6 class="fw-bold ${m.desbloqueada ? 'text-dark' : 'text-muted'} mb-1" style="font-size: 0.9rem;">${m.nome}</h6><small class="text-muted" style="font-size: 0.75rem;">${m.desc}</small></div></div>`; });
+                    document.getElementById('perfilMedalhas').innerHTML = mHtml;
+                }
+            });
+        }
+
+        function abrirImagemMaior(caminho) { document.getElementById('imagemMaiorSrc').src = caminho; new bootstrap.Modal(document.getElementById('modalImagemMaior')).show(); }
+
         carregarRankingCacadores();
         carregarRankingAdesivos();
     </script>

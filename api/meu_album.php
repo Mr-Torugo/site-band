@@ -2,40 +2,63 @@
 header('Content-Type: application/json');
 require_once 'conexao.php';
 
+$usuario_id = $_GET['usuario_id'] ?? 0;
+
+if (!$usuario_id) {
+    echo json_encode(['sucesso' => false, 'erro' => 'Usuário não identificado.']);
+    exit;
+}
+
 try {
-    try { $pdo->exec("ALTER TABLE adesivos ADD COLUMN categoria TEXT DEFAULT 'Urbano'"); } catch (Exception $e) {}
-
-    $usuario_id = $_GET['usuario_id'] ?? '';
-    if (empty($usuario_id)) throw new Exception("Usuário não informado.");
-
-    $sqlAchados = "SELECT 
-                    d.data_descoberta, d.foto_selfie, d.comentario, 
-                    a.id, a.nome_local, a.foto_original, a.raridade, a.categoria 
-                   FROM descobertas d
-                   JOIN adesivos a ON d.adesivo_id = a.id
-                   WHERE d.descobridor_id = ? AND d.tipo_registro = 'conquistado' AND d.is_latest = 1
-                   ORDER BY a.id ASC";
-    $stmtAchados = $pdo->prepare($sqlAchados);
-    $stmtAchados->execute([$usuario_id]);
-    $achados = $stmtAchados->fetchAll(PDO::FETCH_ASSOC);
-
-    $sqlColados = "SELECT id, nome_local, foto_original, raridade, categoria, data_criacao FROM adesivos WHERE criador_id = ? ORDER BY id ASC";
+    // 1. Busca apenas os adesivos que o usuário COLOU (criador)
+    $sqlColados = "
+        SELECT 
+            id, 
+            COALESCE(codigo, id) AS codigo, 
+            nome_local, 
+            foto_original, 
+            raridade, 
+            data_criacao 
+        FROM adesivos 
+        WHERE criador_id = :uid
+        ORDER BY data_criacao DESC
+    ";
     $stmtColados = $pdo->prepare($sqlColados);
-    $stmtColados->execute([$usuario_id]);
+    $stmtColados->execute(['uid' => $usuario_id]);
     $colados = $stmtColados->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($achados as &$item) { 
-        $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); 
-        if(empty($item['categoria'])) $item['categoria'] = 'Urbano';
-    }
-    foreach ($colados as &$item) { 
-        $item['codigo'] = '#' . str_pad($item['id'], 2, "0", STR_PAD_LEFT); 
-        if(empty($item['categoria'])) $item['categoria'] = 'Urbano';
-    }
+    // 2. Busca apenas os adesivos que o usuário ENCONTROU (conquistado / 100% XP)
+    $sqlAchados = "
+        SELECT 
+            a.id, 
+            COALESCE(a.codigo, a.id) AS codigo, 
+            a.nome_local, 
+            a.foto_original, 
+            a.raridade, 
+            d.data_descoberta, 
+            d.foto_selfie, 
+            d.comentario
+        FROM descobertas d
+        JOIN adesivos a ON d.adesivo_id = a.id
+        WHERE d.descobridor_id = :uid AND d.tipo_registro = 'conquistado'
+        ORDER BY d.data_descoberta DESC
+    ";
+    $stmtAchados = $pdo->prepare($sqlAchados);
+    $stmtAchados->execute(['uid' => $usuario_id]);
+    $achados = $stmtAchados->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode(['sucesso' => true, 'achados' => $achados, 'colados' => $colados]);
-} catch (Exception $e) {
+    // Retorna o pacote exatamente com os nomes que o seu JavaScript espera!
+    echo json_encode([
+        'sucesso' => true,
+        'colados' => $colados,
+        'achados' => $achados
+    ]);
+
+} catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+    echo json_encode([
+        'sucesso' => false,
+        'erro' => 'Erro no banco de dados: ' . $e->getMessage()
+    ]);
 }
 ?>
