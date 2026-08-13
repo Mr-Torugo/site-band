@@ -29,10 +29,16 @@ function calcularXP($pdo, $usuario_id) {
 }
 
 function definirTitulo($xp) {
-    if ($xp >= 500) return 'Lenda do Bando';
-    if ($xp >= 200) return 'Caçador Experiente';
-    if ($xp >= 50) return 'Explorador';
-    return 'Novato';
+    // Escala de patentes (Sempre do maior para o menor!)
+    if ($xp >= 17000) return 'Entidade Suprema';   // O nível Deus do bandesivos
+    if ($xp >= 9000) return 'Lenda Viva';         // Jogador histórico
+    if ($xp >= 5000) return 'Mestre do Mapa';     // Conhece a cidade inteira
+    if ($xp >= 3000)  return 'Veterano';           // Já tem muita história pra contar
+    if ($xp >= 1000)  return 'Caçador de Elite';   // Não deixa passar um raro
+    if ($xp >= 600)  return 'Rastreador';         // Começando a levar a sério
+    if ($xp >= 50)   return 'Explorador';         // Saiu do bairro
+    
+    return 'Novato'; // De 0 a 49 XP
 }
 
 // ==========================================

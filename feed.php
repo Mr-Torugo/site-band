@@ -126,13 +126,11 @@
 
         .feed-img {
             width: 100%;
-            max-height: 350px;
-            height: auto;
-            object-fit: contain;
+            height: 450px; /* Fixamos a altura para criar um "quadro" padrão */
+            object-fit: cover; /* A mágica: preenche 100% do quadro sem achatar a foto */
             border-radius: 8px;
             margin-top: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-            background-color: #212529;
             cursor: pointer;
             transition: transform 0.2s ease;
         }
