@@ -182,6 +182,25 @@
             font-weight: 900;
             color: #198754;
         }
+
+        .medalha-ranking-lista {
+            font-size: 1rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 2px 6px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* 👇 Efeito no link do nome do local 👇 */
+        .link-mapa {
+            text-decoration: none;
+            color: #212529;
+            transition: color 0.2s;
+        }
+        .link-mapa:hover {
+            color: #0d6efd;
+        }
     </style>
 </head>
 
@@ -285,7 +304,27 @@
                     data.dados.forEach((user, index) => {
                         let posClass = index === 0 ? 'pos-1' : (index === 1 ? 'pos-2' : (index === 2 ? 'pos-3' : ''));
                         let posText = index < 3 ? '🏆' : (index + 1) + 'º';
-                        html += `<div class="ranking-item d-flex align-items-center" onclick="abrirPerfil(${user.id})"><div class="ranking-pos ${posClass} me-3">${posText}</div><div class="flex-grow-1"><h5 class="mb-0 fw-bold text-dark">${user.apelido}</h5><small class="badge bg-secondary">${user.titulo}</small></div><div class="text-end"><h5 class="mb-0 fw-bold text-success">${user.xp_total} XP</h5></div></div>`;
+                        
+                        let medalhasHtml = '';
+                        if (user.medalhas && user.medalhas.length > 0) {
+                            medalhasHtml = `<div class="d-flex flex-wrap gap-1 mt-1">${user.medalhas.map(icone => `<span class="medalha-ranking-lista">${icone}</span>`).join('')}</div>`;
+                        }
+
+                        html += `
+                            <div class="ranking-item d-flex align-items-center" onclick="abrirPerfil(${user.id})">
+                                <div class="ranking-pos ${posClass} me-3">${posText}</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <h5 class="mb-0 fw-bold text-dark">${user.apelido}</h5>
+                                        <small class="badge bg-secondary">${user.titulo}</small>
+                                    </div>
+                                    ${medalhasHtml}
+                                </div>
+                                <div class="text-end">
+                                    <h5 class="mb-0 fw-bold text-success">${user.xp_total} XP</h5>
+                                </div>
+                            </div>
+                        `;
                     });
                     document.getElementById('listaRanking').innerHTML = html;
                 }
@@ -300,7 +339,30 @@
                     let html = '';
                     data.dados.forEach((adesivo, index) => {
                         let corMedalha = index === 0 ? 'bg-warning text-dark' : (index === 1 ? 'bg-light text-dark' : (index === 2 ? 'bg-dark text-white' : 'bg-secondary text-white'));
-                        html += `<div class="col-12 col-md-6 col-lg-4"><div class="card card-figurinha"><div class="position-relative"><span class="badge bg-primary badge-codigo">#${adesivo.codigo}</span><span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span><img src="${adesivo.foto_original}" class="img-adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')"></div><div class="card-body"><h5 class="card-title fw-bold mb-1">${adesivo.nome_local}</h5><small class="text-muted d-block mb-3">Colado por: <b>${adesivo.quem_colou}</b></small><div class="d-flex justify-content-between align-items-center bg-light p-2 rounded"><span class="text-muted fw-bold">Descobertas:</span><span class="info-achados">${adesivo.total_achados}</span></div></div></div></div>`;
+                        
+                        // 👇 O título agora é um link clicável que direciona para o Mapa 👇
+                        html += `
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card card-figurinha">
+                                <div class="position-relative">
+                                    <span class="badge bg-primary badge-codigo">#${adesivo.codigo}</span>
+                                    <span class="badge ${corMedalha} badge-ranking-adesivo">#${index + 1}</span>
+                                    <img src="${adesivo.foto_original}" class="img-adesivo" onclick="abrirImagemMaior('${adesivo.foto_original}')">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold mb-1">
+                                        <a href="index.php?adesivo=${adesivo.id}" class="link-mapa">
+                                            <i class="bi bi-geo-alt-fill text-primary"></i> ${adesivo.nome_local}
+                                        </a>
+                                    </h5>
+                                    <small class="text-muted d-block mb-3">Colado por: <b>${adesivo.quem_colou}</b></small>
+                                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+                                        <span class="text-muted fw-bold">Descobertas:</span>
+                                        <span class="info-achados">${adesivo.total_achados}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
                     });
                     grid.innerHTML = html;
                 }
