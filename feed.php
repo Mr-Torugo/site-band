@@ -333,6 +333,32 @@
 
                             let corRaridade = item.raridade === 'Raro' ? 'bg-primary' : (item.raridade === 'Lendário' ? 'bg-warning text-dark' : (item.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
+                            // 👇 NOVA LÓGICA DE CORES DAS CATEGORIAS AQUI 👇
+                            let catTratada = item.categoria || 'Urbano';
+                            let badgeCategoria = '';
+                            
+                            switch(catTratada) {
+                                case 'Natureza': 
+                                    badgeCategoria = `<span class="badge bg-success me-1">${catTratada}</span>`; break; // Verde
+                                case 'Urbano': 
+                                    badgeCategoria = `<span class="badge bg-secondary me-1">${catTratada}</span>`; break; // Cinza
+                                case 'Praia': 
+                                    badgeCategoria = `<span class="badge bg-info text-dark me-1">${catTratada}</span>`; break; // Azul Claro
+                                case 'Turísticos': 
+                                    badgeCategoria = `<span class="badge bg-warning text-dark me-1">${catTratada}</span>`; break; // Amarelo
+                                case 'Estrada': 
+                                    badgeCategoria = `<span class="badge bg-dark me-1">${catTratada}</span>`; break; // Preto
+                                case 'Móveis': 
+                                    badgeCategoria = `<span class="badge bg-primary me-1">${catTratada}</span>`; break; // Azul Escuro
+                                case 'Estados': 
+                                    badgeCategoria = `<span class="badge bg-danger me-1">${catTratada}</span>`; break; // Vermelho
+                                case 'Internacionais': 
+                                    badgeCategoria = `<span class="badge me-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break; // Roxo
+                                default: 
+                                    badgeCategoria = `<span class="badge bg-light text-dark border me-1">${catTratada}</span>`; // Padrão
+                            }
+                            // 👆 FIM DA NOVA LÓGICA 👆
+
                             const fotoParaExibir = item.foto_registro || item.foto_adesivo || item.foto; // Blindagem do nome da variável
                             const imagemHtml = fotoParaExibir ? `<img src="${fotoParaExibir}" class="feed-img" alt="Foto da ação" onclick="abrirImagemMaior('${fotoParaExibir}')">` : '';
 
@@ -357,24 +383,30 @@
                             if (tipoAcaoTratado === 'colou' || tipoAcaoTratado === 'novo_adesivo') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeLocal = item.local || item.nome_local;
-
+                                
                                 html += `
                                 <div class="feed-item">
                                     <div class="feed-icone icone-colou"><i class="bi bi-pin-angle-fill"></i></div>
                                     <div class="feed-card">
-                                        <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade || 'Urbano'}</span></div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">${dataFormatada}</small>
+                                            <div>
+                                                ${badgeCategoria}
+                                                <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span>
+                                            </div>
+                                        </div>
                                         <p class="mb-0"><b>${quemAgiu}</b> colou um novo adesivo em <strong class="text-primary">${nomeLocal}</strong>.</p>
                                         ${imagemHtml}
                                         ${htmlAcoes}
                                     </div>
                                 </div>`;
-                            }
+                            } 
                             // Verifica se é descoberta (achou)
                             else if (tipoAcaoTratado === 'achou' || tipoAcaoTratado === 'descoberta') {
                                 let quemAgiu = item.quem_agiu || item.nome_usuario;
                                 let nomeLocal = item.local || item.nome_local;
                                 let donoAdesivo = item.dono_adesivo || 'um caçador';
-
+                                
                                 let iconeAcao = '👁️'; let textoAcao = 'avistou o adesivo de';
                                 if (item.tipo_registro === 'conquistado') { iconeAcao = '👑'; textoAcao = 'conquistou o adesivo de'; }
                                 else if (item.tipo_registro === 'encontrado') { iconeAcao = '📸'; textoAcao = 'encontrou o adesivo de'; }
@@ -383,7 +415,13 @@
                                 <div class="feed-item">
                                     <div class="feed-icone icone-achou">${iconeAcao}</div>
                                     <div class="feed-card">
-                                        <div class="d-flex justify-content-between align-items-center mb-2"><small class="text-muted">${dataFormatada}</small><span class="badge ${corRaridade}">${item.raridade || 'Urbano'}</span></div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">${dataFormatada}</small>
+                                            <div>
+                                                ${badgeCategoria}
+                                                <span class="badge ${corRaridade}">${item.raridade || 'Comum'}</span>
+                                            </div>
+                                        </div>
                                         <p class="mb-0">${iconeAcao} <b>${quemAgiu}</b> ${textoAcao} <b>${donoAdesivo}</b> em <strong class="text-success">${nomeLocal}</strong>!</p>
                                         ${imagemHtml}
                                         ${htmlAcoes}

@@ -2,11 +2,9 @@
 header('Content-Type: application/json');
 require_once 'conexao.php';
 
-// Pega o ID de quem está logado para saber se ele curtiu os posts
 $usuario_id = $_POST['usuario_id'] ?? $_GET['usuario_id'] ?? 0;
 
 try {
-    // Essa super query junta os ADESIVOS NOVOS com as DESCOBERTAS usando UNION ALL
     $sql = "
         SELECT 
             a.id AS id_acao,
@@ -17,6 +15,8 @@ try {
             NULL AS tipo_registro,
             a.data_criacao AS data_acao,
             NULL AS comentario,
+            a.categoria,
+            a.raridade,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id AND usuario_id = :uid) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'novo_adesivo' AND acao_id = a.id) AS total_comentarios
@@ -34,6 +34,8 @@ try {
             d.tipo_registro,
             d.data_descoberta AS data_acao,
             d.comentario,
+            a.categoria,
+            a.raridade,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_curtidas,
             (SELECT COUNT(*) FROM curtidas WHERE tipo_acao = 'descoberta' AND acao_id = d.id AND usuario_id = :uid) AS curtido_por_mim,
             (SELECT COUNT(*) FROM comentarios WHERE tipo_acao = 'descoberta' AND acao_id = d.id) AS total_comentarios

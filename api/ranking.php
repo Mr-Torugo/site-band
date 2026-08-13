@@ -12,8 +12,8 @@ try {
                     WHEN a.raridade = 'Comum' AND d.tipo_registro = 'encontrado' THEN 5
                     WHEN a.raridade = 'Raro' AND d.tipo_registro = 'conquistado' THEN 50
                     WHEN a.raridade = 'Raro' AND d.tipo_registro = 'encontrado' THEN 25
-                    WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'conquistado' THEN 100
-                    WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'encontrado' THEN 50
+                    WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'conquistado' THEN 1500
+                    WHEN a.raridade = 'Lendário' AND d.tipo_registro = 'encontrado' THEN 750
                     WHEN a.raridade = 'Tesouro' AND d.tipo_registro = 'conquistado' THEN 500
                     WHEN a.raridade = 'Tesouro' AND d.tipo_registro = 'encontrado' THEN 250
                     ELSE 0 END) FROM descobertas d JOIN adesivos a ON d.adesivo_id = a.id WHERE d.descobridor_id = u.id AND d.is_latest = 1), 0) + 

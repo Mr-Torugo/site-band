@@ -54,13 +54,16 @@ $menuAtivo = $menuAtivo ?? '';
     </small>
     
     <a href="admin.php" id="btnMenuAdmin" class="btn btn-sm btn-outline-danger ms-1 fw-bold d-none rounded-pill px-3">🛡️ Admin</a>
+    
+    <!-- BOTÃO DO MAPA ADICIONADO AQUI 👇 -->
+    <a href="index.php" class="btn btn-sm btn-dark ms-2 fw-bold text-white rounded-pill px-3"><i class="bi bi-map-fill me-1"></i> Mapa</a>
+    
     <button onclick="abrirMissao()" class="btn btn-sm btn-success ms-2 fw-bold text-white rounded-pill px-3"><i class="bi bi-bullseye me-1"></i> Missão</button>
     <a href="feed.php" class="btn btn-sm btn-info ms-2 fw-bold text-white rounded-pill px-3"><i class="bi bi-broadcast me-1"></i> Radar</a>
     <a href="album.php" class="btn btn-sm btn-primary ms-2 fw-bold rounded-pill px-3"><i class="bi bi-journal-album me-1"></i> Álbum</a>
     <a href="ranking.php" class="btn btn-sm btn-warning text-dark ms-2 fw-bold rounded-pill px-3"><i class="bi bi-trophy-fill me-1"></i> Ranking</a>
     <button onclick="sairDoApp()" class="btn btn-sm text-danger ms-2 fw-bold"><i class="bi bi-box-arrow-right fs-5"></i></button>
 </div>
-
 
 <?php 
 include './includes/modal_missao.php'; 

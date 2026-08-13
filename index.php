@@ -587,8 +587,35 @@
 
                 let corRaridade = adesivo.raridade === 'Raro' ? 'bg-primary' : (adesivo.raridade === 'Lendário' ? 'bg-warning text-dark' : (adesivo.raridade === 'Tesouro' ? 'badge-tesouro' : 'bg-secondary'));
 
-                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">${adesivo.codigo || '00'}</span> <span class="badge bg-info text-dark mb-1">${adesivo.categoria || 'Urbano'}</span> <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
-                marker.bindPopup(popupContent); marcadoresCluster.addLayer(marker);
+                // 👇 NOVA LÓGICA DE CORES DAS CATEGORIAS (MAPA) 👇
+                let catTratada = adesivo.categoria || 'Urbano';
+                let badgeCategoria = '';
+                
+                switch(catTratada) {
+                    case 'Natureza': 
+                        badgeCategoria = `<span class="badge bg-success mb-1">${catTratada}</span>`; break;
+                    case 'Urbano': 
+                        badgeCategoria = `<span class="badge bg-secondary mb-1">${catTratada}</span>`; break;
+                    case 'Praia': 
+                        badgeCategoria = `<span class="badge bg-info text-dark mb-1">${catTratada}</span>`; break;
+                    case 'Turísticos': 
+                        badgeCategoria = `<span class="badge bg-warning text-dark mb-1">${catTratada}</span>`; break;
+                    case 'Estrada': 
+                        badgeCategoria = `<span class="badge bg-dark mb-1">${catTratada}</span>`; break;
+                    case 'Móveis': 
+                        badgeCategoria = `<span class="badge bg-primary mb-1">${catTratada}</span>`; break;
+                    case 'Estados': 
+                        badgeCategoria = `<span class="badge bg-danger mb-1">${catTratada}</span>`; break;
+                    case 'Internacionais': 
+                        badgeCategoria = `<span class="badge mb-1" style="background-color: #6f42c1; color: white;">${catTratada}</span>`; break;
+                    default: 
+                        badgeCategoria = `<span class="badge bg-light text-dark border mb-1">${catTratada}</span>`;
+                }
+                // 👆 FIM DA NOVA LÓGICA 👆
+                const popupContent = `<div style="text-align: center; font-family: sans-serif; min-width: 160px;"><span class="badge bg-dark mb-1">#${adesivo.codigo || '00'}</span> ${badgeCategoria} <span class="badge ${corRaridade} mb-1">${adesivo.raridade}</span><br><strong>${adesivo.nome_local}</strong><br><small style="color: #666;">Colado por: <b>${adesivo.quem_colou}</b></small><br><img src="${adesivo.foto_caminho}" alt="Adesivo" onclick="abrirImagemMaior('${adesivo.foto_caminho}')" style="width: 150px; height: auto; margin-top: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;"><br>${historicoHtml}${botaoAcaoHtml}${botaoMuralHtml}${boxAdminHtml}</div>`;
+                
+                marker.bindPopup(popupContent); 
+                marcadoresCluster.addLayer(marker);
             });
         }
 
