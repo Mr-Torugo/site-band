@@ -66,11 +66,11 @@ http://localhost/site-band/api/setup_admin.php?id=1
 
 ⚠️ Atenção: As seguintes pastas e arquivos não estão versionados por motivos de segurança e armazenamento (configurados no .gitignore):
 
-- database/banco.sqlite: O banco de dados de produção.
+- `database/banco.sqlite`: O banco de dados de produção.
 
-- uploads/: O diretório onde as fotos e selfies dos usuários são salvas.
+- `uploads/`: O diretório onde as fotos e selfies dos usuários são salvas.
 
-👨‍💻 Autor
+### 👨‍💻 Autor
 
 Desenvolvido por Vitor Hugo (e o Bando!).
 
